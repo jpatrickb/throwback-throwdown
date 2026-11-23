@@ -4,3 +4,6 @@ data/photos/*
 !data/photos/.gitkeep
 data/state.json
 .env
+test-results/
+tests/test-results/
+playwright-report/

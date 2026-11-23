@@ -37,6 +37,8 @@ export function useConnected(): boolean {
     const off = () => setConnected(false);
     socket.on('connect', on);
     socket.on('disconnect', off);
+    // Catch a connect that fired before this effect subscribed (WebKit/iPhone hits this).
+    setConnected(socket.connected);
     return () => {
       socket.off('connect', on);
       socket.off('disconnect', off);

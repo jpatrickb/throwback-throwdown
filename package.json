@@ -10,7 +10,8 @@
     "tunnel": "cloudflared tunnel run party",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
-    "bots": "tsx scripts/bots.ts"
+    "bots": "tsx scripts/bots.ts",
+    "e2e": "playwright test -c tests"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",
