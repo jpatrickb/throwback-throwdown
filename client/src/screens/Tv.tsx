@@ -1,4 +1,4 @@
-import { useEffect, useMemo, type ReactElement } from 'react';
+import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import type { Phase, TvView } from '../../../shared/types.ts';
 import { socket, useConnected, useView, IS_MOCK } from '../socket.ts';
@@ -17,6 +17,9 @@ import { Logo } from '../tv/common.tsx';
 import { screenVariants } from '../tv/motion.ts';
 import { stressView } from '../tv/devStress.ts';
 import { decorateView } from '../tv/entrants.ts';
+import { SettingsPanel } from '../tv/settings/SettingsPanel.tsx';
+import { useTvPref } from '../tv/settings/store.ts';
+import { applyTheme } from '../tv/settings/themes.ts';
 import '../tv/tv.css';
 
 const SCREENS: Record<Phase, (p: { view: TvView }) => ReactElement> = {
@@ -37,6 +40,11 @@ export function Tv() {
   useGameAudio(rawView);
   const view = useMemo(() => decorateView(stressView(rawView)), [rawView]);
   const connected = useConnected();
+  const [reactionsOn] = useTvPref('reactions');
+  // The theme is server state (phones follow it); apply whatever the server says.
+  const theme = view?.settings.theme;
+  useEffect(() => applyTheme(theme), [theme]);
+  const cursor = useCursorReveal();
 
   useEffect(() => {
     const hello = () => socket.emit('tv:hello');
@@ -54,7 +62,7 @@ export function Tv() {
   const calm = phase === 'CAPTIONING' || phase === 'VOTING';
 
   return (
-    <main className="tv">
+    <main className={`tv ${cursor ? 'tv-cursor' : ''}`}>
       <Background calm={calm} />
       <AnimatePresence mode="wait">
         <motion.div key={key} className="tv-stage" variants={screenVariants} initial="initial" animate="animate" exit="exit">
@@ -70,11 +78,31 @@ export function Tv() {
           )}
         </motion.div>
       </AnimatePresence>
-      {view && <Reactions players={view.players} />}
+      {view && reactionsOn && <Reactions players={view.players} />}
       {!IS_MOCK && view && !connected && <div className="tv-offline">Reconnecting to the game…</div>}
       {/* Rendered before the overlay so the overlay (same z-index) covers it until clicked. */}
       <AudioIndicator />
       <StartOverlay />
+      <SettingsPanel view={view} />
     </main>
   );
+}
+
+/** The TV hides the mouse cursor; show it for a few seconds whenever the mouse moves. */
+function useCursorReveal(): boolean {
+  const [on, setOn] = useState(false);
+  useEffect(() => {
+    let t: ReturnType<typeof setTimeout> | undefined;
+    const move = () => {
+      setOn(true);
+      clearTimeout(t);
+      t = setTimeout(() => setOn(false), 2500);
+    };
+    window.addEventListener('mousemove', move);
+    return () => {
+      window.removeEventListener('mousemove', move);
+      clearTimeout(t);
+    };
+  }, []);
+  return on;
 }

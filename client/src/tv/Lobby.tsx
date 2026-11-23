@@ -27,7 +27,6 @@ export function Lobby({ view }: { view: TvView }) {
         <p className="room-label">
           Room code <span className="room-code">{view.roomCode}</span>
         </p>
-        {view.lanJoinUrl && <p className="lan-url">No signal? Wi-Fi: {view.lanJoinUrl.replace(/^https?:\/\//, '')}</p>}
         <Doodle name="star" className="corner-doodle" />
       </div>
 

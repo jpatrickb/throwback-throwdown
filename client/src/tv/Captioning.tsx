@@ -22,9 +22,9 @@ function SoloCaptioning({ view }: { view: TvView }) {
   const shown = crowd ? (waiting.length <= 12 ? waiting : []) : players;
   return (
     <div className="screen captioning">
-      <RoundHeader index={round.index} total={round.totalPhotosQueued} title="Write a caption!" />
+      <RoundHeader index={round.index} total={round.totalPhotosQueued} title="Write a caption on your phone!" />
       <div className="caption-body">
-        <Polaroid src={round.photo.url} label="Caption this!" tilt={-3} className="polaroid-main" />
+        <Polaroid src={round.photo.url} tilt={-3} className="polaroid-main" />
         <aside className="caption-side">
           <CountdownRing deadline={view.deadline} serverNow={view.serverNow} phase={view.phase} settings={view.settings} />
           <p className="progress-line">
@@ -66,9 +66,9 @@ function TeamCaptioning({ view }: { view: TvView }) {
   const allIn = teams.length > 0 && teams.every((t) => done.has(t.id));
   return (
     <div className="screen captioning">
-      <RoundHeader index={round.index} total={round.totalPhotosQueued} title="Write your team’s caption!" />
+      <RoundHeader index={round.index} total={round.totalPhotosQueued} title="Write your team’s caption on your phone!" />
       <div className="caption-body">
-        <Polaroid src={round.photo.url} label="Caption this!" tilt={-3} className="polaroid-main" />
+        <Polaroid src={round.photo.url} tilt={-3} className="polaroid-main" />
         <aside className="caption-side">
           <CountdownRing deadline={view.deadline} serverNow={view.serverNow} phase={view.phase} settings={view.settings} />
           <p className="progress-line">

@@ -42,7 +42,7 @@ export function PhotoReveal({ view }: { view: TvView }) {
           transition={{ type: 'spring', stiffness: 120, damping: 14 }}
         >
           <div className="flip-front">
-            <Polaroid src={round.photo.url} label="Who is this?!" tilt={-2} className="polaroid-hero" />
+            <Polaroid src={round.photo.url} tilt={-2} className="polaroid-hero" />
           </div>
           <div className="flip-back">
             {ART.photoBack ? <img src={ART.photoBack} alt="" className="photo-back" /> : <div className="photo-back" />}
@@ -56,7 +56,7 @@ export function PhotoReveal({ view }: { view: TvView }) {
         animate={flipped ? { opacity: 1, y: 0 } : {}}
         transition={{ delay: 0.8 }}
       >
-        Get your caption ready… ✍️
+        Get ready to write a caption on your phone ✍️
       </motion.p>
     </div>
   );

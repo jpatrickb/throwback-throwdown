@@ -7,6 +7,7 @@ import { BRAND } from '../brand.ts';
 import { useCountdown } from '../socket.ts';
 import { playSfx, type SfxKey } from '../audio/index.ts';
 import { SPRING_POP } from './motion.ts';
+import { useFitText } from './fit.ts';
 
 /** <img> that quietly disappears if the file is missing. */
 export function ArtImg({ src, className, alt = '', style }: { src: string | null; className?: string; alt?: string; style?: CSSProperties }) {
@@ -87,16 +88,15 @@ export function PlayerChip({ player, done, big }: { player: Player; done?: boole
   );
 }
 
-/** Polaroid frame with a strip of washi tape. `label` is handwritten on the bottom strip. */
+/** Polaroid frame with a strip of washi tape. The bottom strip is deliberately blank, like a real
+ *  polaroid: players write the captions, so the game never writes on the photo. */
 export function Polaroid({
   src,
-  label,
   tilt = -2,
   className,
   children,
 }: {
   src: string;
-  label?: ReactNode;
   tilt?: number;
   className?: string;
   children?: ReactNode;
@@ -105,7 +105,7 @@ export function Polaroid({
     <div className={`polaroid ${className ?? ''}`} style={{ '--tilt': `${tilt}deg` } as CSSProperties}>
       <span className="tape tape-top" />
       <PolaroidPhoto src={src} />
-      <div className="polaroid-label">{label}</div>
+      <div className="polaroid-label" aria-hidden />
       {children}
     </div>
   );
@@ -186,14 +186,16 @@ export function useSfxOnIncrease(count: number, key: SfxKey) {
 }
 
 /** Header strip shown on in-round screens: small logo + round badge + room code. */
-export function RoundHeader({ index, total, title }: { index: number; total: number; title: ReactNode }) {
+export function RoundHeader({ index, total, title, fitKey }: { index: number; total: number; title: ReactNode; fitKey?: string }) {
+  // The title shrinks to fit its column, so long titles and wide theme fonts never collide.
+  const ref = useFitText<HTMLElement>([fitKey ?? String(title)], { max: 3, min: 1.4, step: 0.1 });
   return (
-    <header className="round-header">
+    <header className="round-header" ref={ref}>
       <span className="round-badge">
         Round {index + 1}
         <small> of {Math.max(total, index + 1)}</small>
       </span>
-      <h2 className="phase-title">{title}</h2>
+      <h2 className="phase-title fit-cell">{title}</h2>
       <span className="round-header-logo">{BRAND.shortName}</span>
     </header>
   );

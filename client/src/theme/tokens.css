@@ -105,6 +105,158 @@
   --audio-indicator-fg: var(--c-paper);
   --audio-indicator-inset: 24px;
 
+  /* ---- Roles (so themes can split "ink" from outlines and text-on-accent) ---- */
+  --c-on-accent: var(--c-ink);              /* text on sun/team/accent badges */
+  --stage-chip-bg: rgb(255 255 255 / 0.12); /* chips sitting directly on the stage */
+  --stage-chip-line: rgb(255 255 255 / 0.25);
+  --stage-pattern: none;                    /* optional texture over the stage gradient */
+  --spotlight: rgb(255 255 255 / 0.12);
+  --vignette: rgb(0 0 0 / 0.55);
+  --overlay-bg: rgb(20 6 30 / 0.7);
+  --logo-a: var(--c-sun);
+  --logo-b: var(--c-mint);
+  --logo-shadow: 0.05em 0.05em 0 var(--c-ink), 0.1em 0.1em 0 var(--c-bubblegum), 0.16em 0.16em 0.3em rgb(0 0 0 / 0.4);
+  --panel-bg: var(--c-paper);               /* settings panel */
+  --team-name-size: 1.2em;                  /* lobby team column headers (wide fonts shrink it) */
+  --c-stage-highlight: var(--c-sun);        /* emphasised numbers/words drawn straight on the stage */
+
   /* ---- TV scale: 1em on the TV = this. 24px at 1920x1080, 16px at 1280x720 ---- */
   --tv-base: min(1.25vw, 2.2222vh);
+}
+
+/* =====================================================================
+   THEMES. "Berry Stage" is :root above. Each block below overrides tokens only;
+   the TV settings panel sets <html data-theme="...">. The theme list (names and
+   swatches) is in client/src/tv/settings/themes.ts. Fonts load in client/index.html.
+   ===================================================================== */
+
+/* ---- Cork Board: a light, warm scrapbook pinned to a cork wall ---- */
+:root[data-theme='cork'] {
+  --c-stage-deep: #a87a45;
+  --c-stage: #c99a62;
+  --c-stage-hot: #e3bd86;
+  --c-ray: rgb(255 248 230 / 0.10);
+  --stage-pattern: radial-gradient(rgb(90 55 20 / 0.18) 0.09em, transparent 0.11em) 0 0 / 1.1em 1.1em,
+    radial-gradient(rgb(255 240 210 / 0.25) 0.07em, transparent 0.09em) 0.55em 0.55em / 1.1em 1.1em;
+  --spotlight: rgb(255 250 235 / 0.30);
+  --vignette: rgb(70 40 10 / 0.45);
+  --c-paper: #fffdf6;
+  --c-paper-shade: #eadfc8;
+  --c-ink: #3a2414;
+  --c-ink-soft: #7a5e46;
+  --c-fg: #2f1c0e;
+  --c-fg-muted: #5a3f28;
+  --c-sun: #ffd23f;
+  --c-bubblegum: #e8507e;
+  --c-mint: #1f9a82; /* darker so mint text reads on white paper */
+  --c-sky: #3d8fd6;
+  --tape-1: rgb(232 80 126 / 0.70);
+  --tape-2: rgb(43 181 154 / 0.70);
+  --tape-3: rgb(255 210 63 / 0.80);
+  --tape-4: rgb(61 143 214 / 0.70);
+  --stage-chip-bg: rgb(255 253 246 / 0.55);
+  --stage-chip-line: rgb(58 36 20 / 0.35);
+  --overlay-bg: rgb(60 35 15 / 0.6);
+  --shadow-text: 0 0.05em 0 rgb(255 248 230 / 0.55);
+  --logo-a: #e8507e;
+  --logo-b: #2bb59a;
+  --logo-shadow: 0.05em 0.05em 0 var(--c-paper), 0.1em 0.1em 0 var(--c-ink), 0.16em 0.16em 0.3em rgb(60 30 0 / 0.35);
+  --font-display: 'Shrikhand', 'Lilita One', Georgia, serif;
+  --font-hand: 'Caveat Brush', 'Permanent Marker', cursive;
+  --c-timer: #2bb59a;
+  --team-name-size: 1.02em;
+  --c-stage-highlight: #b8174f;
+}
+
+/* ---- Retro Arcade: neon on a midnight grid ---- */
+:root[data-theme='arcade'] {
+  --c-stage-deep: #05010f;
+  --c-stage: #120634;
+  --c-stage-hot: #3b0d6e;
+  --c-ray: rgb(0 240 255 / 0.06);
+  --stage-pattern: linear-gradient(rgb(255 60 200 / 0.10) 0.06em, transparent 0.06em) 0 0 / 3em 3em,
+    linear-gradient(90deg, rgb(255 60 200 / 0.10) 0.06em, transparent 0.06em) 0 0 / 3em 3em;
+  --spotlight: rgb(120 60 255 / 0.20);
+  --vignette: rgb(0 0 0 / 0.7);
+  --c-paper: #160d33;
+  --c-paper-shade: #2a1d5c;
+  --c-ink: #e9e4ff;
+  --c-ink-soft: #a99fe0;
+  --c-fg: #f4f1ff;
+  --c-fg-muted: #b9aef0;
+  --c-sun: #ffe600;
+  --c-tangerine: #ff9a1f;
+  --c-bubblegum: #ff2fb4;
+  --c-mint: #00f0d0;
+  --c-sky: #22b8ff;
+  --c-grape: #a46bff;
+  --c-success: #39ff88;
+  --c-on-accent: #0b0420;
+  --tape-1: rgb(255 47 180 / 0.75);
+  --tape-2: rgb(0 240 208 / 0.75);
+  --tape-3: rgb(255 230 0 / 0.80);
+  --tape-4: rgb(34 184 255 / 0.75);
+  --stage-chip-bg: rgb(0 240 255 / 0.08);
+  --stage-chip-line: rgb(0 240 255 / 0.45);
+  --overlay-bg: rgb(5 1 15 / 0.75);
+  --shadow-card: 0 0 0 0.12em rgb(0 240 255 / 0.55), 0 0 1.2em rgb(0 240 255 / 0.35), 0 0.6em 1.6em rgb(0 0 0 / 0.6);
+  --shadow-pop: 0.2em 0.2em 0 #ff2fb4;
+  --shadow-text: 0 0 0.25em rgb(255 47 180 / 0.9), 0 0.05em 0 #000;
+  --glow-sun: 0 0 1.4em rgb(255 230 0 / 0.75);
+  --logo-a: #00f0d0;
+  --logo-b: #ff2fb4;
+  --logo-shadow: 0 0 0.12em #fff, 0 0 0.35em currentColor, 0.08em 0.08em 0 #0b0420;
+  --font-display: 'Bungee', 'Lilita One', 'Arial Black', sans-serif;
+  /* Captions use --font-hand; a pixel font hurt readability on phones, so arcade keeps the friendly body font. */
+  --font-hand: 'Nunito', system-ui, sans-serif;
+  --c-timer: #00f0d0;
+  --c-timer-urgent: #ff2fb4;
+  --radius-sm: 0.2em;
+  --radius: 0.35em;
+  --radius-lg: 0.6em;
+  --panel-bg: #1d1145;
+  --team-name-size: 0.9em;
+}
+
+/* ---- Sunny Picnic: soft pastels on gingham ---- */
+:root[data-theme='picnic'] {
+  --c-stage-deep: #8fd3c7;
+  --c-stage: #b8e6dc;
+  --c-stage-hot: #fff3c4;
+  --c-ray: rgb(255 255 255 / 0.22);
+  --stage-pattern: linear-gradient(90deg, rgb(255 140 160 / 0.13) 50%, transparent 50%) 0 0 / 2.4em 2.4em,
+    linear-gradient(rgb(255 140 160 / 0.13) 50%, transparent 50%) 0 0 / 2.4em 2.4em;
+  --spotlight: rgb(255 255 240 / 0.45);
+  --vignette: rgb(40 90 80 / 0.25);
+  --c-paper: #fffaf0;
+  --c-paper-shade: #f3e6d0;
+  --c-ink: #3b3355;
+  --c-ink-soft: #7c7399;
+  --c-fg: #2f2850;
+  --c-fg-muted: #5a5280;
+  --c-sun: #ffd166;
+  --c-tangerine: #ffa77a;
+  --c-bubblegum: #ff7aa2;
+  --c-mint: #23a083; /* darker than the swatch so mint text reads on cream */
+  --c-sky: #73b7ff;
+  --c-grape: #a78bfa;
+  --c-success: #3cbf7a;
+  --tape-1: rgb(255 122 162 / 0.65);
+  --tape-2: rgb(79 201 168 / 0.65);
+  --tape-3: rgb(255 209 102 / 0.75);
+  --tape-4: rgb(115 183 255 / 0.65);
+  --stage-chip-bg: rgb(255 255 255 / 0.6);
+  --stage-chip-line: rgb(59 51 85 / 0.25);
+  --overlay-bg: rgb(47 40 80 / 0.45);
+  --shadow-text: 0 0.05em 0 rgb(255 255 255 / 0.7);
+  --shadow-card: 0 0.3em 0 rgb(59 51 85 / 0.15), 0 0.8em 1.6em rgb(59 51 85 / 0.18);
+  --logo-a: #ff7aa2;
+  --logo-b: #35b893;
+  --logo-shadow: 0.05em 0.05em 0 #fff, 0.1em 0.1em 0 var(--c-ink), 0.16em 0.16em 0.35em rgb(59 51 85 / 0.25);
+  --font-display: 'Fredoka', 'Lilita One', 'Trebuchet MS', sans-serif;
+  --c-timer: #35b893;
+  --radius-sm: 0.6em;
+  --radius: 1em;
+  --radius-lg: 1.6em;
+  --c-stage-highlight: #d63f72;
 }

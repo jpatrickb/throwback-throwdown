@@ -35,7 +35,7 @@ input, textarea {
 button {
   font-family: var(--font-display); font-size: 1.25rem; letter-spacing: var(--tracking-display);
   padding: 0.85rem 1rem; border-radius: var(--radius); border: var(--border-chunky);
-  background: var(--c-sun); color: var(--c-ink); cursor: pointer; box-shadow: var(--shadow-pop);
+  background: var(--c-sun); color: var(--c-on-accent); cursor: pointer; box-shadow: var(--shadow-pop);
   transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
 }
 button:active:not(:disabled) { transform: translate(0.15em, 0.15em); box-shadow: 0.1em 0.1em 0 var(--c-ink); }

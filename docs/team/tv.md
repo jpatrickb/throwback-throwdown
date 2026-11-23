@@ -57,6 +57,21 @@
 - Immediate SFX now go through a 0ms timer so React StrictMode's dev double-run doesn't double-fire them.
 - Verified by wrapping `window.__tvAudio.playSfx` in headless Chrome and logging every call with timestamps on RESULTS (normal, `&mocktie`, `&mocksweep`), SCOREBOARD, FINAL and PHOTO_REVEAL, in team and solo modes. No console errors.
 
+## Done (Nov 23): Patrick's feedback
+- **No game text on photos.** `Polaroid` no longer takes a label, so the strip is always blank, like a real polaroid. The polaroid back art has no text.
+  Instructions live in the header ("Write a caption on your phone!", "Vote for the funniest on your phone!") and under the reveal photo.
+  Header titles fit themselves to their column, so long titles and wide theme fonts never collide.
+- **LAN URL** is only in Settings → Emergency.
+- **Settings** (`client/src/tv/settings/`): a discreet gear bottom-left in every phase, or the **S** key. Esc closes, focus stays inside the panel, and the cursor shows while the mouse moves.
+  - `registry.ts` is **one array of setting definitions** (toggle / slider / choice / info). Adding a setting is one entry.
+  - Theme, music/SFX on-off, master/music/SFX volume, emoji reactions on the TV (saved per device in localStorage `tvPrefs`), fullscreen, and the Wi-Fi join URL.
+  - **The theme is server state** so phones follow it. The panel emits `tv:setTheme {theme}`, and the TV applies `view.settings.theme` to `<html data-theme>`. Nothing is stored locally. In mock mode a pick is a local preview only.
+  - Audio goes through `audioAdapter.ts`, a re-export of audio's real `useAudioSettings`/`get`/`setAudioSettings` (landed in a0fd90f). The M and -/= keys stay in sync with the panel.
+- **Themes** (ids from `THEMES` in shared/types.ts): berry (Berry Stage, default), cork (Cork Board), arcade (Retro Arcade), picnic (Sunny Picnic). Each is a `[data-theme]` block in `tokens.css`; `settings/themes.ts` holds only the preview swatches.
+  Checked on phones (390×844) too. Arcade captions use the body font, since the pixel font hurt readability. Cork and picnic use a darker mint, and `--c-stage-highlight` keeps highlighted numbers readable on light stages.
+  New role tokens make light and dark themes work: `--c-on-accent`, `--stage-chip-*`, `--stage-pattern`, `--logo-*`, `--team-name-size`, and others.
+  Fonts added in index.html: Shrikhand, Caveat Brush, Bungee, Fredoka. Dev/mocks: `?theme=<id>`.
+
 ## Dev helpers
 - `/tv?mock=<PHASE>` as usual. Click once to dismiss the start overlay.
 - `&solo=1` individual mode. `&mockplayers=25`, `&mockcaptions=0|1|25`, `&mocklong` (all captions 80 chars), `&mocktie`, `&mocksweep` stress the fixtures (`client/src/tv/devStress.ts`, mock mode only).

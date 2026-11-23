@@ -81,7 +81,6 @@ export function Results({ view }: { view: TvView }) {
 
   const crowd = results.length > CROWD;
   const density = captionDensity(results.length, Math.max(0, ...results.map((c) => c.text.length)));
-  const subject = round.subjectRevealed && round.photo.subject ? round.photo.subject : null;
   const tough = results.length <= 1;
 
   return (
@@ -89,6 +88,7 @@ export function Results({ view }: { view: TvView }) {
       <RoundHeader
         index={round.index}
         total={round.totalPhotosQueued}
+        fitKey={String(title)}
         title={
           <AnimatePresence mode="wait">
             <motion.span key={String(title)} initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} transition={{ duration: 0.25 }}>
@@ -99,12 +99,7 @@ export function Results({ view }: { view: TvView }) {
       />
       <div className="results-body">
         <div className="results-left">
-          <Polaroid
-            src={round.photo.url}
-            tilt={-3}
-            className="polaroid-small"
-            label={subject && done ? <span className="subject-name">It’s {subject}!</span> : done ? 'What a round!' : 'Votes are in!'}
-          />
+          <Polaroid src={round.photo.url} tilt={-3} className="polaroid-small" />
           {tough && (
             <motion.p className="tough-crowd" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ ...SPRING_POP, delay: 0.4 }}>
               {results.length === 0 ? 'Tough crowd! Nobody wrote a caption 🦗' : 'Only one brave soul this round!'}

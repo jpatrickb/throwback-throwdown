@@ -45,8 +45,8 @@ Keep the same palette across every asset so they all look like one set. When a p
 ## 4. Polaroid back: `photo-back.png` (key `photoBack`, placeholder `photo-back.svg`)
 - **Size:** 800×960 PNG
 - **Prompt:** *[shared style]* The back of an instant photo: cream-to-kraft paper with faint
-  ruled lines, a little coffee-ring stain, and a big hand-drawn question mark with sparkles in the
-  middle. Flat, straight on, no perspective, fills the frame.
+  ruled lines, a little coffee-ring stain and a small camera doodle. **No text and no question
+  marks** (Patrick: the game never writes on the photos). Flat, straight on, no perspective, fills the frame.
 
 ## 5. Doodle stickers (keys under `doodles`, placeholders `*.svg`)
 Each one: **512×512 transparent PNG**, a single sticker centered, with a thin white sticker border.

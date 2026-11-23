@@ -57,10 +57,10 @@ export function Voting({ view }: { view: TvView }) {
 
   return (
     <div className="screen voting">
-      <RoundHeader index={round.index} total={round.totalPhotosQueued} title="Vote for the funniest!" />
+      <RoundHeader index={round.index} total={round.totalPhotosQueued} title="Vote for the funniest on your phone!" />
       <div className={`voting-body ${n > 12 ? 'voting-xwide' : n >= 9 ? 'voting-wide' : ''}`}>
         <div className="voting-left">
-          <Polaroid src={round.photo.url} label={n > 12 ? 'Vote!' : 'Pick a favorite!'} tilt={-4} className="polaroid-small" />
+          <Polaroid src={round.photo.url} tilt={-4} className="polaroid-small" />
           <CountdownRing deadline={view.deadline} serverNow={view.serverNow} phase={view.phase} settings={view.settings} size="sm" />
         </div>
         {n === 0 ? (

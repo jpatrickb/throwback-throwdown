@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 480">
-  <!-- Back of a polaroid: shown before the flip reveal. -->
+  <!-- Back of a polaroid, shown before the flip reveal. No text: the game never writes on photos. -->
   <rect width="400" height="480" rx="8" fill="#f1e2c4"/>
   <g fill="none" stroke="#d9b48a" stroke-width="3"><path d="M30 60h340M30 100h340M30 140h340"/></g>
-  <text x="200" y="300" text-anchor="middle" font-family="Permanent Marker, cursive" font-size="44" fill="#6d5470">Who is it?!</text>
-  <text x="200" y="360" text-anchor="middle" font-size="70">📸</text>
+  <circle cx="290" cy="330" r="46" fill="none" stroke="#e6cfa6" stroke-width="10" opacity="0.7"/>
+  <text x="200" y="300" text-anchor="middle" font-size="90">📸</text>
 </svg>
