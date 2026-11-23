@@ -28,24 +28,24 @@ export interface Cue {
 }
 
 export const MUSIC: Record<MusicKey, Cue> = {
-  lobby: { src: placeholder('music-lobby'), volume: 0.5, loop: true },
-  captioning: { src: placeholder('music-captioning'), volume: 0.4, loop: true },
-  voting: { src: placeholder('music-voting'), volume: 0.4, loop: true },
-  results: { src: placeholder('music-results'), volume: 0.35, loop: true },
-  final: { src: placeholder('music-final'), volume: 0.5, loop: true },
+  lobby: { src: real('music-lobby'), volume: 0.5, loop: true },
+  captioning: { src: real('music-captioning'), volume: 0.5, loop: true },
+  voting: { src: real('music-voting'), volume: 0.4, loop: true },
+  results: { src: real('music-results'), volume: 0.35, loop: true },
+  final: { src: real('music-final'), volume: 0.5, loop: true },
 };
 
 export const SFX: Record<SfxKey, Cue> = {
-  join: { src: placeholder('sfx-join'), volume: 0.6, loop: false },
-  reveal: { src: placeholder('sfx-reveal'), volume: 0.8, loop: false, duck: true },
-  submit: { src: placeholder('sfx-submit'), volume: 0.5, loop: false },
-  tick: { src: placeholder('sfx-tick'), volume: 0.45, loop: false },
-  timesUp: { src: placeholder('sfx-timesUp'), volume: 0.8, loop: false, duck: true },
-  cardDeal: { src: placeholder('sfx-cardDeal'), volume: 0.5, loop: false },
-  tally: { src: placeholder('sfx-tally'), volume: 0.55, loop: false },
-  winner: { src: placeholder('sfx-winner'), volume: 0.9, loop: false, duck: true },
-  leaderboard: { src: placeholder('sfx-leaderboard'), volume: 0.7, loop: false, duck: true },
-  champion: { src: placeholder('sfx-champion'), volume: 1, loop: false, duck: true },
+  join: { src: real('sfx-join'), volume: 0.6, loop: false },
+  reveal: { src: real('sfx-reveal'), volume: 0.8, loop: false, duck: true },
+  submit: { src: real('sfx-submit'), volume: 0.5, loop: false },
+  tick: { src: real('sfx-tick'), volume: 0.35, loop: false },
+  timesUp: { src: real('sfx-timesUp'), volume: 0.8, loop: false, duck: true },
+  cardDeal: { src: real('sfx-cardDeal'), volume: 0.5, loop: false },
+  tally: { src: real('sfx-tally'), volume: 0.55, loop: false },
+  winner: { src: real('sfx-winner'), volume: 0.9, loop: false, duck: true },
+  leaderboard: { src: real('sfx-leaderboard'), volume: 0.7, loop: false, duck: true },
+  champion: { src: real('sfx-champion'), volume: 1, loop: false, duck: true },
 };
 
 /** Which music bed plays in each phase. null = silence (the reveal stinger gets the stage).
