@@ -95,7 +95,7 @@
                         "length": 864
                       },
                       {
-                        "pitch": 70,
+                        "pitch": 69,
                         "velocity": 100,
                         "release_velocity": 0,
                         "channel": 0,
@@ -103,7 +103,7 @@
                         "length": 212
                       },
                       {
-                        "pitch": 69,
+                        "pitch": 67,
                         "velocity": 100,
                         "release_velocity": 0,
                         "channel": 0,
@@ -111,7 +111,7 @@
                         "length": 212
                       },
                       {
-                        "pitch": 70,
+                        "pitch": 69,
                         "velocity": 100,
                         "release_velocity": 0,
                         "channel": 0,
@@ -207,7 +207,7 @@
                         "length": 864
                       },
                       {
-                        "pitch": 72,
+                        "pitch": 71,
                         "velocity": 100,
                         "release_velocity": 0,
                         "channel": 0,
@@ -215,7 +215,7 @@
                         "length": 212
                       },
                       {
-                        "pitch": 71,
+                        "pitch": 69,
                         "velocity": 100,
                         "release_velocity": 0,
                         "channel": 0,
@@ -223,7 +223,7 @@
                         "length": 212
                       },
                       {
-                        "pitch": 72,
+                        "pitch": 71,
                         "velocity": 100,
                         "release_velocity": 0,
                         "channel": 0,
@@ -388,7 +388,7 @@
           "filter_sustain": 45.0,
           "level": -3.0,
           "osc1_wave": 0.0,
-          "osc2_detune": 12.0,
+          "osc2_detune": 4.0,
           "osc2_semitones": 0.0,
           "osc2_wave": 0.0,
           "osc_mix": 50.0,
@@ -571,7 +571,7 @@
           "glide": 12.0,
           "level": -4.0,
           "osc1_wave": 1.0,
-          "osc2_detune": 8.0,
+          "osc2_detune": 4.0,
           "osc2_semitones": 0.0,
           "osc2_wave": 0.0,
           "osc_mix": 40.0,
@@ -1537,9 +1537,9 @@
           {
             "plugin": "chorus",
             "params": {
-              "depth": 35.0,
+              "depth": 18.0,
               "mix": 40.0,
-              "rate": 0.6
+              "rate": 0.5
             },
             "bypass": false,
             "active": true,
@@ -1614,7 +1614,7 @@
           "filter_env_amount": 10.0,
           "level": -6.0,
           "osc1_wave": 0.0,
-          "osc2_detune": 14.0,
+          "osc2_detune": 4.0,
           "osc2_semitones": 0.0,
           "osc2_wave": 0.0,
           "osc_mix": 50.0,

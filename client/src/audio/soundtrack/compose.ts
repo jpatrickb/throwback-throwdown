@@ -9,6 +9,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { melody, melodyBeats, parseChord, pcAtOrAbove, voice, writeSmf, type Note, type Part } from './midi.ts';
 import { SFX } from './sfx.ts';
+import { checkBass, checkMelody, checkParts } from './harmony.ts';
 
 // ---------- patches ----------
 
@@ -38,7 +39,7 @@ const plate = (mix: number, decay = 1.8): Insert => ({
   plugin: 'plate_reverb',
   params: { mix, decay, damping: 8000, pre_delay: 20, low_cut: 250 },
 });
-const chorus = (mix: number): Insert => ({ plugin: 'chorus', params: { mix, rate: 0.6, depth: 35 } });
+const chorus = (mix: number): Insert => ({ plugin: 'chorus', params: { mix, rate: 0.5, depth: 18 } });
 
 const PATCHES: Record<string, Patch> = {
   bass: {
@@ -68,7 +69,7 @@ const PATCHES: Record<string, Patch> = {
   brass: {
     instrument: 'subtractive_synth',
     params: {
-      osc1_wave: SAW, osc2_wave: SAW, osc2_semitones: 0, osc2_detune: 12, osc_mix: 50,
+      osc1_wave: SAW, osc2_wave: SAW, osc2_semitones: 0, osc2_detune: 4, osc_mix: 50,
       cutoff: 850, resonance: 12, filter_env_amount: 60,
       amp_attack: 10, amp_decay: 300, amp_sustain: 75, amp_release: 140,
       filter_attack: 25, filter_decay: 260, filter_sustain: 45, filter_release: 150,
@@ -80,7 +81,7 @@ const PATCHES: Record<string, Patch> = {
   lead: {
     instrument: 'subtractive_synth',
     params: {
-      osc1_wave: SQUARE, osc2_wave: SAW, osc2_semitones: 0, osc2_detune: 8, osc_mix: 40,
+      osc1_wave: SQUARE, osc2_wave: SAW, osc2_semitones: 0, osc2_detune: 4, osc_mix: 40,
       cutoff: 2400, resonance: 18, filter_env_amount: 35,
       amp_attack: 4, amp_decay: 220, amp_sustain: 65, amp_release: 110,
       filter_attack: 2, filter_decay: 200, filter_sustain: 40, filter_release: 120,
@@ -115,7 +116,7 @@ const PATCHES: Record<string, Patch> = {
   pad: {
     instrument: 'subtractive_synth',
     params: {
-      osc1_wave: SAW, osc2_wave: SAW, osc2_semitones: 0, osc2_detune: 14, osc_mix: 50,
+      osc1_wave: SAW, osc2_wave: SAW, osc2_semitones: 0, osc2_detune: 4, osc_mix: 50,
       cutoff: 1300, resonance: 8, filter_env_amount: 10,
       amp_attack: 350, amp_decay: 800, amp_sustain: 80, amp_release: 900,
       velocity: 30, level: -6,
@@ -127,7 +128,7 @@ const PATCHES: Record<string, Patch> = {
     // gliding saw for whooshes and swoops
     instrument: 'subtractive_synth',
     params: {
-      osc1_wave: SAW, osc2_wave: SAW, osc2_semitones: 7, osc2_detune: 18, osc_mix: 40,
+      osc1_wave: SAW, osc2_wave: SAW, osc2_semitones: 7, osc2_detune: 4, osc_mix: 40,
       cutoff: 1800, resonance: 30, filter_env_amount: 20,
       amp_attack: 40, amp_decay: 300, amp_sustain: 70, amp_release: 220,
       filter_attack: 60, filter_decay: 300, filter_sustain: 50, filter_release: 200,
@@ -140,7 +141,7 @@ const PATCHES: Record<string, Patch> = {
     // sliding brass for the playful "aww"
     instrument: 'subtractive_synth',
     params: {
-      osc1_wave: SAW, osc2_wave: SQUARE, osc2_semitones: 0, osc2_detune: 6, osc_mix: 35,
+      osc1_wave: SAW, osc2_wave: SQUARE, osc2_semitones: 0, osc2_detune: 4, osc_mix: 35,
       cutoff: 700, resonance: 10, filter_env_amount: 40,
       amp_attack: 25, amp_decay: 400, amp_sustain: 80, amp_release: 160,
       filter_attack: 60, filter_decay: 400, filter_sustain: 50, filter_release: 160,
@@ -253,22 +254,20 @@ function bassLine(style: BassStyle, bars: string[], lo = 33): Note[] {
     const R = pcAtOrAbove(ch.bass, lo);
     const fifth = pcAtOrAbove((ch.root + 7) % 12, R);
     const third = pcAtOrAbove((ch.root + ch.tones[1]) % 12, R);
-    const nextR = pcAtOrAbove(nx.bass, lo);
-    const approach = nextR > R ? nextR - 1 : nextR + 1;
     const add = (t: number, d: number, p: number, v = 100) => {
       if (t < e.d - 1e-6) out.push({ t: e.t + t, d: Math.min(d, e.d - t), p, v });
     };
     switch (style) {
       case 'pop':
-        add(0, 0.8, R, 110); add(1.5, 0.4, R, 92); add(2, 0.8, fifth, 100); add(3, 0.4, R + 12, 90); add(3.5, 0.4, approach, 88);
-        if (e.d <= 2) { add(1, 0.4, fifth, 92); add(1.5, 0.4, approach, 86); }
+        add(0, 0.8, R, 110); add(1.5, 0.4, R, 92); add(2, 0.8, fifth, 100); add(3, 0.4, R + 12, 90); add(3.5, 0.4, fifth, 86);
+        if (e.d <= 2) { add(1, 0.4, fifth, 92); add(1.5, 0.4, R + 12, 86); }
         break;
       case 'disco':
         for (let i = 0; i < e.d * 2; i++) add(i / 2, 0.42, i % 2 ? R + 12 : R, i % 2 ? 88 : 108);
         break;
       case 'walk':
-        if (e.d >= 4) { add(0, 0.6, R, 96); add(1, 0.6, third, 84); add(2, 0.6, fifth, 90); add(3, 0.6, approach, 84); }
-        else { add(0, 0.6, R, 96); add(1, 0.6, approach, 84); }
+        if (e.d >= 4) { add(0, 0.6, R, 96); add(1, 0.6, third, 84); add(2, 0.6, fifth, 90); add(3, 0.6, third, 84); }
+        else { add(0, 0.6, R, 96); add(1, 0.6, fifth, 84); }
         break;
       case 'pulse':
         for (let i = 0; i < e.d * 2; i++) add(i / 2, 0.4, R, i % 2 ? 70 : 92);
@@ -282,7 +281,7 @@ function comp(style: CompStyle, bars: string[], lo: number, hi: number, vel = 90
   const out: Note[] = [];
   let prev: number[] | null = null;
   for (const e of chordEvents(bars)) {
-    const v = voice(parseChord(e.sym), lo, hi, prev);
+    const v = voice(parseChord(e.sym), lo, hi, prev, 3); // triads: no clustered 7ths/9ths
     prev = v;
     const stab = (t: number, d: number, vv = vel) => {
       if (t < e.d - 1e-6) for (const p of v) out.push({ t: e.t + t, d: Math.min(d, e.d - t), p, v: vv });
@@ -326,6 +325,7 @@ interface Cue {
   tonic: number; // MIDI pitch of melody degree 1
   build: (bars: string[], len: number) => Part[]; // arrangement for the full loop
   mix?: Record<string, number>; // per-cue fader offsets in dB, e.g. { Bell: 3 }
+  retired?: boolean; // kept for reference, not rendered or checked
 }
 
 const sum = (a: Note[][]) => a.flat();
@@ -344,13 +344,13 @@ const CUES: Cue[] = [
     },
     melody: {
       A: [
-        '3:.5 5:.5 r:.5 5:.5 6:.5 5:.5 3:1',
-        '1:.5 3:.5 r:.5 3:.5 2:1 1:1',
-        "6:.5 1':.5 r:.5 1':.5 2':.5 1':.5 6:1",
-        '5:1.5 4:.5 3:1 2:1',
-        '3:.5 5:.5 r:.5 5:.5 6:.5 5:.5 3:1',
-        '1:.5 3:.5 r:.5 3:.5 5:1 6:1',
-        '4:.5 4:.5 6:1 5:.5 4:.5 2:1',
+        "3:.5 5:.5 r:.5 5:.5 1':.5 6:.5 5:1",
+        '1:.5 3:.5 r:.5 3:.5 3:.5 2:.5 1:1',
+        "6:.5 1':.5 r:.5 1':.5 1':.5 2':.5 1':.5 6:.5",
+        "5:1.5 6:.5 7:1 2':1",
+        "3:.5 5:.5 r:.5 5:.5 1':.5 6:.5 5:1",
+        '1:.5 3:.5 r:.5 3:.5 6:1 5:1',
+        '4:.5 4:.5 6:1 5:1 2:1',
         '1:3 r:1',
       ],
       B: [
@@ -358,8 +358,8 @@ const CUES: Cue[] = [
         '7:1 5:.5 7:.5 r:1 5:1',
         '5:1 3:.5 5:.5 7:1 5:1',
         '6:3 r:1',
-        "1':.5 1':.5 6:.5 1':.5 2':1 1':1",
-        "2':.5 2':.5 7:.5 2':.5 3':1 2':1",
+        "1':.5 1':.5 6:.5 1':.5 4':1 1':1",
+        "2':.5 2':.5 7:.5 2':.5 5':1 2':1",
         "4':1 3':1 2':1 1':1",
         "7:1 2':1 5:2",
       ],
@@ -375,6 +375,7 @@ const CUES: Cue[] = [
   },
   {
     name: 'music-captioning',
+    retired: true, // CAPTIONING now plays the lobby track (Patrick's favorite); see docs/team/audio.md
     bpm: 96,
     mix: { Bell: 3, Drums: -2 },
     tonic: 65, // F4
@@ -423,24 +424,24 @@ const CUES: Cue[] = [
     },
     melody: {
       A: [
-        '5:.5 5:.5 r:.5 5:.5 6:.5 5:.5 3:.5 1:.5',
-        '2:.5 2:.5 r:.5 2:.5 3:.5 2:.5 7,:1',
-        '3:.5 3:.5 r:.5 3:.5 5:.5 3:.5 2:.5 1:.5',
-        '6,:1 1:1 3:1 r:1',
-        '5:.5 5:.5 r:.5 5:.5 6:.5 5:.5 3:.5 1:.5',
-        '2:.5 2:.5 r:.5 2:.5 #4:.5 5:.5 6:1',
-        '5:.5 3:.5 1:.5 3:.5 5:1 6:1',
-        '6:1 4:1 2:1 r:1',
+        '5:.5 5:.5 r:.5 5:.5 5:.5 6:.5 5:.5 3:.5',
+        '2:.5 2:.5 r:.5 2:.5 2:.5 3:.5 2:.5 7,:.5',
+        '3:.5 3:.5 r:.5 3:.5 3:.5 2:.5 1:.5 6,:.5',
+        '6,:1 1:1 4:1 r:1',
+        '5:.5 5:.5 r:.5 5:.5 5:.5 6:.5 5:.5 3:.5',
+        '2:.5 2:.5 r:.5 2:.5 5:.5 6:.5 5:1',
+        "6:.5 5:.5 4:.5 5:.5 6:1 1':1",
+        '5:1 3:1 2:1 r:1',
       ],
       B: [
-        "3':1 1':.5 5:.5 r:1 1':1",
+        "4':1 1':.5 6:.5 r:1 1':1",
         "2':1 7:.5 5:.5 r:1 7:1",
-        "1':.5 7:.5 6:.5 5:.5 6:1 3:1",
-        '5:2 3:1 r:1',
-        "3':.5 3':.5 r:.5 3':.5 2':.5 1':.5 6:1",
-        "2':.5 2':.5 r:.5 2':.5 1':.5 7:.5 5:1",
-        "6:.5 1':.5 3':.5 1':.5 2':1 6:1",
-        "1':.5 7:.5 6:.5 5:.5 4:.5 2:.5 6,:.5 7,:.5",
+        '7:.5 6:.5 5:.5 6:.5 7:1 3:1',
+        '6:2 3:1 r:1',
+        "1':.5 1':.5 r:.5 1':.5 1':.5 2':.5 1':1",
+        "2':.5 2':.5 r:.5 2':.5 7:.5 6:.5 5:1",
+        "6:.5 1':.5 2':.5 1':.5 6:1 4:1",
+        '7:.5 6:.5 5:.5 3:.5 2:.5 3:.5 2:.5 7,:.5',
       ],
     },
     build: (bars, len) => [
@@ -457,7 +458,7 @@ const CUES: Cue[] = [
     mix: { Bell: 2 },
     tonic: 72, // C5 (A minor / C major)
     sections: {
-      A: ['Am', 'F', 'C', 'G', 'Am', 'F', 'Dm7', 'Esus4 E'],
+      A: ['Am', 'F', 'C', 'G', 'Am', 'F', 'Dm7', 'G7sus4 G'],
       B: ['F', 'G', 'Em', 'Am', 'F', 'G', 'Csus4 C', 'G'],
     },
     melody: {
@@ -467,17 +468,17 @@ const CUES: Cue[] = [
         '5:1 r:1 3:1 r:1',
         'r:2 2:1 5,:1',
         '3:1 r:1 6:1 r:1',
-        "r:2 1':1 2':1",
-        "3':1 r:1 2':1 1':1",
-        '7:2 #5:2',
+        "r:2 6:1 1':1",
+        "4':1 r:1 2':1 1':1",
+        "2':2 7:2",
       ],
       B: [
-        "6:1 r:.5 1':.5 3':2",
+        "6:1 r:.5 1':.5 4':2",
         "2':1 r:.5 7:.5 5:2",
         "7:1 r:.5 5:.5 3':2",
         "1':3 r:1",
         "6:1 r:.5 1':.5 4':2",
-        "3':1 r:.5 2':.5 7:2",
+        "5':1 r:.5 2':.5 7:2",
         "1':1 4':1 3':2",
         "2':2 7:1 5:1",
       ],
@@ -501,21 +502,21 @@ const CUES: Cue[] = [
     melody: {
       A: [
         "1':1.5 5:.5 1':.5 2':.5 3':1",
-        "4':1.5 3':.5 2':1 1':1",
-        "2':1.5 1':.5 7:1 5:1",
-        "6:1 7:1 1':1 2':1",
+        "4':1.5 5':.5 4':1 2':1",
+        "1':1.5 6:.5 3':1 1':1",
+        "7:1 6:1 5:1 2':1",
         "1':1.5 5:.5 1':.5 2':.5 3':1",
-        "4':1.5 5':.5 4':1 3':1",
-        "2':1 1':1 7:1 6:1",
+        "4':1.5 5':.5 4':1 6':1",
+        "2':1 1':1 7:1 5:1",
         "1':3 r:1",
       ],
       B: [
-        "r:.5 2':.5 4':.5 5':.5 6':1 5':1",
-        "r:.5 1':.5 3':.5 4':.5 5':1 3':1",
+        "r:.5 6:.5 1':.5 2':.5 1':1 6:1",
+        "r:.5 5:.5 7:.5 2':.5 7:1 5:1",
         "r:.5 7:.5 2':.5 3':.5 5':1 3':1",
         "3':3 r:1",
-        "r:.5 2':.5 4':.5 5':.5 6':1 5':1",
-        "r:.5 1':.5 3':.5 5':.5 7':1 5':1",
+        "r:.5 6:.5 1':.5 2':.5 1':1 6:1",
+        "r:.5 7:.5 2':.5 5':.5 7':1 5':1",
         "4':1 3':1 2':1 1':1",
         "7:1 2':1 5':2",
       ],
@@ -608,27 +609,36 @@ function trackPreset(name: string, patch: Patch) {
   };
 }
 
+const problems: string[] = [];
+
 for (const cue of CUES) {
+  if (cue.retired) continue;
   const bars = [...cue.sections.A, ...cue.sections.B];
   const loopBars = bars.length;
-  // Render the loop twice; build.sh keeps the second pass, whose start already contains the
-  // first pass's reverb and release tails, so the file loops seamlessly.
+  const keyPc = cue.tonic % 12;
   const parts = cue.build(bars, loopBars);
-  for (const p of parts) p.notes = [...p.notes, ...shift(p.notes, loopBars * 4)];
+  // Melody (one pass), then the harmony checks, then the second pass.
+  const melodyNotes: Note[] = [];
   for (const m of MELODY_TRACKS[cue.name]) {
     const part = parts.find((p) => p.name === m.track);
     if (!part) throw new Error(`${cue.name}: no ${m.track} track`);
-    for (const pass of [0, 1]) {
-      (['A', 'B'] as const).forEach((sec, si) => {
-        if (m.sections && !m.sections.includes(sec)) return;
-        cue.melody[sec].forEach((tok, bi) => {
-          if (Math.abs(melodyBeats(tok) - 4) > 1e-6) throw new Error(`${cue.name} ${sec}${bi + 1}: ${melodyBeats(tok)} beats`);
-          const start = pass * loopBars * 4 + (si * 8 + bi) * 4;
-          part.notes.push(...melody(tok, cue.tonic + 12 * m.octave, start, m.vel));
-        });
+    (['A', 'B'] as const).forEach((sec, si) => {
+      if (m.sections && !m.sections.includes(sec)) return;
+      cue.melody[sec].forEach((tok, bi) => {
+        if (Math.abs(melodyBeats(tok) - 4) > 1e-6) throw new Error(`${cue.name} ${sec}${bi + 1}: ${melodyBeats(tok)} beats`);
+        const notes = melody(tok, cue.tonic + 12 * m.octave, (si * 8 + bi) * 4, m.vel);
+        part.notes.push(...notes);
+        if (m === MELODY_TRACKS[cue.name][0]) melodyNotes.push(...notes);
       });
-    }
+    });
   }
+  const spans = chordEvents(bars);
+  checkParts(cue.name, keyPc, parts, problems);
+  checkMelody(cue.name, melodyNotes, spans, problems);
+  checkBass(cue.name, parts.find((p) => p.name === 'Bass')?.notes ?? [], spans, problems);
+  // Render the loop twice; build.sh keeps the second pass, whose start already contains the
+  // first pass's reverb and release tails, so the file loops seamlessly.
+  for (const p of parts) p.notes = [...p.notes, ...shift(p.notes, loopBars * 4)];
   const barSec = 240 / cue.bpm;
   emit(cue.name, parts, cue.bpm, [{ out: cue.name, start: 0, end: barSec * loopBars * 2 }], cue.mix);
   jobs.push([cue.name, cue.name, 'music', (barSec * loopBars).toFixed(6), (barSec * loopBars * 2).toFixed(6)].join('\t'));
@@ -644,6 +654,11 @@ for (const [key, takes] of Object.entries(SFX)) {
   const bounces: Bounce[] = [];
   let cursorBeats = 0;
   takes.forEach((take, i) => {
+    checkParts(`sfx ${key} take ${i + 1}`, take.key ?? 0, take.parts, problems);
+    // Tally is pitched up a major scale per step at runtime, so its takes must sit on the tonic (C).
+    if (key === 'tally') {
+      for (const p of take.parts) for (const nn of p.notes) if (!p.drums && nn.p % 12 !== 0) problems.push(`sfx tally take ${i + 1}: notes must be C (rising steps are relative to C)`);
+    }
     const endBeat = Math.max(...take.parts.flatMap((p) => p.notes.map((nn) => nn.t + nn.d)));
     for (const p of take.parts) {
       const m = merged.get(p.name) ?? { name: p.name, drums: p.drums, notes: [] };
@@ -661,5 +676,9 @@ for (const [key, takes] of Object.entries(SFX)) {
   emit(session, [...merged.values()], SFX_BPM, bounces);
 }
 
+if (problems.length) {
+  console.error(`Harmony check failed (${problems.length}):\n  ` + problems.join('\n  '));
+  process.exit(1);
+}
 writeFileSync(join(out, 'jobs.tsv'), jobs.join('\n') + '\n');
-console.log(`composed ${CUES.length} cues and ${takeCount} sfx takes (${Object.keys(SFX).length} keys) into ${out}`);
+console.log(`composed ${CUES.filter((c) => !c.retired).length} cues and ${takeCount} sfx takes (${Object.keys(SFX).length} keys) into ${out}`);

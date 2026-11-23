@@ -6,6 +6,7 @@
 import type { Note, Part } from './midi.ts';
 
 export interface Take {
+  key?: number; // pitch class of the take's major key (default 0 = C major); checked by harmony.ts
   tail: number; // seconds of release/reverb kept after the last note
   parts: Part[];
 }
@@ -23,7 +24,7 @@ const drums = (...notes: Note[][]): Part => ({ name: 'Drums', drums: true, notes
 const part = (name: string, ...notes: Note[][]): Part => ({ name, notes: notes.flat() });
 
 // Chord shapes (MIDI) in the soundtrack's bright major keys.
-const C = [60, 64, 67, 72], D = [62, 66, 69, 74], F = [60, 65, 69, 72], G = [59, 62, 67, 71], Bb = [58, 62, 65, 70];
+const C = [60, 64, 67, 72], F = [60, 65, 69, 72], G = [59, 62, 67, 71], Am = [57, 60, 64, 69];
 
 export const SFX: Record<string, Take[]> = {
   // ---------- lobby ----------
@@ -58,7 +59,11 @@ export const SFX: Record<string, Take[]> = {
       drums([n(0.25, 0.4, i % 2 ? OH : CRASH, 44)]),
     ],
   })),
-  roundStart: [C, D, F].map((ch, i) => ({
+  roundStart: [
+    { ch: C, root: 36 },
+    { ch: G, root: 31 },
+    { ch: F, root: 41 },
+  ].map(({ ch, root }, i) => ({
     tail: 0.9,
     parts: [
       drums(
@@ -66,7 +71,7 @@ export const SFX: Record<string, Take[]> = {
         [n(0.5, 0.2, K, 124), n(0.5, 1, CRASH, 118), n(0.5, 0.2, FLOOR, 110)],
       ),
       part('Brass', chord(0.5, 0.7, ch.map((p) => p + 12), 118)),
-      part('Bass', [n(0.5, 0.8, ch[0] - 24, 120)]),
+      part('Bass', [n(0.5, 0.8, root, 120)]),
       part('Bell', [n(0.5, 0.8, ch[3] + 12, 80)]),
     ],
   })),
@@ -94,7 +99,7 @@ export const SFX: Record<string, Take[]> = {
   })),
   allIn: [
     { arp: [72, 76, 79, 84, 88], a: F, b: C },
-    { arp: [74, 78, 81, 86, 90], a: G.map((p) => p + 2), b: D },
+    { arp: [74, 77, 81, 86, 89], a: G, b: C },
     { arp: [67, 71, 74, 79, 83], a: C.map((p) => p - 5), b: G },
   ].map(({ arp, a, b }) => ({
     tail: 0.8,
@@ -108,8 +113,8 @@ export const SFX: Record<string, Take[]> = {
     {
       tail: 0.5,
       parts: [
-        part('Brass', chord(0, 0.25, [67, 71, 74, 77], 112), chord(0.4, 0.55, [67, 71, 74, 77], 122)),
-        part('Block', [n(0, 0.06, 96, 100), n(0.2, 0.06, 96, 100)]),
+        part('Brass', chord(0, 0.25, [67, 71, 74, 79], 112), chord(0.4, 0.55, [67, 71, 74, 79], 122)),
+        part('Block', [n(0, 0.06, 91, 100), n(0.2, 0.06, 91, 100)]),
         drums([n(0, 0.1, SN, 100), n(0.4, 0.1, SN, 116), n(0.4, 0.1, K, 116)]),
       ],
     },
@@ -158,12 +163,13 @@ export const SFX: Record<string, Take[]> = {
     { tail: 0.3, parts: [drums(roll(0, 12, 0.125, SN, 40, 4), roll(1.5, 12, 0.0833, SN, 88, 3), [n(0, 2.5, FLOOR, 50)])] },
     { tail: 0.3, parts: [drums(roll(0, 16, 0.125, FLOOR, 50, 3), roll(2, 8, 0.0625, SN, 96, 3)), part('Pad', chord(0, 2.5, [55, 60, 62, 67], 70))] },
   ],
-  tally: [[76, 81], [74, 79], [79, 84]].map((ps) => ({
+  // Tally takes sit on C only: the manager pitches each count-up step up the C major scale.
+  tally: [[84], [84, 96], [72, 84]].map((ps) => ({
     tail: 0.35,
-    parts: [part('Bell', [n(0, 0.08, ps[0], 80), n(0.12, 0.3, ps[1], 105)])],
+    parts: [part('Bell', ps.map((p, i) => n(0, 0.3, p, 105 - i * 20)))],
   })),
   zeroVotes: [
-    { tail: 0.4, parts: [part('Trombone', run(0, 0.5, [67, 66, 65], 0.45, 96), [n(1.5, 1.3, 64, 100)]), drums([n(1.5, 0.2, TOM_L, 50)])] },
+    { tail: 0.4, parts: [part('Trombone', run(0, 0.5, [67, 65, 64], 0.45, 96), [n(1.5, 1.3, 62, 100)]), drums([n(1.5, 0.2, TOM_L, 50)])] },
     { tail: 0.4, parts: [part('Trombone', [n(0, 0.6, 67, 96), n(0.55, 1.2, 62, 100)])] },
     { tail: 0.4, parts: [part('Pluck', run(0, 0.33, [76, 72, 67], 0.3, 90)), part('Trombone', [n(1, 1, 60, 90)]), drums([n(1, 0.1, TOM_L, 60)])] },
   ],
@@ -208,8 +214,8 @@ export const SFX: Record<string, Take[]> = {
       tail: 0.85,
       parts: [
         part('Sweep', [n(0, 0.5, 55, 90), n(0.48, 0.5, 91, 100)]),
-        part('Brass', chord(1, 1.1, D.map((p) => p + 12), 118)),
-        part('Bell', run(1, 0.1, [86, 90, 93, 98], 0.5, 90)),
+        part('Brass', chord(1, 1.1, C.map((p) => p + 12), 118)),
+        part('Bell', run(1, 0.1, [84, 88, 91, 96], 0.5, 90)),
         drums([n(1, 1, CRASH, 116), n(1, 0.2, K, 120), n(0.5, 0.1, CLAP, 90), n(0.75, 0.1, CLAP, 100)]),
       ],
     },
@@ -255,7 +261,7 @@ export const SFX: Record<string, Take[]> = {
   podium3: [
     {
       tail: 0.6,
-      parts: [part('Brass', chord(0, 0.5, Bb.map((p) => p + 12), 100)), drums([n(0, 0.2, K, 100), n(0, 0.1, SN, 96), n(0, 0.5, CRASH, 70)])],
+      parts: [part('Brass', chord(0, 0.5, Am.map((p) => p + 12), 100)), drums([n(0, 0.2, K, 100), n(0, 0.1, SN, 96), n(0, 0.5, CRASH, 70)])],
     },
   ],
   podium2: [
@@ -284,13 +290,14 @@ export const SFX: Record<string, Take[]> = {
     { key: 0, low: 67 },
     { key: 2, low: 69 },
   ].map(({ key, low }) => ({
+    key, // take 2 is in D major (the final music's key)
     tail: 1.6,
     parts: [
       part(
         'Brass',
         [n(0, 0.22, low, 96), n(0.25, 0.22, low, 96), n(0.5, 0.22, low, 96)],
         chord(0.75, 0.9, [64, 67, 72].map((p) => p + key), 108),
-        [n(1.75, 0.22, 70 + key, 100), n(2, 0.22, 69 + key, 100), n(2.25, 0.22, 70 + key, 100)],
+        [n(1.75, 0.22, 69 + key, 100), n(2, 0.22, 67 + key, 100), n(2.25, 0.22, 69 + key, 100)],
         chord(2.5, 2.6, [64, 67, 72, 76, 79].map((p) => p + key), 116),
       ),
       part('Lead', [n(2.5, 2.4, 84 + key, 100)]),

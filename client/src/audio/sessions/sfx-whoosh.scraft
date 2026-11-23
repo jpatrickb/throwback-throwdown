@@ -166,9 +166,9 @@
           {
             "plugin": "chorus",
             "params": {
-              "depth": 35.0,
+              "depth": 18.0,
               "mix": 40.0,
-              "rate": 0.6
+              "rate": 0.5
             },
             "bypass": false,
             "active": true,
@@ -236,7 +236,7 @@
           "glide": 260.0,
           "level": -6.0,
           "osc1_wave": 0.0,
-          "osc2_detune": 18.0,
+          "osc2_detune": 4.0,
           "osc2_semitones": 7.0,
           "osc2_wave": 0.0,
           "osc_mix": 40.0,

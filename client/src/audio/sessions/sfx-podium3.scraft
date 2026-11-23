@@ -47,7 +47,7 @@
                   "sequence": {
                     "notes": [
                       {
-                        "pitch": 70,
+                        "pitch": 69,
                         "velocity": 100,
                         "release_velocity": 0,
                         "channel": 0,
@@ -55,7 +55,7 @@
                         "length": 480
                       },
                       {
-                        "pitch": 74,
+                        "pitch": 72,
                         "velocity": 100,
                         "release_velocity": 0,
                         "channel": 0,
@@ -63,7 +63,7 @@
                         "length": 480
                       },
                       {
-                        "pitch": 77,
+                        "pitch": 76,
                         "velocity": 100,
                         "release_velocity": 0,
                         "channel": 0,
@@ -71,7 +71,7 @@
                         "length": 480
                       },
                       {
-                        "pitch": 82,
+                        "pitch": 81,
                         "velocity": 100,
                         "release_velocity": 0,
                         "channel": 0,
@@ -196,7 +196,7 @@
           "filter_sustain": 45.0,
           "level": -3.0,
           "osc1_wave": 0.0,
-          "osc2_detune": 12.0,
+          "osc2_detune": 4.0,
           "osc2_semitones": 0.0,
           "osc2_wave": 0.0,
           "osc_mix": 50.0,

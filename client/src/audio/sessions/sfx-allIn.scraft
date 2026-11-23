@@ -95,7 +95,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 78,
+                        "pitch": 77,
                         "velocity": 89,
                         "release_velocity": 0,
                         "channel": 0,
@@ -119,7 +119,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 90,
+                        "pitch": 89,
                         "velocity": 104,
                         "release_velocity": 0,
                         "channel": 0,
@@ -382,31 +382,7 @@
                         "length": 672
                       },
                       {
-                        "pitch": 73,
-                        "velocity": 104,
-                        "release_velocity": 0,
-                        "channel": 0,
-                        "start": 8400,
-                        "length": 240
-                      },
-                      {
-                        "pitch": 76,
-                        "velocity": 104,
-                        "release_velocity": 0,
-                        "channel": 0,
-                        "start": 8400,
-                        "length": 240
-                      },
-                      {
-                        "pitch": 81,
-                        "velocity": 104,
-                        "release_velocity": 0,
-                        "channel": 0,
-                        "start": 8400,
-                        "length": 240
-                      },
-                      {
-                        "pitch": 85,
+                        "pitch": 71,
                         "velocity": 104,
                         "release_velocity": 0,
                         "channel": 0,
@@ -415,6 +391,30 @@
                       },
                       {
                         "pitch": 74,
+                        "velocity": 104,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 8400,
+                        "length": 240
+                      },
+                      {
+                        "pitch": 79,
+                        "velocity": 104,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 8400,
+                        "length": 240
+                      },
+                      {
+                        "pitch": 83,
+                        "velocity": 104,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 8400,
+                        "length": 240
+                      },
+                      {
+                        "pitch": 72,
                         "velocity": 114,
                         "release_velocity": 0,
                         "channel": 0,
@@ -422,7 +422,7 @@
                         "length": 672
                       },
                       {
-                        "pitch": 78,
+                        "pitch": 76,
                         "velocity": 114,
                         "release_velocity": 0,
                         "channel": 0,
@@ -430,7 +430,7 @@
                         "length": 672
                       },
                       {
-                        "pitch": 81,
+                        "pitch": 79,
                         "velocity": 114,
                         "release_velocity": 0,
                         "channel": 0,
@@ -438,7 +438,7 @@
                         "length": 672
                       },
                       {
-                        "pitch": 86,
+                        "pitch": 84,
                         "velocity": 114,
                         "release_velocity": 0,
                         "channel": 0,
@@ -627,7 +627,7 @@
           "filter_sustain": 45.0,
           "level": -3.0,
           "osc1_wave": 0.0,
-          "osc2_detune": 12.0,
+          "osc2_detune": 4.0,
           "osc2_semitones": 0.0,
           "osc2_wave": 0.0,
           "osc_mix": 50.0,

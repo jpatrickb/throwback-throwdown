@@ -55,7 +55,7 @@
                         "length": 432
                       },
                       {
-                        "pitch": 66,
+                        "pitch": 65,
                         "velocity": 96,
                         "release_velocity": 0,
                         "channel": 0,
@@ -63,7 +63,7 @@
                         "length": 432
                       },
                       {
-                        "pitch": 65,
+                        "pitch": 64,
                         "velocity": 96,
                         "release_velocity": 0,
                         "channel": 0,
@@ -71,7 +71,7 @@
                         "length": 432
                       },
                       {
-                        "pitch": 64,
+                        "pitch": 62,
                         "velocity": 100,
                         "release_velocity": 0,
                         "channel": 0,
@@ -218,7 +218,7 @@
           "glide": 140.0,
           "level": -4.0,
           "osc1_wave": 0.0,
-          "osc2_detune": 6.0,
+          "osc2_detune": 4.0,
           "osc2_semitones": 0.0,
           "osc2_wave": 1.0,
           "osc_mix": 35.0,

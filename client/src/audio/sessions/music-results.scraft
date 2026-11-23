@@ -5438,7 +5438,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 40,
+                        "pitch": 43,
                         "velocity": 92,
                         "release_velocity": 0,
                         "channel": 0,
@@ -5446,7 +5446,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 40,
+                        "pitch": 43,
                         "velocity": 70,
                         "release_velocity": 0,
                         "channel": 0,
@@ -5454,7 +5454,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 40,
+                        "pitch": 43,
                         "velocity": 92,
                         "release_velocity": 0,
                         "channel": 0,
@@ -5462,7 +5462,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 40,
+                        "pitch": 43,
                         "velocity": 70,
                         "release_velocity": 0,
                         "channel": 0,
@@ -5470,7 +5470,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 40,
+                        "pitch": 43,
                         "velocity": 92,
                         "release_velocity": 0,
                         "channel": 0,
@@ -5478,7 +5478,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 40,
+                        "pitch": 43,
                         "velocity": 70,
                         "release_velocity": 0,
                         "channel": 0,
@@ -5486,7 +5486,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 40,
+                        "pitch": 43,
                         "velocity": 92,
                         "release_velocity": 0,
                         "channel": 0,
@@ -5494,7 +5494,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 40,
+                        "pitch": 43,
                         "velocity": 70,
                         "release_velocity": 0,
                         "channel": 0,
@@ -6462,7 +6462,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 40,
+                        "pitch": 43,
                         "velocity": 92,
                         "release_velocity": 0,
                         "channel": 0,
@@ -6470,7 +6470,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 40,
+                        "pitch": 43,
                         "velocity": 70,
                         "release_velocity": 0,
                         "channel": 0,
@@ -6478,7 +6478,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 40,
+                        "pitch": 43,
                         "velocity": 92,
                         "release_velocity": 0,
                         "channel": 0,
@@ -6486,7 +6486,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 40,
+                        "pitch": 43,
                         "velocity": 70,
                         "release_velocity": 0,
                         "channel": 0,
@@ -6494,7 +6494,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 40,
+                        "pitch": 43,
                         "velocity": 92,
                         "release_velocity": 0,
                         "channel": 0,
@@ -6502,7 +6502,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 40,
+                        "pitch": 43,
                         "velocity": 70,
                         "release_velocity": 0,
                         "channel": 0,
@@ -6510,7 +6510,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 40,
+                        "pitch": 43,
                         "velocity": 92,
                         "release_velocity": 0,
                         "channel": 0,
@@ -6518,7 +6518,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 40,
+                        "pitch": 43,
                         "velocity": 70,
                         "release_velocity": 0,
                         "channel": 0,
@@ -7345,14 +7345,6 @@
                         "length": 3792
                       },
                       {
-                        "pitch": 60,
-                        "velocity": 64,
-                        "release_velocity": 0,
-                        "channel": 0,
-                        "start": 23040,
-                        "length": 3792
-                      },
-                      {
                         "pitch": 62,
                         "velocity": 64,
                         "release_velocity": 0,
@@ -7369,7 +7361,23 @@
                         "length": 3792
                       },
                       {
-                        "pitch": 57,
+                        "pitch": 60,
+                        "velocity": 64,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 26880,
+                        "length": 1872
+                      },
+                      {
+                        "pitch": 62,
+                        "velocity": 64,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 26880,
+                        "length": 1872
+                      },
+                      {
+                        "pitch": 67,
                         "velocity": 64,
                         "release_velocity": 0,
                         "channel": 0,
@@ -7381,19 +7389,11 @@
                         "velocity": 64,
                         "release_velocity": 0,
                         "channel": 0,
-                        "start": 26880,
+                        "start": 28800,
                         "length": 1872
                       },
                       {
-                        "pitch": 64,
-                        "velocity": 64,
-                        "release_velocity": 0,
-                        "channel": 0,
-                        "start": 26880,
-                        "length": 1872
-                      },
-                      {
-                        "pitch": 56,
+                        "pitch": 62,
                         "velocity": 64,
                         "release_velocity": 0,
                         "channel": 0,
@@ -7401,15 +7401,7 @@
                         "length": 1872
                       },
                       {
-                        "pitch": 59,
-                        "velocity": 64,
-                        "release_velocity": 0,
-                        "channel": 0,
-                        "start": 28800,
-                        "length": 1872
-                      },
-                      {
-                        "pitch": 64,
+                        "pitch": 67,
                         "velocity": 64,
                         "release_velocity": 0,
                         "channel": 0,
@@ -7785,14 +7777,6 @@
                         "length": 3792
                       },
                       {
-                        "pitch": 60,
-                        "velocity": 64,
-                        "release_velocity": 0,
-                        "channel": 0,
-                        "start": 84480,
-                        "length": 3792
-                      },
-                      {
                         "pitch": 62,
                         "velocity": 64,
                         "release_velocity": 0,
@@ -7809,7 +7793,7 @@
                         "length": 3792
                       },
                       {
-                        "pitch": 57,
+                        "pitch": 60,
                         "velocity": 64,
                         "release_velocity": 0,
                         "channel": 0,
@@ -7817,7 +7801,7 @@
                         "length": 1872
                       },
                       {
-                        "pitch": 59,
+                        "pitch": 62,
                         "velocity": 64,
                         "release_velocity": 0,
                         "channel": 0,
@@ -7825,19 +7809,11 @@
                         "length": 1872
                       },
                       {
-                        "pitch": 64,
+                        "pitch": 67,
                         "velocity": 64,
                         "release_velocity": 0,
                         "channel": 0,
                         "start": 88320,
-                        "length": 1872
-                      },
-                      {
-                        "pitch": 56,
-                        "velocity": 64,
-                        "release_velocity": 0,
-                        "channel": 0,
-                        "start": 90240,
                         "length": 1872
                       },
                       {
@@ -7849,7 +7825,15 @@
                         "length": 1872
                       },
                       {
-                        "pitch": 64,
+                        "pitch": 62,
+                        "velocity": 64,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 90240,
+                        "length": 1872
+                      },
+                      {
+                        "pitch": 67,
                         "velocity": 64,
                         "release_velocity": 0,
                         "channel": 0,
@@ -8118,9 +8102,9 @@
           {
             "plugin": "chorus",
             "params": {
-              "depth": 35.0,
+              "depth": 18.0,
               "mix": 40.0,
-              "rate": 0.6
+              "rate": 0.5
             },
             "bypass": false,
             "active": true,
@@ -8195,7 +8179,7 @@
           "filter_env_amount": 10.0,
           "level": -6.0,
           "osc1_wave": 0.0,
-          "osc2_detune": 14.0,
+          "osc2_detune": 4.0,
           "osc2_semitones": 0.0,
           "osc2_wave": 0.0,
           "osc_mix": 50.0,
@@ -8635,7 +8619,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 72,
+                        "pitch": 74,
                         "velocity": 60,
                         "release_velocity": 0,
                         "channel": 0,
@@ -8643,7 +8627,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 74,
+                        "pitch": 77,
                         "velocity": 48,
                         "release_velocity": 0,
                         "channel": 0,
@@ -8651,7 +8635,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 72,
+                        "pitch": 74,
                         "velocity": 60,
                         "release_velocity": 0,
                         "channel": 0,
@@ -8667,7 +8651,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 72,
+                        "pitch": 74,
                         "velocity": 60,
                         "release_velocity": 0,
                         "channel": 0,
@@ -8675,7 +8659,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 74,
+                        "pitch": 77,
                         "velocity": 48,
                         "release_velocity": 0,
                         "channel": 0,
@@ -8683,7 +8667,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 64,
+                        "pitch": 67,
                         "velocity": 60,
                         "release_velocity": 0,
                         "channel": 0,
@@ -8691,7 +8675,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 69,
+                        "pitch": 72,
                         "velocity": 48,
                         "release_velocity": 0,
                         "channel": 0,
@@ -8699,7 +8683,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 71,
+                        "pitch": 74,
                         "velocity": 60,
                         "release_velocity": 0,
                         "channel": 0,
@@ -8707,7 +8691,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 76,
+                        "pitch": 79,
                         "velocity": 48,
                         "release_velocity": 0,
                         "channel": 0,
@@ -8715,7 +8699,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 64,
+                        "pitch": 67,
                         "velocity": 60,
                         "release_velocity": 0,
                         "channel": 0,
@@ -8723,7 +8707,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 68,
+                        "pitch": 71,
                         "velocity": 48,
                         "release_velocity": 0,
                         "channel": 0,
@@ -8731,7 +8715,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 71,
+                        "pitch": 74,
                         "velocity": 60,
                         "release_velocity": 0,
                         "channel": 0,
@@ -8739,7 +8723,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 76,
+                        "pitch": 79,
                         "velocity": 48,
                         "release_velocity": 0,
                         "channel": 0,
@@ -9659,7 +9643,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 72,
+                        "pitch": 74,
                         "velocity": 60,
                         "release_velocity": 0,
                         "channel": 0,
@@ -9667,7 +9651,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 74,
+                        "pitch": 77,
                         "velocity": 48,
                         "release_velocity": 0,
                         "channel": 0,
@@ -9675,7 +9659,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 72,
+                        "pitch": 74,
                         "velocity": 60,
                         "release_velocity": 0,
                         "channel": 0,
@@ -9691,7 +9675,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 72,
+                        "pitch": 74,
                         "velocity": 60,
                         "release_velocity": 0,
                         "channel": 0,
@@ -9699,7 +9683,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 74,
+                        "pitch": 77,
                         "velocity": 48,
                         "release_velocity": 0,
                         "channel": 0,
@@ -9707,7 +9691,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 64,
+                        "pitch": 67,
                         "velocity": 60,
                         "release_velocity": 0,
                         "channel": 0,
@@ -9715,7 +9699,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 69,
+                        "pitch": 72,
                         "velocity": 48,
                         "release_velocity": 0,
                         "channel": 0,
@@ -9723,7 +9707,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 71,
+                        "pitch": 74,
                         "velocity": 60,
                         "release_velocity": 0,
                         "channel": 0,
@@ -9731,7 +9715,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 76,
+                        "pitch": 79,
                         "velocity": 48,
                         "release_velocity": 0,
                         "channel": 0,
@@ -9739,7 +9723,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 64,
+                        "pitch": 67,
                         "velocity": 60,
                         "release_velocity": 0,
                         "channel": 0,
@@ -9747,7 +9731,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 68,
+                        "pitch": 71,
                         "velocity": 48,
                         "release_velocity": 0,
                         "channel": 0,
@@ -9755,7 +9739,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 71,
+                        "pitch": 74,
                         "velocity": 60,
                         "release_velocity": 0,
                         "channel": 0,
@@ -9763,7 +9747,7 @@
                         "length": 384
                       },
                       {
-                        "pitch": 76,
+                        "pitch": 79,
                         "velocity": 48,
                         "release_velocity": 0,
                         "channel": 0,
@@ -10518,7 +10502,7 @@
                         "length": 884
                       },
                       {
-                        "pitch": 84,
+                        "pitch": 81,
                         "velocity": 86,
                         "release_velocity": 0,
                         "channel": 0,
@@ -10526,7 +10510,7 @@
                         "length": 884
                       },
                       {
-                        "pitch": 86,
+                        "pitch": 84,
                         "velocity": 86,
                         "release_velocity": 0,
                         "channel": 0,
@@ -10534,7 +10518,7 @@
                         "length": 884
                       },
                       {
-                        "pitch": 88,
+                        "pitch": 89,
                         "velocity": 86,
                         "release_velocity": 0,
                         "channel": 0,
@@ -10558,7 +10542,7 @@
                         "length": 884
                       },
                       {
-                        "pitch": 83,
+                        "pitch": 86,
                         "velocity": 86,
                         "release_velocity": 0,
                         "channel": 0,
@@ -10566,7 +10550,7 @@
                         "length": 1766
                       },
                       {
-                        "pitch": 80,
+                        "pitch": 83,
                         "velocity": 86,
                         "release_velocity": 0,
                         "channel": 0,
@@ -10590,7 +10574,7 @@
                         "length": 442
                       },
                       {
-                        "pitch": 88,
+                        "pitch": 89,
                         "velocity": 86,
                         "release_velocity": 0,
                         "channel": 0,
@@ -10678,7 +10662,7 @@
                         "length": 1766
                       },
                       {
-                        "pitch": 88,
+                        "pitch": 91,
                         "velocity": 86,
                         "release_velocity": 0,
                         "channel": 0,
@@ -10830,7 +10814,7 @@
                         "length": 884
                       },
                       {
-                        "pitch": 84,
+                        "pitch": 81,
                         "velocity": 86,
                         "release_velocity": 0,
                         "channel": 0,
@@ -10838,7 +10822,7 @@
                         "length": 884
                       },
                       {
-                        "pitch": 86,
+                        "pitch": 84,
                         "velocity": 86,
                         "release_velocity": 0,
                         "channel": 0,
@@ -10846,7 +10830,7 @@
                         "length": 884
                       },
                       {
-                        "pitch": 88,
+                        "pitch": 89,
                         "velocity": 86,
                         "release_velocity": 0,
                         "channel": 0,
@@ -10870,7 +10854,7 @@
                         "length": 884
                       },
                       {
-                        "pitch": 83,
+                        "pitch": 86,
                         "velocity": 86,
                         "release_velocity": 0,
                         "channel": 0,
@@ -10878,7 +10862,7 @@
                         "length": 1766
                       },
                       {
-                        "pitch": 80,
+                        "pitch": 83,
                         "velocity": 86,
                         "release_velocity": 0,
                         "channel": 0,
@@ -10902,7 +10886,7 @@
                         "length": 442
                       },
                       {
-                        "pitch": 88,
+                        "pitch": 89,
                         "velocity": 86,
                         "release_velocity": 0,
                         "channel": 0,
@@ -10990,7 +10974,7 @@
                         "length": 1766
                       },
                       {
-                        "pitch": 88,
+                        "pitch": 91,
                         "velocity": 86,
                         "release_velocity": 0,
                         "channel": 0,
