@@ -41,7 +41,7 @@
               "id": 2,
               "name": "Brass",
               "start": 0,
-              "length": 62400,
+              "length": 710400,
               "content": {
                 "Midi": {
                   "sequence": {
@@ -52,15 +52,15 @@
                         "release_velocity": 0,
                         "channel": 0,
                         "start": 0,
-                        "length": 288
+                        "length": 286
                       },
                       {
                         "pitch": 76,
-                        "velocity": 100,
+                        "velocity": 102,
                         "release_velocity": 0,
                         "channel": 0,
                         "start": 316,
-                        "length": 288
+                        "length": 286
                       },
                       {
                         "pitch": 79,
@@ -68,46 +68,246 @@
                         "release_velocity": 0,
                         "channel": 0,
                         "start": 634,
-                        "length": 288
+                        "length": 284
                       },
                       {
                         "pitch": 64,
-                        "velocity": 110,
+                        "velocity": 112,
                         "release_velocity": 0,
                         "channel": 0,
-                        "start": 960,
+                        "start": 950,
                         "length": 1536
                       },
                       {
                         "pitch": 67,
-                        "velocity": 110,
+                        "velocity": 112,
                         "release_velocity": 0,
                         "channel": 0,
-                        "start": 960,
+                        "start": 950,
                         "length": 1536
                       },
                       {
                         "pitch": 72,
-                        "velocity": 110,
+                        "velocity": 112,
                         "release_velocity": 0,
                         "channel": 0,
-                        "start": 960,
+                        "start": 950,
                         "length": 1536
                       },
                       {
                         "pitch": 76,
-                        "velocity": 110,
+                        "velocity": 112,
                         "release_velocity": 0,
                         "channel": 0,
-                        "start": 960,
+                        "start": 950,
                         "length": 1536
                       },
                       {
                         "pitch": 84,
-                        "velocity": 110,
+                        "velocity": 112,
                         "release_velocity": 0,
                         "channel": 0,
-                        "start": 960,
+                        "start": 950,
+                        "length": 1536
+                      },
+                      {
+                        "pitch": 67,
+                        "velocity": 100,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 8640,
+                        "length": 286
+                      },
+                      {
+                        "pitch": 72,
+                        "velocity": 102,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 8956,
+                        "length": 286
+                      },
+                      {
+                        "pitch": 76,
+                        "velocity": 104,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 9274,
+                        "length": 284
+                      },
+                      {
+                        "pitch": 64,
+                        "velocity": 112,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 9590,
+                        "length": 1536
+                      },
+                      {
+                        "pitch": 67,
+                        "velocity": 112,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 9590,
+                        "length": 1536
+                      },
+                      {
+                        "pitch": 72,
+                        "velocity": 112,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 9590,
+                        "length": 1536
+                      },
+                      {
+                        "pitch": 79,
+                        "velocity": 112,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 9590,
+                        "length": 1536
+                      },
+                      {
+                        "pitch": 84,
+                        "velocity": 112,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 9590,
+                        "length": 1536
+                      },
+                      {
+                        "pitch": 67,
+                        "velocity": 100,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 17280,
+                        "length": 286
+                      },
+                      {
+                        "pitch": 67,
+                        "velocity": 102,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 17596,
+                        "length": 286
+                      },
+                      {
+                        "pitch": 67,
+                        "velocity": 104,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 17914,
+                        "length": 284
+                      },
+                      {
+                        "pitch": 64,
+                        "velocity": 112,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 18230,
+                        "length": 1536
+                      },
+                      {
+                        "pitch": 67,
+                        "velocity": 112,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 18230,
+                        "length": 1536
+                      },
+                      {
+                        "pitch": 72,
+                        "velocity": 112,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 18230,
+                        "length": 1536
+                      },
+                      {
+                        "pitch": 76,
+                        "velocity": 112,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 18230,
+                        "length": 1536
+                      },
+                      {
+                        "pitch": 84,
+                        "velocity": 112,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 18230,
+                        "length": 1536
+                      },
+                      {
+                        "pitch": 72,
+                        "velocity": 100,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 25920,
+                        "length": 216
+                      },
+                      {
+                        "pitch": 74,
+                        "velocity": 102,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 26160,
+                        "length": 216
+                      },
+                      {
+                        "pitch": 76,
+                        "velocity": 104,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 26400,
+                        "length": 216
+                      },
+                      {
+                        "pitch": 79,
+                        "velocity": 106,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 26640,
+                        "length": 216
+                      },
+                      {
+                        "pitch": 67,
+                        "velocity": 112,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 26880,
+                        "length": 1536
+                      },
+                      {
+                        "pitch": 72,
+                        "velocity": 112,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 26880,
+                        "length": 1536
+                      },
+                      {
+                        "pitch": 76,
+                        "velocity": 112,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 26880,
+                        "length": 1536
+                      },
+                      {
+                        "pitch": 79,
+                        "velocity": 112,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 26880,
+                        "length": 1536
+                      },
+                      {
+                        "pitch": 84,
+                        "velocity": 112,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 26880,
                         "length": 1536
                       }
                     ],
@@ -262,7 +462,7 @@
               "id": 4,
               "name": "Bell",
               "start": 0,
-              "length": 48000,
+              "length": 696000,
               "content": {
                 "Midi": {
                   "sequence": {
@@ -272,7 +472,7 @@
                         "velocity": 90,
                         "release_velocity": 0,
                         "channel": 0,
-                        "start": 960,
+                        "start": 950,
                         "length": 960
                       },
                       {
@@ -280,7 +480,55 @@
                         "velocity": 80,
                         "release_velocity": 0,
                         "channel": 0,
-                        "start": 960,
+                        "start": 950,
+                        "length": 960
+                      },
+                      {
+                        "pitch": 84,
+                        "velocity": 90,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 9590,
+                        "length": 960
+                      },
+                      {
+                        "pitch": 88,
+                        "velocity": 80,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 9590,
+                        "length": 960
+                      },
+                      {
+                        "pitch": 84,
+                        "velocity": 90,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 18230,
+                        "length": 960
+                      },
+                      {
+                        "pitch": 88,
+                        "velocity": 80,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 18230,
+                        "length": 960
+                      },
+                      {
+                        "pitch": 84,
+                        "velocity": 90,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 26880,
+                        "length": 960
+                      },
+                      {
+                        "pitch": 88,
+                        "velocity": 80,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 26880,
                         "length": 960
                       }
                     ],
@@ -429,7 +677,7 @@
               "id": 6,
               "name": "Drums",
               "start": 0,
-              "length": 48000,
+              "length": 696000,
               "content": {
                 "Midi": {
                   "sequence": {
@@ -463,7 +711,7 @@
                         "velocity": 118,
                         "release_velocity": 0,
                         "channel": 9,
-                        "start": 960,
+                        "start": 950,
                         "length": 192
                       },
                       {
@@ -471,7 +719,135 @@
                         "velocity": 112,
                         "release_velocity": 0,
                         "channel": 9,
-                        "start": 960,
+                        "start": 950,
+                        "length": 960
+                      },
+                      {
+                        "pitch": 38,
+                        "velocity": 80,
+                        "release_velocity": 0,
+                        "channel": 9,
+                        "start": 8640,
+                        "length": 96
+                      },
+                      {
+                        "pitch": 38,
+                        "velocity": 86,
+                        "release_velocity": 0,
+                        "channel": 9,
+                        "start": 8956,
+                        "length": 96
+                      },
+                      {
+                        "pitch": 38,
+                        "velocity": 92,
+                        "release_velocity": 0,
+                        "channel": 9,
+                        "start": 9274,
+                        "length": 96
+                      },
+                      {
+                        "pitch": 36,
+                        "velocity": 118,
+                        "release_velocity": 0,
+                        "channel": 9,
+                        "start": 9590,
+                        "length": 192
+                      },
+                      {
+                        "pitch": 49,
+                        "velocity": 112,
+                        "release_velocity": 0,
+                        "channel": 9,
+                        "start": 9590,
+                        "length": 960
+                      },
+                      {
+                        "pitch": 38,
+                        "velocity": 80,
+                        "release_velocity": 0,
+                        "channel": 9,
+                        "start": 17280,
+                        "length": 96
+                      },
+                      {
+                        "pitch": 38,
+                        "velocity": 86,
+                        "release_velocity": 0,
+                        "channel": 9,
+                        "start": 17596,
+                        "length": 96
+                      },
+                      {
+                        "pitch": 38,
+                        "velocity": 92,
+                        "release_velocity": 0,
+                        "channel": 9,
+                        "start": 17914,
+                        "length": 96
+                      },
+                      {
+                        "pitch": 36,
+                        "velocity": 118,
+                        "release_velocity": 0,
+                        "channel": 9,
+                        "start": 18230,
+                        "length": 192
+                      },
+                      {
+                        "pitch": 49,
+                        "velocity": 112,
+                        "release_velocity": 0,
+                        "channel": 9,
+                        "start": 18230,
+                        "length": 960
+                      },
+                      {
+                        "pitch": 38,
+                        "velocity": 80,
+                        "release_velocity": 0,
+                        "channel": 9,
+                        "start": 25920,
+                        "length": 96
+                      },
+                      {
+                        "pitch": 38,
+                        "velocity": 86,
+                        "release_velocity": 0,
+                        "channel": 9,
+                        "start": 26160,
+                        "length": 96
+                      },
+                      {
+                        "pitch": 38,
+                        "velocity": 92,
+                        "release_velocity": 0,
+                        "channel": 9,
+                        "start": 26400,
+                        "length": 96
+                      },
+                      {
+                        "pitch": 38,
+                        "velocity": 98,
+                        "release_velocity": 0,
+                        "channel": 9,
+                        "start": 26640,
+                        "length": 96
+                      },
+                      {
+                        "pitch": 36,
+                        "velocity": 118,
+                        "release_velocity": 0,
+                        "channel": 9,
+                        "start": 26880,
+                        "length": 192
+                      },
+                      {
+                        "pitch": 49,
+                        "velocity": 112,
+                        "release_velocity": 0,
+                        "channel": 9,
+                        "start": 26880,
                         "length": 960
                       }
                     ],
@@ -628,7 +1004,7 @@
               "id": 8,
               "name": "Bass",
               "start": 0,
-              "length": 57600,
+              "length": 705600,
               "content": {
                 "Midi": {
                   "sequence": {
@@ -638,7 +1014,31 @@
                         "velocity": 110,
                         "release_velocity": 0,
                         "channel": 0,
-                        "start": 960,
+                        "start": 950,
+                        "length": 1344
+                      },
+                      {
+                        "pitch": 36,
+                        "velocity": 110,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 9590,
+                        "length": 1344
+                      },
+                      {
+                        "pitch": 36,
+                        "velocity": 110,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 18230,
+                        "length": 1344
+                      },
+                      {
+                        "pitch": 36,
+                        "velocity": 110,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 26880,
                         "length": 1344
                       }
                     ],

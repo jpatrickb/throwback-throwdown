@@ -5,7 +5,7 @@
 #   ffmpeg      -> cut the exact loop, static-gain normalize, encode .ogg + .mp3
 #
 #   bash client/src/audio/soundtrack/build.sh            # everything
-#   bash client/src/audio/soundtrack/build.sh music-lobby sfx-winner   # just these
+#   bash client/src/audio/soundtrack/build.sh music-lobby sfx-winner   # just these sessions (or sfx-winner-2)
 #
 # Env: SOUNDCRAFT_CLI (default ~/Downloads/soundcraft/target/release/soundcraft-cli), BUILD_DIR (default: temp).
 # Outputs: client/public/audio/<name>.{ogg,mp3} and client/src/audio/sessions/<name>.scraft
@@ -37,12 +37,17 @@ measure() { # file -> "I peak" (LUFS, dBFS sample peak)
 }
 
 want=" $* "
-while IFS=$'\t' read -r -u 3 name kind start end; do
+rendered=""
+while IFS=$'\t' read -r -u 3 session name kind start end; do
   [ -z "$name" ] && continue
-  if [ $# -gt 0 ] && [[ "$want" != *" $name "* ]]; then continue; fi
-  dir="$BUILD/$name"
-  (cd "$dir" && "$SC" script "$name.script" --save "$SESS/$name.scraft" >"$dir/soundcraft.log" 2>&1) \
-    || { echo "Soundcraft failed for $name:"; tail -5 "$dir/soundcraft.log"; exit 1; }
+  if [ $# -gt 0 ] && [[ "$want" != *" $session "* ]] && [[ "$want" != *" $name "* ]]; then continue; fi
+  dir="$BUILD/$session"
+  # One Soundcraft run per session (an SFX session bounces all of its takes at once).
+  if [ "$rendered" != "$session" ]; then
+    (cd "$dir" && "$SC" script "$session.script" --save "$SESS/$session.scraft" >"$dir/soundcraft.log" 2>&1 </dev/null) \
+      || { echo "Soundcraft failed for $session:"; tail -5 "$dir/soundcraft.log"; exit 1; }
+    rendered="$session"
+  fi
 
   seg="$dir/seg.wav"
   if [ "$kind" = music ]; then
@@ -68,10 +73,12 @@ while IFS=$'\t' read -r -u 3 name kind start end; do
   cap=$(echo "$CEILING - ($peak)" | bc -l)
   if (($(echo "$gain > $cap" | bc -l))); then gain=$cap; fi
   ffmpeg -hide_banner -loglevel error -y -i "$seg" -af "volume=${gain}dB" -c:a pcm_s16le "$dir/final.wav"
-  ffmpeg -hide_banner -loglevel error -y -i "$dir/final.wav" -c:a vorbis -strict -2 -ac 2 -b:a 192k "$PUB/$name.ogg"
-  ffmpeg -hide_banner -loglevel error -y -i "$dir/final.wav" -c:a libmp3lame -b:a 192k "$PUB/$name.mp3"
+  # Stingers are short and mostly mono-ish: a lower bitrate keeps the committed audio small.
+  br=192k; [ "$kind" = sfx ] && br=128k
+  ffmpeg -hide_banner -loglevel error -y -i "$dir/final.wav" -c:a vorbis -strict -2 -ac 2 -b:a $br "$PUB/$name.ogg"
+  ffmpeg -hide_banner -loglevel error -y -i "$dir/final.wav" -c:a libmp3lame -b:a $br "$PUB/$name.mp3"
   read -r flufs fpeak <<<"$(measure "$dir/final.wav")"
-  printf '  %-18s %-5s %6.2fs  %6s LUFS  peak %6s dBFS\n' "$name" "$kind" \
+  printf '  %-20s %-5s %6.2fs  %6s LUFS  peak %6s dBFS\n' "$name" "$kind" \
     "$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$dir/final.wav")" "$flufs" "$fpeak"
 done 3<"$BUILD/jobs.tsv"
 

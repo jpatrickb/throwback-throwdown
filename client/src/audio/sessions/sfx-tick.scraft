@@ -41,7 +41,7 @@
               "id": 2,
               "name": "Block",
               "start": 0,
-              "length": 1900,
+              "length": 121900,
               "content": {
                 "Midi": {
                   "sequence": {
@@ -52,6 +52,14 @@
                         "release_velocity": 0,
                         "channel": 0,
                         "start": 0,
+                        "length": 76
+                      },
+                      {
+                        "pitch": 86,
+                        "velocity": 110,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 4800,
                         "length": 76
                       }
                     ],

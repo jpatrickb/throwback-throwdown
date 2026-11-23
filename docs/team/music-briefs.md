@@ -98,6 +98,13 @@ The photo reveal phase is deliberately silent (the reveal stinger lands on its o
 Same export settings. **No loop and no silence at the start**: trim to the first transient so they fire in sync with the animation.
 Filenames go in `client/public/audio/` and get switched over in the `SFX` block of `cues.ts`.
 
+**Takes:** every key now has 1–4 takes (`sfx-<key>-1` … `-4`), and the game picks one at random. The generated
+takes are written in `client/src/audio/soundtrack/sfx.ts`, and each key's Soundcraft session (`sessions/sfx-<key>.scraft`)
+holds its takes back to back. To add your own take, drop `my-take.ogg/.mp3` in `client/public/audio/` and list it:
+`winner: { takes: [real('my-take'), ...takes('sfx-winner', 4)], ... }`. The full key list (25 keys, including
+roundStart, allIn, lastCall, voteCast, drumroll, tie, sweep, zeroVotes, teamJoin, teamRename, podium1–3,
+leaderChange and whoosh) is the table at the top of `docs/team/audio.md`. The table below covers the original ten.
+
 | Filename | Length | Description |
 |---|---|---|
 | `sfx-join` | ~0.3 s | Cheerful two-note "boop-bip" when a player joins the lobby. Can play many times in a row, so keep it soft. |

@@ -1,5 +1,43 @@
 # audio: status
 
+## SFX keys: who fires what (hand this to tv)
+
+Call `playSfx(key)` from `client/src/audio/index.ts`. Every key has 1–4 Soundcraft-rendered takes; the manager
+picks one at random (never the same take twice in a row), ducks the music under the big ones, and drops
+duplicates that land on the same moment. **AUTO** keys fire from `useGameAudio(view)`: **tv must not call them.**
+
+| Key | Takes | Who fires it | When |
+|---|---|---|---|
+| `join` | 4 | tv (already wired: `useSfxOnIncrease(players.length, 'join')`) | A player joins the lobby. In team mode this automatically plays `teamJoin` instead. |
+| `teamJoin` | 4 | **AUTO** | A player lands on (or is moved to) a team in the lobby |
+| `teamRename` | 2 | **AUTO** | A team's name changes (any phase) |
+| `whoosh` | 4 | **AUTO** | Every phase change. It yields to allIn/timesUp/roundStart/reveal/champion fired at the same moment. |
+| `roundStart` | 3 | tv should call | At the "Round N" slam (start of PHOTO_REVEAL, before or with the photo) |
+| `reveal` | 3 | tv (already wired) | The photo flips in |
+| `submit` | 4 | tv (already wired in Captioning) | A caption is submitted (a new ✓ badge) |
+| `voteCast` | 4 | **AUTO** | Each vote during VOTING (subtle). **tv: remove `useSfxOnIncrease(voted.size, 'submit')` in Voting.tsx**, or votes double up. |
+| `allIn` | 3 | **AUTO** | Every player/team has captioned, or everyone has voted. It plays as the phase advances early. |
+| `lastCall` | 2 | **AUTO** | 10 seconds left in CAPTIONING/VOTING (ticks follow from 9) |
+| `tick` | 2 | **AUTO** | Each of the last 9 seconds (the last 3 pitched up) |
+| `timesUp` | 3 | **AUTO** | The deadline hits zero |
+| `cardDeal` | 3 | tv (already wired) | Each caption card appears in VOTING |
+| `drumroll` | 2 | tv should call | About 1.5 s before revealing the round winner (≈1.6 s long, ends dry so `winner` lands on the hit) |
+| `tally` | 3 | tv (already wired) | Each step of a vote count-up. It **rises in pitch automatically** for calls under 0.7 s apart; or pass `playSfx('tally', { step: n })`. |
+| `zeroVotes` | 3 | tv should call | A caption with 0 votes is shown (playful "aww"). Replaces the `cardDeal` currently used for zero-vote batches. Call it once per batch, not per caption. |
+| `winner` | 4 | tv (already wired) | The round winner reveal |
+| `tie` | 2 | tv should call | Top captions are tied for the win (call instead of `winner`, or just before it) |
+| `sweep` | 2 | tv should call | The clean-sweep bonus is shown (`SWEEP_BONUS`) |
+| `leaderboard` | 2 | tv (already wired) | The scoreboard reshuffle |
+| `leaderChange` | 2 | tv should call | A different team/player takes first place on the scoreboard (after the reshuffle settles) |
+| `podium3` | 1 | tv should call | FINAL: third place revealed |
+| `podium2` | 1 | tv should call | FINAL: second place revealed |
+| `podium1` | 1 | tv should call | FINAL: first place revealed (then `champion` for the celebration, or instead of it) |
+| `champion` | 2 | tv (already wired) | The final champion celebration |
+
+Lengths: 0.3–2.2 s (champion 3.7 s, reveal 2.5 s). Takes live in `client/public/audio/sfx-<key>-<n>.{ogg,mp3}`;
+`cues.ts` lists the takes per key and their volume, ducking and repeat gap.
+
+
 ## Done
 - **Cue manifest** `client/src/audio/cues.ts`: music cues, every SfxKey (src/volume/loop/duck), `PHASE_MUSIC`, and mixing/timing knobs (`AUDIO_TUNING`). Swapping in a real track means changing `placeholder('x')` to `real('x')`.
 - **Manager** `client/src/audio/manager.ts` (Howler):
@@ -43,13 +81,22 @@
 - **Sessions:** `client/src/audio/sessions/*.scraft` (self-contained: MIDI clips inline). Music sessions hold the loop twice; bounce the second pass. See `docs/team/music-briefs.md`.
 - **Limit:** I can't listen to the audio. Mix balance was set from per-stem loudness measurements, so Patrick should give it a listen and nudge levels in `compose.ts` (`volumeDb`, per-cue `mix`) or the `cues.ts` volumes.
 
+## SFX takes & new moments (Nov 23)
+- 25 SfxKeys (15 new) with 66 takes, all rendered in Soundcraft from `client/src/audio/soundtrack/sfx.ts` (note data per take) by `build.sh`. One session per key, `client/src/audio/sessions/sfx-<key>.scraft`, holds that key's takes back to back, 2 s apart. Two new patches: Sweep (gliding saw for whooshes) and Trombone (sliding brass for "aww").
+- Manifest: `SfxCue.takes` (array of [ogg, mp3]), `minGapMs`, `risingRunMs`, `duck`. `SFX_EXCLUSIVE` priority groups stop pile-ups (e.g. allIn beats whoosh; join/teamJoin first wins). `RISING_STEPS` drives the tally pitch climb.
+- Manager auto-detects from the view: allIn (including when the server auto-advances, since the next phase's first view still lists submissions/votes), voteCast, teamJoin, teamRename, whoosh, lastCall.
+- `playSfx(key, { step? })` is additive; old calls are unchanged.
+- Size: `client/public/audio` is now 12 MB (music 8 MB, SFX 4.4 MB at 128 kbps). I removed the unused ffmpeg placeholder files (2.9 MB); `generate-placeholders.sh` can regenerate them.
+- Verified in Chrome (synthetic views):
+  - Takes never repeat back to back, and a tally run climbs 1 → 1.12 → 1.26 → 1.34 → 1.50 → 1.68, then a new run starts on a new take.
+  - lastCall fires at 10 s; allIn fires on early advance with the whoosh suppressed; voteCast, teamJoin and teamRename fire.
+  - All 66 takes load. No console errors except the favicon 404.
+
 ## Notes for tv
-- Render `<AudioIndicator />`. Call `unlockAudio()` from the start overlay.
-- **Don't call `tick` or `timesUp`.** They're automatic.
-- Call `tally` once per count-up step.
+- See the table at the top. Never call the AUTO keys (teamJoin, teamRename, whoosh, voteCast, allIn, lastCall, tick, timesUp).
+- Call `tally` once per count-up step; the pitch climbs on its own.
 
 ## Next / ideas
-- Rotate tally pitch variants, so repeated tallies rise in pitch.
 - Volume and mute controls on `/host` (PLAN §D) would need a contract change (a host action relayed to the TV). Deferred.
 
 ## Questions for Patrick

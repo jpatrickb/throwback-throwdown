@@ -8,6 +8,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { melody, melodyBeats, parseChord, pcAtOrAbove, voice, writeSmf, type Note, type Part } from './midi.ts';
+import { SFX } from './sfx.ts';
 
 // ---------- patches ----------
 
@@ -121,6 +122,32 @@ const PATCHES: Record<string, Patch> = {
     },
     inserts: [chorus(40), eq({ hpf_on: 1, hpf_freq: 220, lpf_on: 1, lpf_freq: 6000 }), plate(32, 2.2)],
     volumeDb: -6,
+  },
+  sweep: {
+    // gliding saw for whooshes and swoops
+    instrument: 'subtractive_synth',
+    params: {
+      osc1_wave: SAW, osc2_wave: SAW, osc2_semitones: 7, osc2_detune: 18, osc_mix: 40,
+      cutoff: 1800, resonance: 30, filter_env_amount: 20,
+      amp_attack: 40, amp_decay: 300, amp_sustain: 70, amp_release: 220,
+      filter_attack: 60, filter_decay: 300, filter_sustain: 50, filter_release: 200,
+      glide: 260, velocity: 40, level: -6,
+    },
+    inserts: [eq({ hpf_on: 1, hpf_freq: 300 }), chorus(40), plate(30, 1.6)],
+    volumeDb: -8,
+  },
+  trombone: {
+    // sliding brass for the playful "aww"
+    instrument: 'subtractive_synth',
+    params: {
+      osc1_wave: SAW, osc2_wave: SQUARE, osc2_semitones: 0, osc2_detune: 6, osc_mix: 35,
+      cutoff: 700, resonance: 10, filter_env_amount: 40,
+      amp_attack: 25, amp_decay: 400, amp_sustain: 80, amp_release: 160,
+      filter_attack: 60, filter_decay: 400, filter_sustain: 50, filter_release: 160,
+      glide: 140, velocity: 60, level: -4,
+    },
+    inserts: [eq({ hpf_on: 1, hpf_freq: 120 }), plate(20)],
+    volumeDb: -4,
   },
   block: {
     // woodblock-ish tick
@@ -520,114 +547,31 @@ const MELODY_TRACKS: Record<string, { track: string; octave: number; vel: number
 };
 
 const TRACK_PATCH: Record<string, string> = {
-  Drums: 'drums', Bass: 'bass', Keys: 'keys', Brass: 'brass', Lead: 'lead', Bell: 'bell', Pluck: 'pluck', Pad: 'pad', Block: 'block',
+  Drums: 'drums', Bass: 'bass', Keys: 'keys', Brass: 'brass', Lead: 'lead', Bell: 'bell', Pluck: 'pluck', Pad: 'pad',
+  Block: 'block', Sweep: 'sweep', Trombone: 'trombone',
 };
-
-// ---------- SFX ----------
-
-interface Sfx {
-  name: string;
-  bpm: number;
-  tail: number; // seconds of release/reverb to keep after the last note
-  parts: Part[];
-}
-
-const n = (t: number, d: number, p: number, v = 100): Note => ({ t, d, p, v });
-const chordAt = (t: number, d: number, ps: number[], v = 100) => ps.map((p) => n(t, d, p, v));
-
-const SFX: Sfx[] = [
-  { name: 'sfx-join', bpm: 120, tail: 0.5, parts: [{ name: 'Bell', notes: [n(0, 0.2, 84, 90), n(0.18, 0.4, 91, 100)] }] },
-  {
-    name: 'sfx-submit', bpm: 120, tail: 0.25,
-    parts: [
-      { name: 'Pluck', notes: [n(0, 0.12, 88, 90), n(0.1, 0.25, 93, 100)] },
-      { name: 'Drums', drums: true, notes: [n(0, 0.1, CH, 60)] },
-    ],
-  },
-  { name: 'sfx-tick', bpm: 120, tail: 0.08, parts: [{ name: 'Block', notes: [n(0, 0.08, 84, 110)] }] },
-  {
-    name: 'sfx-cardDeal', bpm: 120, tail: 0.2,
-    parts: [
-      { name: 'Drums', drums: true, notes: [n(0, 0.1, CH, 90), n(0.06, 0.1, CLAP, 40)] },
-      { name: 'Pluck', notes: [n(0.06, 0.15, 81, 70)] },
-    ],
-  },
-  { name: 'sfx-tally', bpm: 120, tail: 0.35, parts: [{ name: 'Bell', notes: [n(0, 0.08, 83, 80), n(0.06, 0.3, 88, 105)] }] },
-  {
-    name: 'sfx-reveal', bpm: 120, tail: 1.4,
-    parts: [
-      { name: 'Drums', drums: true, notes: [...Array.from({ length: 12 }, (_, i) => n(i * 0.125, 0.1, SN, 40 + i * 6)), n(1.5, 1, CRASH, 110), n(1.5, 0.2, K, 115)] },
-      { name: 'Bell', notes: [72, 76, 79, 84, 88, 91].map((p, i) => n(1.5 + i * 0.09, 0.6, p, 90)) },
-      { name: 'Pad', notes: chordAt(0, 2.6, [60, 64, 67, 72], 90) },
-    ],
-  },
-  {
-    name: 'sfx-timesUp', bpm: 120, tail: 0.9,
-    parts: [
-      { name: 'Brass', notes: [n(0, 0.4, 79, 100), n(0.5, 0.4, 76, 100), n(1, 1.2, 72, 105), n(1, 1.2, 64, 90), n(1, 1.2, 67, 90)] },
-      { name: 'Drums', drums: true, notes: [n(0, 0.2, TOM_H, 90), n(0.5, 0.2, TOM_M, 90), n(1, 0.2, FLOOR, 100), n(1, 0.2, K, 100)] },
-    ],
-  },
-  {
-    name: 'sfx-leaderboard', bpm: 120, tail: 1.0,
-    parts: [
-      { name: 'Bell', notes: [60, 64, 67, 72, 76, 79, 84].map((p, i) => n(i * 0.12, 0.3, p, 70 + i * 4)) },
-      { name: 'Drums', drums: true, notes: [n(0, 0.1, TOM_L, 70), n(0.25, 0.1, TOM_M, 80), n(0.5, 0.1, TOM_H, 90), n(0.86, 0.5, CRASH, 100), n(0.86, 0.2, K, 110)] },
-      { name: 'Brass', notes: chordAt(0.86, 0.5, [64, 67, 72, 76], 96) },
-    ],
-  },
-  {
-    name: 'sfx-winner', bpm: 120, tail: 1.2,
-    parts: [
-      {
-        name: 'Brass',
-        notes: [n(0, 0.3, 72, 100), n(0.33, 0.3, 76, 100), n(0.66, 0.3, 79, 104), ...chordAt(1, 1.6, [64, 67, 72, 76, 84], 110)],
-      },
-      { name: 'Bell', notes: [n(1, 1, 84, 90), n(1, 1, 88, 80)] },
-      { name: 'Drums', drums: true, notes: [n(0, 0.1, SN, 80), n(0.33, 0.1, SN, 86), n(0.66, 0.1, SN, 92), n(1, 1, CRASH, 112), n(1, 0.2, K, 118)] },
-      { name: 'Bass', notes: [n(1, 1.4, 36, 110)] },
-    ],
-  },
-  {
-    name: 'sfx-champion', bpm: 120, tail: 1.6,
-    parts: [
-      {
-        name: 'Brass',
-        notes: [
-          n(0, 0.22, 67, 96), n(0.25, 0.22, 67, 96), n(0.5, 0.22, 67, 96), ...chordAt(0.75, 0.9, [64, 67, 72], 108),
-          n(1.75, 0.22, 70, 100), n(2, 0.22, 69, 100), n(2.25, 0.22, 70, 100), ...chordAt(2.5, 2.6, [64, 67, 72, 76, 79], 116),
-        ],
-      },
-      { name: 'Lead', notes: [n(2.5, 2.4, 84, 100)] },
-      { name: 'Bell', notes: [72, 76, 79, 84, 88, 91, 96].map((p, i) => n(2.5 + i * 0.1, 1, p, 86)) },
-      {
-        name: 'Drums', drums: true,
-        notes: [
-          n(0.75, 0.2, K, 110), n(0.75, 0.6, CRASH, 96),
-          ...Array.from({ length: 8 }, (_, i) => n(1.5 + i * 0.125, 0.1, SN, 60 + i * 7)),
-          n(2.5, 2, CRASH, 120), n(2.5, 0.2, K, 124), n(2.5, 0.2, FLOOR, 110),
-        ],
-      },
-      { name: 'Bass', notes: [n(0.75, 0.9, 36, 110), n(2.5, 2.4, 36, 118)] },
-      { name: 'Pad', notes: chordAt(2.5, 2.6, [60, 64, 67, 72], 90) },
-    ],
-  },
-];
 
 // ---------- output ----------
 
 const out = resolve(process.argv[2] ?? 'soundtrack-build');
 mkdirSync(out, { recursive: true });
+// jobs.tsv: session, output name, kind, cut start (s), cut end (s) — the cut is relative to <output>.wav
 const jobs: string[] = [];
 
-function emit(name: string, parts: Part[], bpm: number, bounceEndSec: number, mix: Record<string, number> = {}) {
-  const dir = join(out, name);
+interface Bounce {
+  out: string; // output name; Soundcraft writes <out>.wav
+  start: number; // seconds, in the session timeline
+  end: number;
+}
+
+function emit(session: string, parts: Part[], bpm: number, bounces: Bounce[], mix: Record<string, number> = {}) {
+  const dir = join(out, session);
   mkdirSync(dir, { recursive: true });
   const used = parts.filter((p) => p.notes.length);
-  writeFileSync(join(dir, `${name}.mid`), writeSmf(used, bpm));
+  writeFileSync(join(dir, `${session}.mid`), writeSmf(used, bpm));
   const lines: string[] = [];
   const cmd = (id: string, p: object) => lines.push(`${id} ${JSON.stringify(p)}`);
-  cmd('file.import_midi', { path: join(dir, `${name}.mid`) });
+  cmd('file.import_midi', { path: join(dir, `${session}.mid`) });
   for (const part of used) {
     const patch = PATCHES[TRACK_PATCH[part.name]];
     if (!patch) throw new Error(`no patch for track ${part.name}`);
@@ -637,8 +581,10 @@ function emit(name: string, parts: Part[], bpm: number, bounceEndSec: number, mi
   }
   cmd('track.new', { kind: 'master', name: 'Master' });
   MASTER_INSERTS.forEach((ins, slot) => cmd('mix.insert', { slot, plugin: ins.plugin, params: ins.params }));
-  cmd('file.bounce_mix', { path: join(dir, `${name}.wav`), bit_depth: '24', start: 0, end: { seconds: bounceEndSec } });
-  writeFileSync(join(dir, `${name}.script`), lines.join('\n') + '\n');
+  for (const b of bounces) {
+    cmd('file.bounce_mix', { path: join(dir, `${b.out}.wav`), bit_depth: '24', start: { seconds: b.start }, end: { seconds: b.end } });
+  }
+  writeFileSync(join(dir, `${session}.script`), lines.join('\n') + '\n');
 }
 
 function trackPreset(name: string, patch: Patch) {
@@ -683,17 +629,37 @@ for (const cue of CUES) {
       });
     }
   }
-  const barSec = (240 / cue.bpm);
-  emit(cue.name, parts, cue.bpm, barSec * loopBars * 2, cue.mix);
-  jobs.push([cue.name, 'music', (barSec * loopBars).toFixed(6), (barSec * loopBars * 2).toFixed(6)].join('\t'));
+  const barSec = 240 / cue.bpm;
+  emit(cue.name, parts, cue.bpm, [{ out: cue.name, start: 0, end: barSec * loopBars * 2 }], cue.mix);
+  jobs.push([cue.name, cue.name, 'music', (barSec * loopBars).toFixed(6), (barSec * loopBars * 2).toFixed(6)].join('\t'));
 }
 
-for (const s of SFX) {
-  const endBeat = Math.max(...s.parts.flatMap((p) => p.notes.map((nn) => nn.t + nn.d)));
-  const len = (endBeat * 60) / s.bpm + s.tail;
-  emit(s.name, s.parts, s.bpm, len);
-  jobs.push([s.name, 'sfx', '0', len.toFixed(6)].join('\t'));
+// Each SFX key is one session with its takes laid out back to back (2 s apart after each tail),
+// so opening sfx-winner.scraft shows every winner take side by side.
+const SFX_BPM = 120;
+let takeCount = 0;
+for (const [key, takes] of Object.entries(SFX)) {
+  const session = `sfx-${key}`;
+  const merged = new Map<string, Part>();
+  const bounces: Bounce[] = [];
+  let cursorBeats = 0;
+  takes.forEach((take, i) => {
+    const endBeat = Math.max(...take.parts.flatMap((p) => p.notes.map((nn) => nn.t + nn.d)));
+    for (const p of take.parts) {
+      const m = merged.get(p.name) ?? { name: p.name, drums: p.drums, notes: [] };
+      m.notes.push(...shift(p.notes, cursorBeats));
+      merged.set(p.name, m);
+    }
+    const start = (cursorBeats * 60) / SFX_BPM;
+    const len = (endBeat * 60) / SFX_BPM + take.tail;
+    const name = `${session}-${i + 1}`;
+    bounces.push({ out: name, start, end: start + len });
+    jobs.push([session, name, 'sfx', '0', len.toFixed(6)].join('\t'));
+    cursorBeats += Math.ceil(((len + 2) * SFX_BPM) / 60);
+    takeCount++;
+  });
+  emit(session, [...merged.values()], SFX_BPM, bounces);
 }
 
 writeFileSync(join(out, 'jobs.tsv'), jobs.join('\n') + '\n');
-console.log(`composed ${CUES.length} cues and ${SFX.length} sfx into ${out}`);
+console.log(`composed ${CUES.length} cues and ${takeCount} sfx takes (${Object.keys(SFX).length} keys) into ${out}`);

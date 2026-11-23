@@ -41,25 +41,81 @@
               "id": 2,
               "name": "Pluck",
               "start": 0,
-              "length": 8400,
+              "length": 394800,
               "content": {
                 "Midi": {
                   "sequence": {
                     "notes": [
                       {
                         "pitch": 88,
-                        "velocity": 90,
+                        "velocity": 92,
                         "release_velocity": 0,
                         "channel": 0,
                         "start": 0,
-                        "length": 116
+                        "length": 240
                       },
                       {
                         "pitch": 93,
-                        "velocity": 100,
+                        "velocity": 98,
                         "release_velocity": 0,
                         "channel": 0,
-                        "start": 96,
+                        "start": 192,
+                        "length": 240
+                      },
+                      {
+                        "pitch": 86,
+                        "velocity": 92,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 4800,
+                        "length": 240
+                      },
+                      {
+                        "pitch": 91,
+                        "velocity": 98,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 4992,
+                        "length": 240
+                      },
+                      {
+                        "pitch": 84,
+                        "velocity": 92,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 9600,
+                        "length": 240
+                      },
+                      {
+                        "pitch": 88,
+                        "velocity": 98,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 9792,
+                        "length": 240
+                      },
+                      {
+                        "pitch": 91,
+                        "velocity": 104,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 9984,
+                        "length": 240
+                      },
+                      {
+                        "pitch": 91,
+                        "velocity": 92,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 15360,
+                        "length": 240
+                      },
+                      {
+                        "pitch": 96,
+                        "velocity": 98,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 15552,
                         "length": 240
                       }
                     ],
@@ -212,7 +268,7 @@
               "id": 4,
               "name": "Drums",
               "start": 0,
-              "length": 2400,
+              "length": 386400,
               "content": {
                 "Midi": {
                   "sequence": {
@@ -223,6 +279,30 @@
                         "release_velocity": 0,
                         "channel": 9,
                         "start": 0,
+                        "length": 96
+                      },
+                      {
+                        "pitch": 42,
+                        "velocity": 60,
+                        "release_velocity": 0,
+                        "channel": 9,
+                        "start": 4800,
+                        "length": 96
+                      },
+                      {
+                        "pitch": 42,
+                        "velocity": 60,
+                        "release_velocity": 0,
+                        "channel": 9,
+                        "start": 9600,
+                        "length": 96
+                      },
+                      {
+                        "pitch": 42,
+                        "velocity": 60,
+                        "release_velocity": 0,
+                        "channel": 9,
+                        "start": 15360,
                         "length": 96
                       }
                     ],

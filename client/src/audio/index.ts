@@ -8,19 +8,39 @@ import { audio } from './manager.ts';
 
 export { AudioIndicator } from './AudioIndicator.tsx';
 
-/** One-shot sound effects the TV can trigger at animation moments.
- *  `tick` and `timesUp` are played automatically from view.deadline; the TV doesn't need to call them. */
+/** One-shot sound effects. Every key has one or more takes (random, never the same twice in a row).
+ *  AUTO = fired by useGameAudio from the view; the TV doesn't call these. See docs/team/audio.md. */
 export type SfxKey =
-  | 'join' // a player joined the lobby
-  | 'reveal' // photo reveal
-  | 'submit' // someone submitted a caption / vote
-  | 'tick' // final-seconds countdown tick
-  | 'timesUp'
-  | 'cardDeal' // caption card appears
-  | 'tally' // a vote counts up
-  | 'winner' // round winner reveal
-  | 'leaderboard' // scoreboard reshuffle
-  | 'champion'; // final winner
+  // lobby
+  | 'join' // TV: a player joined the lobby
+  | 'teamJoin' // AUTO: a player lands on (or moves to) a team in the lobby
+  | 'teamRename' // AUTO: a team renamed itself
+  // round flow
+  | 'whoosh' // AUTO: every phase change
+  | 'roundStart' // TV: the "Round N" slam
+  | 'reveal' // TV: photo reveal
+  // captioning & voting
+  | 'submit' // TV: someone submitted a caption (or vote)
+  | 'voteCast' // AUTO: a vote came in (subtle)
+  | 'allIn' // AUTO: everyone/every team has submitted, or everyone has voted
+  | 'lastCall' // AUTO: 10 seconds left
+  | 'tick' // AUTO: final-seconds countdown tick
+  | 'timesUp' // AUTO: deadline hit zero
+  | 'cardDeal' // TV: caption card appears
+  // results
+  | 'drumroll' // TV: short build right before the winner reveal
+  | 'tally' // TV: a vote counts up (rises in pitch through a count-up)
+  | 'zeroVotes' // TV: a caption got no votes (playful "aww")
+  | 'winner' // TV: round winner reveal
+  | 'tie' // TV: tied for the win
+  | 'sweep' // TV: clean sweep bonus
+  | 'leaderboard' // TV: scoreboard reshuffle
+  | 'leaderChange' // TV: a new leader takes first place on the scoreboard
+  // final
+  | 'podium3' // TV: third place revealed
+  | 'podium2' // TV: second place revealed
+  | 'podium1' // TV: first place revealed
+  | 'champion'; // TV: final winner celebration
 
 /** Call once from Tv.tsx with the latest view. Drives phase music, countdown ticks,
  *  and the TV keyboard shortcuts: M = mute, - / = = volume down / up. */
@@ -52,9 +72,10 @@ export function useGameAudio(view: TvView | null): void {
   }, []);
 }
 
-/** Fire a one-shot sound effect. Safe to call before audio is unlocked (it's dropped). */
-export function playSfx(key: SfxKey): void {
-  audio.playSfx(key);
+/** Fire a one-shot sound effect. Safe to call before audio is unlocked (it's dropped).
+ *  `tally` rises automatically when called repeatedly (within 0.7 s); pass `{ step }` to set the step yourself. */
+export function playSfx(key: SfxKey, opts?: { step?: number }): void {
+  audio.playSfx(key, opts?.step !== undefined ? { step: opts.step } : {});
 }
 
 /** Browsers block audio until a user gesture. TV calls this from its "click to start" overlay. */

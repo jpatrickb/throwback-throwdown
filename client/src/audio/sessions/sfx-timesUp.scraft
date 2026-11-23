@@ -41,7 +41,7 @@
               "id": 2,
               "name": "Brass",
               "start": 0,
-              "length": 52800,
+              "length": 428400,
               "content": {
                 "Midi": {
                   "sequence": {
@@ -64,7 +64,7 @@
                       },
                       {
                         "pitch": 64,
-                        "velocity": 90,
+                        "velocity": 105,
                         "release_velocity": 0,
                         "channel": 0,
                         "start": 960,
@@ -72,7 +72,7 @@
                       },
                       {
                         "pitch": 67,
-                        "velocity": 90,
+                        "velocity": 105,
                         "release_velocity": 0,
                         "channel": 0,
                         "start": 960,
@@ -85,6 +85,70 @@
                         "channel": 0,
                         "start": 960,
                         "length": 1152
+                      },
+                      {
+                        "pitch": 60,
+                        "velocity": 100,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 8640,
+                        "length": 1056
+                      },
+                      {
+                        "pitch": 65,
+                        "velocity": 100,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 8640,
+                        "length": 1056
+                      },
+                      {
+                        "pitch": 69,
+                        "velocity": 100,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 8640,
+                        "length": 1056
+                      },
+                      {
+                        "pitch": 72,
+                        "velocity": 100,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 8640,
+                        "length": 1056
+                      },
+                      {
+                        "pitch": 62,
+                        "velocity": 112,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 16080,
+                        "length": 1056
+                      },
+                      {
+                        "pitch": 67,
+                        "velocity": 112,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 16080,
+                        "length": 1056
+                      },
+                      {
+                        "pitch": 71,
+                        "velocity": 112,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 16080,
+                        "length": 1056
+                      },
+                      {
+                        "pitch": 74,
+                        "velocity": 112,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 16080,
+                        "length": 1056
                       }
                     ],
                     "ctrls": []
@@ -238,7 +302,7 @@
               "id": 4,
               "name": "Drums",
               "start": 0,
-              "length": 28800,
+              "length": 426000,
               "content": {
                 "Midi": {
                   "sequence": {
@@ -274,6 +338,46 @@
                         "channel": 9,
                         "start": 960,
                         "length": 192
+                      },
+                      {
+                        "pitch": 36,
+                        "velocity": 104,
+                        "release_velocity": 0,
+                        "channel": 9,
+                        "start": 8640,
+                        "length": 192
+                      },
+                      {
+                        "pitch": 49,
+                        "velocity": 80,
+                        "release_velocity": 0,
+                        "channel": 9,
+                        "start": 8640,
+                        "length": 768
+                      },
+                      {
+                        "pitch": 36,
+                        "velocity": 112,
+                        "release_velocity": 0,
+                        "channel": 9,
+                        "start": 16080,
+                        "length": 192
+                      },
+                      {
+                        "pitch": 41,
+                        "velocity": 100,
+                        "release_velocity": 0,
+                        "channel": 9,
+                        "start": 16080,
+                        "length": 192
+                      },
+                      {
+                        "pitch": 49,
+                        "velocity": 96,
+                        "release_velocity": 0,
+                        "channel": 9,
+                        "start": 16080,
+                        "length": 960
                       }
                     ],
                     "ctrls": []
@@ -412,6 +516,343 @@
     },
     {
       "id": 5,
+      "name": "Bell",
+      "kind": "Instrument",
+      "format": "Stereo",
+      "color": [
+        80,
+        190,
+        168
+      ],
+      "height": "Medium",
+      "playlists": [
+        {
+          "name": "Bell",
+          "clips": [
+            {
+              "id": 6,
+              "name": "Bell",
+              "start": 0,
+              "length": 240000,
+              "content": {
+                "Midi": {
+                  "sequence": {
+                    "notes": [
+                      {
+                        "pitch": 96,
+                        "velocity": 90,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 7680,
+                        "length": 384
+                      },
+                      {
+                        "pitch": 91,
+                        "velocity": 90,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 8160,
+                        "length": 384
+                      },
+                      {
+                        "pitch": 84,
+                        "velocity": 96,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 8640,
+                        "length": 960
+                      }
+                    ],
+                    "ctrls": []
+                  }
+                }
+              },
+              "gain_db": 0.0,
+              "gain_env": [],
+              "fade_in": {
+                "len": 0,
+                "shape": "EqualPower"
+              },
+              "fade_out": {
+                "len": 0,
+                "shape": "EqualPower"
+              },
+              "muted": false,
+              "edit_locked": false,
+              "time_locked": false,
+              "rating": 0,
+              "sync_point": 0,
+              "color": null,
+              "stretch": 1.0,
+              "group": null
+            }
+          ]
+        }
+      ],
+      "active_playlist": 0,
+      "mixer": {
+        "volume_db": -4.0,
+        "pan": [
+          -1.0,
+          1.0
+        ],
+        "mute": false,
+        "solo": false,
+        "solo_safe": false,
+        "record_arm": false,
+        "input_monitor": false,
+        "phase_invert": false,
+        "input": "None",
+        "output": "Main",
+        "inserts": [
+          {
+            "plugin": "eq_7band",
+            "params": {
+              "hpf_freq": 400.0,
+              "hpf_on": 1.0
+            },
+            "bypass": false,
+            "active": true,
+            "preset": "<custom>"
+          },
+          {
+            "plugin": "room_reverb",
+            "params": {
+              "damping": 7000.0,
+              "decay": 1.4,
+              "low_cut": 200.0,
+              "mix": 26.0,
+              "pre_delay": 12.0,
+              "size": 45.0
+            },
+            "bypass": false,
+            "active": true,
+            "preset": "<custom>"
+          },
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "sends": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "automation_mode": "Read",
+        "trim_db": 0.0,
+        "vca": null,
+        "surround": null
+      },
+      "automation": [],
+      "view": "notes",
+      "hidden": false,
+      "inactive": false,
+      "frozen": false,
+      "comments": "",
+      "folder": null,
+      "folder_open": true,
+      "instrument": {
+        "plugin": "subtractive_synth",
+        "params": {
+          "amp_attack": 1.0,
+          "amp_decay": 650.0,
+          "amp_release": 450.0,
+          "amp_sustain": 0.0,
+          "cutoff": 9000.0,
+          "filter_env_amount": 0.0,
+          "level": -2.0,
+          "osc1_wave": 2.0,
+          "osc2_detune": 2.0,
+          "osc2_semitones": 24.0,
+          "osc2_wave": 2.0,
+          "osc_mix": 22.0,
+          "resonance": 0.0,
+          "velocity": 60.0
+        },
+        "bypass": false,
+        "active": true,
+        "preset": "<custom>"
+      },
+      "ticks_timebase": true,
+      "elastic": null,
+      "pinned": false
+    },
+    {
+      "id": 7,
+      "name": "Block",
+      "kind": "Instrument",
+      "format": "Stereo",
+      "color": [
+        104,
+        186,
+        98
+      ],
+      "height": "Medium",
+      "playlists": [
+        {
+          "name": "Block",
+          "clips": [
+            {
+              "id": 8,
+              "name": "Block",
+              "start": 0,
+              "length": 397450,
+              "content": {
+                "Midi": {
+                  "sequence": {
+                    "notes": [
+                      {
+                        "pitch": 96,
+                        "velocity": 100,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 15360,
+                        "length": 58
+                      },
+                      {
+                        "pitch": 96,
+                        "velocity": 100,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 15600,
+                        "length": 58
+                      },
+                      {
+                        "pitch": 96,
+                        "velocity": 100,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 15840,
+                        "length": 58
+                      }
+                    ],
+                    "ctrls": []
+                  }
+                }
+              },
+              "gain_db": 0.0,
+              "gain_env": [],
+              "fade_in": {
+                "len": 0,
+                "shape": "EqualPower"
+              },
+              "fade_out": {
+                "len": 0,
+                "shape": "EqualPower"
+              },
+              "muted": false,
+              "edit_locked": false,
+              "time_locked": false,
+              "rating": 0,
+              "sync_point": 0,
+              "color": null,
+              "stretch": 1.0,
+              "group": null
+            }
+          ]
+        }
+      ],
+      "active_playlist": 0,
+      "mixer": {
+        "volume_db": 0.0,
+        "pan": [
+          -1.0,
+          1.0
+        ],
+        "mute": false,
+        "solo": false,
+        "solo_safe": false,
+        "record_arm": false,
+        "input_monitor": false,
+        "phase_invert": false,
+        "input": "None",
+        "output": "Main",
+        "inserts": [
+          {
+            "plugin": "eq_7band",
+            "params": {
+              "hpf_freq": 500.0,
+              "hpf_on": 1.0
+            },
+            "bypass": false,
+            "active": true,
+            "preset": "<custom>"
+          },
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "sends": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "automation_mode": "Read",
+        "trim_db": 0.0,
+        "vca": null,
+        "surround": null
+      },
+      "automation": [],
+      "view": "notes",
+      "hidden": false,
+      "inactive": false,
+      "frozen": false,
+      "comments": "",
+      "folder": null,
+      "folder_open": true,
+      "instrument": {
+        "plugin": "subtractive_synth",
+        "params": {
+          "amp_attack": 0.5,
+          "amp_decay": 45.0,
+          "amp_release": 35.0,
+          "amp_sustain": 0.0,
+          "cutoff": 7000.0,
+          "filter_env_amount": 0.0,
+          "level": -4.0,
+          "osc1_wave": 2.0,
+          "osc2_detune": 0.0,
+          "osc2_semitones": 19.0,
+          "osc2_wave": 3.0,
+          "osc_mix": 30.0,
+          "resonance": 0.0,
+          "velocity": 40.0
+        },
+        "bypass": false,
+        "active": true,
+        "preset": "<custom>"
+      },
+      "ticks_timebase": true,
+      "elastic": null,
+      "pinned": false
+    },
+    {
+      "id": 9,
       "name": "Master 1",
       "kind": "Master",
       "format": "Stereo",
@@ -533,7 +974,7 @@
       "end": 0
     },
     "selected_tracks": [
-      5
+      9
     ],
     "selected_clips": [],
     "playhead": 0,
@@ -606,7 +1047,7 @@
     ],
     "values": {}
   },
-  "next_id": 6,
+  "next_id": 10,
   "comments": "",
   "midi_originals": {}
 }

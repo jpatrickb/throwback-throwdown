@@ -41,25 +41,81 @@
               "id": 2,
               "name": "Bell",
               "start": 0,
-              "length": 13900,
+              "length": 473300,
               "content": {
                 "Midi": {
                   "sequence": {
                     "notes": [
                       {
                         "pitch": 84,
-                        "velocity": 90,
+                        "velocity": 92,
                         "release_velocity": 0,
                         "channel": 0,
                         "start": 0,
-                        "length": 192
+                        "length": 384
                       },
                       {
                         "pitch": 91,
-                        "velocity": 100,
+                        "velocity": 98,
                         "release_velocity": 0,
                         "channel": 0,
-                        "start": 172,
+                        "start": 308,
+                        "length": 384
+                      },
+                      {
+                        "pitch": 86,
+                        "velocity": 92,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 5760,
+                        "length": 384
+                      },
+                      {
+                        "pitch": 93,
+                        "velocity": 98,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 6068,
+                        "length": 384
+                      },
+                      {
+                        "pitch": 79,
+                        "velocity": 92,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 11520,
+                        "length": 384
+                      },
+                      {
+                        "pitch": 84,
+                        "velocity": 98,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 11828,
+                        "length": 384
+                      },
+                      {
+                        "pitch": 88,
+                        "velocity": 104,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 12134,
+                        "length": 384
+                      },
+                      {
+                        "pitch": 88,
+                        "velocity": 92,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 18240,
+                        "length": 384
+                      },
+                      {
+                        "pitch": 96,
+                        "velocity": 98,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 18548,
                         "length": 384
                       }
                     ],

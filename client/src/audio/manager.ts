@@ -5,10 +5,12 @@
 //   never download it and the browser never logs an autoplay warning.
 // - Before unlock, music requests are remembered (and start on unlock); SFX are dropped.
 // - Missing or broken files fail silently. No method throws.
+// - SFX have several takes: a random one plays, never the same take twice in a row.
+// - Some moments are detected from the view alone and fire automatically (see detect()).
 import type { Howl as HowlT } from 'howler';
 import type { Phase, TvView } from '../../../shared/types.ts';
 import type { SfxKey } from './index.ts';
-import { AUDIO_TUNING as T, MUSIC, PHASE_MUSIC, SFX, type Cue, type MusicKey } from './cues.ts';
+import { AUDIO_TUNING as T, MUSIC, PHASE_MUSIC, RISING_STEPS, SFX, SFX_EXCLUSIVE, type MusicKey } from './cues.ts';
 
 type HowlerModule = typeof import('howler');
 interface Playing {
@@ -26,14 +28,13 @@ export interface AudioSnapshot {
 }
 
 const STORAGE_KEY = 'tvAudio';
-/** Stingers that should never double-fire (e.g. TV and the auto-timer both asking). */
-const DEDUPE_MS: Partial<Record<SfxKey, number>> = {
-  reveal: 1000,
-  timesUp: 1500,
-  winner: 1000,
-  champion: 2000,
-  leaderboard: 800,
-};
+export interface SfxOptions {
+  /** Step of a rising run (tally count-ups): 0 = base pitch, each step goes up the scale.
+   *  Omit it and consecutive calls within the cue's risingRunMs rise automatically. */
+  step?: number;
+  gain?: number;
+  rate?: number;
+}
 const TIMED_GRACE_MS = 1200; // phase left with <= this remaining counts as "time ran out"
 
 function loadSettings(): { volume: number; muted: boolean } {
@@ -73,6 +74,13 @@ export class AudioManager {
   private duckUntil = 0;
   private duckTimer: ReturnType<typeof setTimeout> | null = null;
   private lastSfxAt = new Map<SfxKey, number>();
+  private lastTake = new Map<SfxKey, number>();
+  private runs = new Map<SfxKey, { take: number; step: number; at: number }>();
+  private recent: { key: SfxKey; take: number; rate: number; at: number }[] = [];
+
+  // view-diff state for auto-fired moments
+  private prevView: TvView | null = null;
+  private allInFired = new Set<string>();
 
   // countdown state
   private phase: Phase | null = null;
@@ -81,6 +89,7 @@ export class AudioManager {
   private lastTickSec: number | null = null;
   private timesUpFired = false;
   private sawTimeLeft = false;
+  private sawBeforeLastCall = false;
   private timer: ReturnType<typeof setInterval> | null = null;
 
   private snap: AudioSnapshot;
@@ -114,8 +123,8 @@ export class AudioManager {
           if (ctx && ctx.state === 'suspended') void ctx.resume();
         });
         // Preload every cue so stingers fire instantly later.
-        for (const k of Object.keys(SFX) as SfxKey[]) this.howl('sfx', k, SFX[k]);
-        for (const k of Object.keys(MUSIC) as MusicKey[]) this.howl('music', k, MUSIC[k]);
+        for (const k of Object.keys(SFX) as SfxKey[]) SFX[k].takes.forEach((src, i) => this.howl(`sfx:${k}:${i}`, src, false));
+        for (const k of Object.keys(MUSIC) as MusicKey[]) this.howl(`music:${k}`, MUSIC[k].src, true);
         this.set({ unlocked: true });
         this.syncMusic();
       })
@@ -124,7 +133,7 @@ export class AudioManager {
       });
   }
 
-  /** Feed every TV view snapshot in. Drives music and the final-seconds ticks. */
+  /** Feed every TV view snapshot in. Drives music, the final-seconds ticks and auto-fired SFX. */
   setView(view: TvView | null): void {
     const prevPhase = this.phase;
     const nextPhase = view?.phase ?? null;
@@ -144,8 +153,11 @@ export class AudioManager {
       this.lastTickSec = null;
       this.timesUpFired = false;
       this.sawTimeLeft = false;
+      this.sawBeforeLastCall = false;
     }
     this.syncTimer();
+    safe(() => this.detect(this.prevView, view));
+    this.prevView = view;
   }
 
   setMusic(key: MusicKey | null): void {
@@ -153,21 +165,45 @@ export class AudioManager {
     this.syncMusic();
   }
 
-  playSfx(key: SfxKey, opts: { gain?: number; rate?: number } = {}): void {
+  playSfx(key: SfxKey, opts: SfxOptions = {}): void {
     if (!this.mod) return; // not unlocked yet: drop it
+    // In team mode a new player lands on a team: one teamJoin instead of join + teamJoin.
+    if (key === 'join' && this.prevView?.settings.teamMode && this.prevView.teams.length) key = 'teamJoin';
     const cue = SFX[key];
     if (!cue) return;
-    const gap = DEDUPE_MS[key];
     const now = Date.now();
-    if (gap && now - (this.lastSfxAt.get(key) ?? 0) < gap) return;
-    this.lastSfxAt.set(key, now);
-    const howl = this.howl('sfx', key, cue);
+    if (cue.minGapMs && now - (this.lastSfxAt.get(key) ?? 0) < cue.minGapMs) return;
+    if (this.blockedByGroup(key, now)) return;
+
+    // Pick the take: keep it through a rising run, otherwise random but never the last one.
+    const run = this.runs.get(key);
+    const inRun = cue.risingRunMs !== undefined && (opts.step !== undefined ? opts.step > 0 : !!run && now - run.at < cue.risingRunMs);
+    let take: number;
+    let step = 0;
+    if (inRun && run && !this.failed.has(`sfx:${key}:${run.take}`)) {
+      take = run.take;
+      step = opts.step ?? run.step + 1;
+    } else {
+      const ok = cue.takes.map((_, i) => i).filter((i) => !this.failed.has(`sfx:${key}:${i}`));
+      if (!ok.length) return;
+      const pool = ok.length > 1 ? ok.filter((i) => i !== this.lastTake.get(key)) : ok;
+      take = pool[Math.floor(Math.random() * pool.length)];
+      step = opts.step ?? 0;
+    }
+    if (cue.risingRunMs !== undefined) this.runs.set(key, { take, step, at: now });
+    const howl = this.howl(`sfx:${key}:${take}`, cue.takes[take], false);
     if (!howl) return;
+    this.lastSfxAt.set(key, now);
+    this.lastTake.set(key, take);
+    const semis = cue.risingRunMs !== undefined ? RISING_STEPS[Math.min(step, RISING_STEPS.length - 1)] : 0;
+    const rate = (opts.rate ?? 1) * Math.pow(2, semis / 12);
+    this.recent.push({ key, take: take + 1, rate: Math.round(rate * 1000) / 1000, at: now });
+    if (this.recent.length > 60) this.recent.shift();
     safe(() => {
       const id = howl.play();
       howl.volume(Math.min(1, cue.volume * (opts.gain ?? 1)), id);
-      if (opts.rate) howl.rate(opts.rate, id);
-      if (cue.duck) this.duck((howl.duration() || 1.5) / (opts.rate ?? 1));
+      if (rate !== 1) howl.rate(rate, id);
+      if (cue.duck) this.duck((howl.duration() || 1.5) / rate);
     });
   }
 
@@ -212,6 +248,7 @@ export class AudioManager {
       failed: [...this.failed],
       phase: this.phase,
       remainingMs: this.deadline ? this.remainingMs() : null,
+      recentSfx: this.recent.map((r) => `${r.key}#${r.take}${r.rate !== 1 ? `@${r.rate}` : ''}`),
     };
   }
 
@@ -230,15 +267,14 @@ export class AudioManager {
     }
   }
 
-  private howl(kind: 'music' | 'sfx', key: string, cue: Cue): HowlT | null {
-    const id = `${kind}:${key}`;
-    if (!this.mod || this.failed.has(id) || !cue.src.length) return null;
+  private howl(id: string, src: string[], loop: boolean): HowlT | null {
+    if (!this.mod || this.failed.has(id) || !src.length) return null;
     let h = this.howls.get(id);
     if (h) return h;
     try {
       h = new this.mod.Howl({
-        src: cue.src,
-        loop: cue.loop,
+        src,
+        loop,
         volume: 1, // per-play volume is set on the sound id
         preload: true,
         onloaderror: () => this.markFailed(id),
@@ -249,6 +285,59 @@ export class AudioManager {
     }
     this.howls.set(id, h);
     return h;
+  }
+
+  /** SFX_EXCLUSIVE: skip `key` if a higher-priority (or, with firstWins, any) group mate just played. */
+  private blockedByGroup(key: SfxKey, now: number): boolean {
+    for (const g of SFX_EXCLUSIVE) {
+      const idx = g.keys.indexOf(key);
+      if (idx < 0) continue;
+      for (let j = 0; j < g.keys.length; j++) {
+        const other = g.keys[j];
+        if (other === key) continue;
+        if (now - (this.lastSfxAt.get(other) ?? 0) >= g.windowMs) continue;
+        if (g.firstWins || j < idx) return true;
+      }
+    }
+    return false;
+  }
+
+  /** Moments the TV doesn't have to call: diff the previous view against the new one. */
+  private detect(prev: TvView | null, view: TvView | null): void {
+    if (!prev || !view) return;
+    const round = view.round?.index ?? -1;
+    const sameRound = (prev.round?.index ?? -1) === round;
+
+    // allIn: the last caption or vote landed. The server advances the phase the moment everyone is
+    // done, so the "all in" state usually arrives in the next phase's first view (same round).
+    let allIn = false;
+    for (const kind of ['caption', 'vote'] as const) {
+      const phase = kind === 'caption' ? 'CAPTIONING' : 'VOTING';
+      const id = `${round}:${kind}`;
+      if (prev.phase === phase && sameRound && !this.allInFired.has(id) && !isAllIn(prev, kind) && isAllIn(view, kind)) {
+        this.allInFired.add(id);
+        allIn = true;
+        this.playSfx('allIn');
+      }
+    }
+
+    // voteCast: a vote came in (subtle blip; the last one is covered by allIn).
+    if (!allIn && prev.phase === 'VOTING' && view.phase === 'VOTING' && sameRound) {
+      if ((view.round?.votedPlayerIds.length ?? 0) > (prev.round?.votedPlayerIds.length ?? 0)) this.playSfx('voteCast');
+    }
+
+    // teamJoin: someone landed on (or moved to) a team in the lobby.
+    if (view.phase === 'LOBBY' && prev.phase === 'LOBBY') {
+      const before = new Map(prev.players.map((p) => [p.id, p.teamId]));
+      if (view.players.some((p) => p.teamId && before.get(p.id) !== p.teamId)) this.playSfx('teamJoin');
+    }
+
+    // teamRename: a team's name changed.
+    const names = new Map(prev.teams.map((t) => [t.id, t.name]));
+    if (view.teams.some((t) => names.has(t.id) && names.get(t.id) !== t.name)) this.playSfx('teamRename');
+
+    // whoosh: every phase change (lower priority than allIn/timesUp/reveal/roundStart/champion).
+    if (prev.phase !== view.phase) this.playSfx('whoosh');
   }
 
   private markFailed(id: string): void {
@@ -273,7 +362,7 @@ export class AudioManager {
     this.current = null;
     if (!key) return;
 
-    const howl = this.howl('music', key, MUSIC[key]);
+    const howl = this.howl(`music:${key}`, MUSIC[key].src, true);
     if (!howl) return;
     const target = this.musicTarget(key);
     const reviving = this.fadingOut.get(key);
@@ -346,10 +435,15 @@ export class AudioManager {
     if (ms > 0) {
       this.sawTimeLeft = true;
       const sec = Math.ceil(ms / 1000);
+      if (sec > T.lastCallSeconds) this.sawBeforeLastCall = true;
       if (sec <= T.tickFromSeconds && sec !== this.lastTickSec) {
         this.lastTickSec = sec;
-        const urgent = sec <= T.urgentTicks;
-        this.playSfx('tick', urgent ? { gain: 1.4, rate: 1.25 } : {});
+        if (sec === T.lastCallSeconds && this.sawBeforeLastCall) {
+          this.playSfx('lastCall');
+        } else {
+          const urgent = sec <= T.urgentTicks;
+          this.playSfx('tick', urgent ? { gain: 1.4, rate: 1.25 } : {});
+        }
       }
     } else if (this.sawTimeLeft && !this.timesUpFired) {
       this.fireTimesUp();
@@ -360,6 +454,31 @@ export class AudioManager {
     this.timesUpFired = true;
     if (T.autoTimesUp) this.playSfx('timesUp');
   }
+}
+
+/** Has every eligible player (or team, in team mode) captioned / voted? Needs at least one. */
+function isAllIn(view: TvView, kind: 'caption' | 'vote'): boolean {
+  const r = view.round;
+  if (!r) return false;
+  const online = view.players.filter((p) => p.connected);
+  if (!online.length) return false;
+  if (kind === 'vote') {
+    const voted = new Set(r.votedPlayerIds);
+    return online.every((p) => voted.has(p.id));
+  }
+  if (view.settings.teamMode && view.teams.length) {
+    const onlineIds = new Set(online.map((p) => p.id));
+    const teamOf = new Map(view.players.map((p) => [p.id, p.teamId]));
+    const done = new Set<string>(r.submittedTeamIds ?? []);
+    for (const id of r.submittedPlayerIds) {
+      const t = teamOf.get(id);
+      if (t) done.add(t);
+    }
+    const eligible = view.teams.filter((t) => t.memberIds.some((id) => onlineIds.has(id)));
+    return eligible.length > 0 && eligible.every((t) => done.has(t.id));
+  }
+  const submitted = new Set(r.submittedPlayerIds);
+  return online.every((p) => submitted.has(p.id));
 }
 
 export const audio = new AudioManager();

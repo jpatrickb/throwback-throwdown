@@ -41,13 +41,13 @@
               "id": 2,
               "name": "Bell",
               "start": 0,
-              "length": 8650,
+              "length": 298100,
               "content": {
                 "Midi": {
                   "sequence": {
                     "notes": [
                       {
-                        "pitch": 83,
+                        "pitch": 76,
                         "velocity": 80,
                         "release_velocity": 0,
                         "channel": 0,
@@ -55,11 +55,43 @@
                         "length": 76
                       },
                       {
-                        "pitch": 88,
+                        "pitch": 81,
                         "velocity": 105,
                         "release_velocity": 0,
                         "channel": 0,
-                        "start": 58,
+                        "start": 116,
+                        "length": 288
+                      },
+                      {
+                        "pitch": 74,
+                        "velocity": 80,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 5760,
+                        "length": 76
+                      },
+                      {
+                        "pitch": 79,
+                        "velocity": 105,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 5876,
+                        "length": 288
+                      },
+                      {
+                        "pitch": 79,
+                        "velocity": 80,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 11520,
+                        "length": 76
+                      },
+                      {
+                        "pitch": 84,
+                        "velocity": 105,
+                        "release_velocity": 0,
+                        "channel": 0,
+                        "start": 11636,
                         "length": 288
                       }
                     ],
