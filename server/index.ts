@@ -188,6 +188,13 @@ io.on('connection', (socket: GameSocket) => {
     sendView(socket);
   });
 
+  on('tv:setTheme', (payload, rawAck) => {
+    const ack = ackOf(rawAck);
+    if (socket.data.role !== 'tv') return ack({ ok: false, error: 'TV only' });
+    if (!isObj(payload) || !isStr(payload.theme, 32)) return ack({ ok: false, error: 'Bad request' });
+    reply(ack, dispatch({ type: 'setTheme', theme: payload.theme }));
+  });
+
   on('player:join', (payload, rawAck) => {
     const ack = ackOf(rawAck);
     const p = parseJoin(payload);

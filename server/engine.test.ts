@@ -549,3 +549,35 @@ describe('teams', () => {
     expect(s.teams.find((t) => t.id === 't1')!.score).toBe(20 * POINTS_PER_VOTE + SWEEP_BONUS);
   });
 });
+
+describe('theme', () => {
+  it('defaults to berry', () => {
+    expect(initialState('ABCD').settings.theme).toBe('berry');
+  });
+
+  it('setTheme accepts known themes only', () => {
+    const s = run(lobby(), [{ type: 'setTheme', theme: 'arcade' }]);
+    expect(s.settings.theme).toBe('arcade');
+    expect(err(s, { type: 'setTheme', theme: 'neon' })).toBe('Unknown theme');
+    // Works mid-game too, and leaves the game alone.
+    const mid = run(captioning(), [{ type: 'setTheme', theme: 'cork' }]);
+    expect(mid.settings.theme).toBe('cork');
+    expect(mid.phase).toBe('CAPTIONING');
+  });
+
+  it('host updateSettings can set the theme (validated)', () => {
+    const s = run(lobby(), [host({ type: 'updateSettings', settings: { theme: 'picnic' } })]);
+    expect(s.settings.theme).toBe('picnic');
+    expect(err(s, host({ type: 'updateSettings', settings: { theme: 'nope' as never } }))).toBe('Unknown theme');
+  });
+
+  it('normalizeState defaults a missing or unknown theme', () => {
+    const old = JSON.parse(JSON.stringify(lobby())) as GameState;
+    delete (old.settings as Partial<GameState['settings']>).theme;
+    expect(normalizeState(old).settings.theme).toBe('berry');
+    (old.settings as { theme: string }).theme = 'gone';
+    expect(normalizeState(old).settings.theme).toBe('berry');
+    old.settings.theme = 'cork';
+    expect(normalizeState(old).settings.theme).toBe('cork');
+  });
+});

@@ -3,7 +3,7 @@
 // and the current time, arms the deadline timer, persists, and broadcasts.
 // The input state is never mutated; a fresh copy is returned on success.
 import type { Caption, GameState, HostAction, Photo, Player, Round, ScoredCaption, Settings, Team } from '../shared/types.ts';
-import { DEFAULT_SETTINGS, POINTS_PER_VOTE, SWEEP_BONUS, TEAM_PRESETS } from '../shared/types.ts';
+import { DEFAULT_SETTINGS, POINTS_PER_VOTE, SWEEP_BONUS, TEAM_PRESETS, THEMES, type ThemeId } from '../shared/types.ts';
 
 export type EngineEvent =
   | { type: 'join'; playerId: string; name: string; avatar?: string | null; color?: string | null }
@@ -12,6 +12,7 @@ export type EngineEvent =
   | { type: 'caption'; playerId: string; text: string; id: string } // id: opaque, used only on first submit
   | { type: 'vote'; playerId: string; captionId: string }
   | { type: 'renameTeam'; playerId: string; name: string } // a member renames their own team
+  | { type: 'setTheme'; theme: string } // from the TV settings panel
   | { type: 'addPhotos'; photos: Photo[] }
   | { type: 'host'; action: HostAction; seed?: number } // seed: randomness for shuffleTeams (pure engine)
   | { type: 'timeout' };
@@ -32,6 +33,8 @@ export const SETTINGS_LIMITS: Record<NumericSetting, [min: number, max: number]>
   teamCount: [2, Math.min(8, TEAM_PRESETS.length)],
 };
 
+export const isThemeId = (v: unknown): v is ThemeId => typeof v === 'string' && THEMES.some((t) => t.id === v);
+
 export function initialState(roomCode: string): GameState {
   const s: GameState = {
     roomCode,
@@ -51,6 +54,7 @@ export function initialState(roomCode: string): GameState {
 export function normalizeState(raw: GameState): GameState {
   const s = structuredClone(raw);
   s.settings = { ...DEFAULT_SETTINGS, ...s.settings };
+  if (!isThemeId(s.settings.theme)) s.settings.theme = DEFAULT_SETTINGS.theme;
   s.teams ??= [];
   for (const p of Object.values(s.players)) p.teamId ??= null;
   for (const r of s.rounds) for (const c of r.captions) c.teamId ??= null;
@@ -359,6 +363,11 @@ function reduce(s: GameState, e: EngineEvent, now: number) {
       t!.name = name;
       return;
     }
+    case 'setTheme': {
+      if (!isThemeId(e.theme)) fail('Unknown theme');
+      s.settings.theme = e.theme as ThemeId;
+      return;
+    }
     case 'addPhotos': {
       const have = new Set(s.photos.map((p) => p.id));
       for (const p of e.photos) {
@@ -521,6 +530,10 @@ function hostAction(s: GameState, a: HostAction, now: number, seed: number) {
         next[key] = Math.min(max, Math.max(min, n));
       }
       if (a.settings?.teamMode !== undefined) next.teamMode = Boolean(a.settings.teamMode);
+      if (a.settings?.theme !== undefined) {
+        if (!isThemeId(a.settings.theme)) fail('Unknown theme');
+        next.theme = a.settings.theme;
+      }
       const teamsChanged = next.teamMode !== s.settings.teamMode || (next.teamMode && next.teamCount !== s.settings.teamCount);
       if (teamsChanged && s.phase !== 'LOBBY') fail('Teams can only be changed in the lobby');
       s.settings = next;

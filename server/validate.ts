@@ -1,6 +1,7 @@
 // Shape checks for every client payload. The server is on the public internet,
 // so nothing from a socket is trusted until it passes through here.
 import type { HostAction, Settings } from '../shared/types.ts';
+import { isThemeId } from './engine.ts';
 
 export const isObj = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null && !Array.isArray(v);
 export const isStr = (v: unknown, max = 200): v is string => typeof v === 'string' && v.length <= max;
@@ -61,6 +62,10 @@ export function parseHostAction(a: unknown): HostAction | null {
         if (v === undefined) continue;
         if (!isNum(v)) return null;
         out[k] = v;
+      }
+      if (a.settings.theme !== undefined) {
+        if (!isThemeId(a.settings.theme)) return null;
+        out.theme = a.settings.theme;
       }
       if (a.settings.teamMode !== undefined) {
         if (typeof a.settings.teamMode !== 'boolean') return null;
