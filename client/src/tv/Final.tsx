@@ -1,0 +1,98 @@
+// Final: podium reveal (3rd, 2nd, 1st), champion celebration, full standings.
+import { useEffect, useState, type CSSProperties } from 'react';
+import { motion } from 'motion/react';
+import type { TvView } from '../../../shared/types.ts';
+import { playSfx } from '../audio/index.ts';
+import { Avatar, Doodle, Logo, playerColor } from './common.tsx';
+import { cannons, burst } from './confetti.ts';
+import { byScore, ranks } from './ranking.ts';
+import { SPRING_POP, TIMING } from './motion.ts';
+
+const PLACE_ORDER = [1, 0, 2]; // podium layout: 2nd, 1st, 3rd
+
+export function Final({ view }: { view: TvView }) {
+  const sorted = [...view.players].sort(byScore);
+  const rk = ranks(sorted);
+  const top = sorted.slice(0, 3);
+  const champs = sorted.filter((_, i) => rk[i] === 1);
+  // shown = how many podium spots revealed, starting from 3rd place
+  const [shown, setShown] = useState(0);
+  useEffect(() => {
+    const n = top.length;
+    const timers = Array.from({ length: n }, (_, k) =>
+      setTimeout(() => {
+        setShown(k + 1);
+        if (k === n - 1) {
+          playSfx('champion');
+          cannons();
+          setTimeout(() => burst(0.5, 0.35, 1.4), 400);
+        } else playSfx('reveal');
+      }, 700 + k * TIMING.finalPodiumStep + (k === n - 1 ? 600 : 0)),
+    );
+    return () => timers.forEach(clearTimeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [top.length]);
+  const revealedIdx = (i: number) => i >= top.length - shown; // top[i] revealed?
+  const champDone = shown >= top.length && top.length > 0;
+
+  return (
+    <div className="screen final">
+      <div className="final-head">
+        <Logo size="sm" />
+        {champDone ? (
+          <motion.h2 className="champion-line" initial={{ scale: 0, rotate: -8 }} animate={{ scale: 1, rotate: -2 }} transition={SPRING_POP}>
+            {champs.length > 1 ? 'Co-champions: ' : 'Champion: '}
+            {champs.map((c) => c.name).join(' & ')}!
+          </motion.h2>
+        ) : (
+          <h2 className="champion-line pending">And the champion is…</h2>
+        )}
+      </div>
+
+      <div className="final-body">
+        <div className="podium">
+          {PLACE_ORDER.filter((i) => i < top.length).map((i) => {
+            const p = top[i];
+            const place = rk[i];
+            const on = revealedIdx(i);
+            return (
+              <div key={p.id} className={`podium-col place-${Math.min(place, 3)} slot-${i + 1}`} style={{ '--pc': playerColor(p) } as CSSProperties}>
+                <motion.div
+                  className="podium-player"
+                  initial={{ y: -400, opacity: 0 }}
+                  animate={on ? { y: 0, opacity: 1 } : {}}
+                  transition={{ type: 'spring', stiffness: 180, damping: 13 }}
+                >
+                  {place === 1 && <Doodle name="crown" className="podium-crown" />}
+                  <Avatar player={p} className="avatar-xl" />
+                  <span className="podium-name">{p.name}</span>
+                  <span className="podium-score">{p.score}</span>
+                </motion.div>
+                <motion.div
+                  className="podium-block"
+                  initial={{ scaleY: 0 }}
+                  animate={{ scaleY: 1 }}
+                  transition={{ delay: 0.2 + i * 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <span className="podium-place">{place}</span>
+                </motion.div>
+              </div>
+            );
+          })}
+        </div>
+
+        <motion.ol className="standings paper-card" initial={{ x: 300, opacity: 0 }} animate={champDone ? { x: 0, opacity: 1 } : {}} transition={{ delay: 0.8, ...SPRING_POP }}>
+          <span className="tape tape-top" />
+          <li className="standings-title">Final standings</li>
+          {sorted.map((p, i) => (
+            <li key={p.id} className="standings-row" style={{ '--pc': playerColor(p) } as CSSProperties}>
+              <span className="st-rank">{rk[i]}</span>
+              <span className="st-name">{p.name}</span>
+              <span className="st-score">{p.score}</span>
+            </li>
+          ))}
+        </motion.ol>
+      </div>
+    </div>
+  );
+}

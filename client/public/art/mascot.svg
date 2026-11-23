@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Placeholder mascot: "Snappy", a retro instant camera. Replace with Patrick's art (mascot.png). -->
+  <g stroke="#2b1630" stroke-width="7" stroke-linejoin="round">
+    <rect x="24" y="52" width="152" height="118" rx="22" fill="#fff7e6"/>
+    <rect x="24" y="52" width="152" height="34" rx="16" fill="#ff5fa2"/>
+    <rect x="128" y="34" width="36" height="22" rx="6" fill="#ffcc33"/>
+    <circle cx="100" cy="122" r="38" fill="#2b1630"/>
+    <circle cx="100" cy="122" r="24" fill="#4fb3ff"/>
+  </g>
+  <circle cx="91" cy="113" r="7" fill="#fff"/>
+  <path d="M60 150q40 22 80 0" fill="none" stroke="#2b1630" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="48" cy="70" r="7" fill="#fff7e6"/>
+  <path d="M8 70 22 74M10 100h14M178 100h14" stroke="#ffcc33" stroke-width="6" stroke-linecap="round"/>
+</svg>
