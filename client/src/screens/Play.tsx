@@ -12,6 +12,7 @@ import { Voting } from '../phone/player/Voting.tsx';
 import { Results } from '../phone/player/Results.tsx';
 import { Final } from '../phone/player/Final.tsx';
 import { Reactions } from '../phone/player/Reactions.tsx';
+import { applySavedTheme, useTheme } from '../phone/useTheme.ts';
 import '../phone/phone.css';
 
 const KEYS = { token: 'ccp:token', name: 'ccp:name', room: 'ccp:room', avatar: 'ccp:avatar', color: 'ccp:color' };
@@ -30,6 +31,8 @@ function store(key: string, value?: string | null): string | null {
 const pick = <T,>(xs: readonly T[]) => xs[Math.floor(Math.random() * xs.length)];
 
 export function Play() {
+  // Only on this route (main.tsx imports every screen): last-known theme, no flash.
+  useState(applySavedTheme);
   return (
     <ToastProvider>
       <PlayInner />
@@ -40,6 +43,7 @@ export function Play() {
 function PlayInner() {
   const view = useView('player');
   const connected = useConnected();
+  useTheme(view?.settings.theme);
   const params = new URLSearchParams(window.location.search);
   const urlRoom = params.get('room')?.toUpperCase() ?? null;
   const [error, setError] = useState<string | null>(null);

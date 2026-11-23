@@ -13,6 +13,7 @@ import { Players } from '../phone/host/Players.tsx';
 import { Settings } from '../phone/host/Settings.tsx';
 import { Teams } from '../phone/host/Teams.tsx';
 import { isTeamMode } from '../phone/teams.ts';
+import { applySavedTheme, useTheme } from '../phone/useTheme.ts';
 import '../phone/phone.css';
 
 const PIN_KEY = 'ccp:hostpin';
@@ -26,6 +27,8 @@ function readPin(): string {
 }
 
 export function Host() {
+  // Only on this route (main.tsx imports every screen): last-known theme, no flash.
+  useState(applySavedTheme);
   return (
     <ToastProvider>
       <HostInner />
@@ -36,6 +39,7 @@ export function Host() {
 function HostInner() {
   const view = useView('host');
   const connected = useConnected();
+  useTheme(view?.settings.theme);
   const [pin, setPin] = useState(readPin);
   const [error, setError] = useState<string | null>(null);
 
