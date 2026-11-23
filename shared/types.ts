@@ -147,12 +147,13 @@ export type Ack<T = object> = (res: ({ ok: true } & T) | { ok: false; error: str
 export interface ClientToServerEvents {
   'tv:hello': () => void;
   'player:join': (
-    p: { roomCode: string; name: string; token?: string },
+    p: { roomCode: string; name: string; token?: string; avatar?: string; color?: string },
     ack: Ack<{ playerId: string; token: string }>,
   ) => void;
   'player:caption': (p: { text: string }, ack: Ack) => void;
   'player:vote': (p: { captionId: string }, ack: Ack) => void;
   'player:react': (p: { emoji: string }) => void; // stretch
+  'player:setAvatar': (p: { avatar: string | null; color: string | null }, ack: Ack) => void; // stretch
   'host:auth': (p: { pin: string }, ack: Ack) => void;
   'host:action': (a: HostAction, ack: Ack) => void;
 }
