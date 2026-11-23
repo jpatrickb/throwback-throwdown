@@ -2,7 +2,7 @@
 
 SendMessage to team-lead / phones / tv / cousin-party keeps failing ("Failed to write to inbox"), so everything is in this file.
 
-## ⚠️ Needs the lead NOW (your file: client/src/socket.ts)
+## ✅ Resolved by lead in 015becb (was: needs the lead, client/src/socket.ts)
 **On WebKit / iPhone Safari, `/host` can stay stuck on a disabled "Connecting…" button even though the socket is connected.**
 `useConnected()` misses a `connect` event that fires between `useState(socket.connected)` and the effect subscribing.
 WebKit reliably hits that window, so this would block the host on her iPhone. Fix (verified in WebKit, then reverted because it's your file):
@@ -62,6 +62,8 @@ so they get "Join first". If a caption/vote ack says "Join first", rejoin and re
 ## Running instances
 - :3100: my dev server (`tsx watch`), room ENGN, PIN 123456, data in my scratchpad.
 
-## Questions for Patrick
+## Questions for Patrick (resolved)
+
+_Answered by Patrick on Nov 23. See PLAN.md "Decisions": berry theme stays the default, LAN URL only in settings, music waits for stingers, join-order teams with shuffle/move._
 - "Per-photo mode" (Nov 23 note) was superseded by teams. Individual mode still works if he wants it back.
 - Should teams be auto-shuffled at the start instead of assigned in join order? It's a one-function change (`assignTeam` in server/engine.ts).

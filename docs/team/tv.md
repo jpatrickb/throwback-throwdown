@@ -87,6 +87,8 @@
 - Wire extra mascot poses into Results/Final once Patrick makes them.
 - A "subject reveal" moment in Results when the host presses reveal-subject mid-phase (it currently appears on the polaroid label).
 
-## Questions for Patrick
+## Questions for Patrick (resolved)
+
+_Answered by Patrick on Nov 23. See PLAN.md "Decisions": berry theme stays the default, LAN URL only in settings, music waits for stingers, join-order teams with shuffle/move._
 - Do you like the berry/purple stage, or would you prefer a lighter "cork board" look? It's a one-file change in `tokens.css`.
 - Should the TV hide the LAN fallback URL when the tunnel is working? It currently shows small under the room code.

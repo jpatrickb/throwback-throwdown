@@ -151,6 +151,8 @@ Because the lobby track pauses and resumes, each CAPTIONING phase continues the 
 ## Next / ideas
 - Volume and mute controls on `/host` (PLAN §D) would need a contract change (a host action relayed to the TV). Deferred.
 
-## Questions for Patrick
+## Questions for Patrick (resolved)
+
+_Answered by Patrick on Nov 23. See PLAN.md "Decisions": berry theme stays the default, LAN URL only in settings, music waits for stingers, join-order teams with shuffle/move._
 - Is the TV sound going over HDMI to the TV, or to a separate speaker? The default master volume is 80%; adjust it with `-`/`=` on the TV.
 - PHOTO_REVEAL is silent (only the reveal stinger plays). Would you prefer the thinking music to start at reveal?
