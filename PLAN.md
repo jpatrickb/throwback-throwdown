@@ -8,6 +8,7 @@
 - **Display:** MacBook → TV over HDMI (MacBook has HDMI built in). Sound goes over HDMI.
 - **Tunnel:** named Cloudflare tunnel `party` → **`https://party.jpatrickbeal.com`** → `localhost:3000`. Config lives in `~/.cloudflared/config.yml` (credentials JSON next to it; keep it secret). Verified end to end on Nov 22: bots joined over the public URL.
 - **Host PIN:** 6 digits, random each start (or `HOST_PIN` env). Because the server is public, wrong guesses are rate-limited: 5 per connection, then a 60s global lockout after 20 per minute.
+- **Patrick's answers (Nov 23):** name stays **Throwback Throwdown**. No "who's in the photo" names: just the picture, and the reveal button is removed. Reactions only on reveal/results/scoreboard. Score fixes stay ±100. Photos are uploaded by the host from her phone, either all at the start or one at a time. **20+ players, per-photo mode** (everyone captions every photo, all captions shown), so TV/phone layouts must handle 25+ captions. the host hosts only, on an **iPhone** (Safari is the priority test).
 - **Stack as built:** Node 26, TypeScript, Express 5, Socket.IO 4, Vite 8, React 19, Vitest.
 
 ---
