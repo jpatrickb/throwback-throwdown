@@ -1,7 +1,7 @@
 import express from 'express';
 import { createServer } from 'node:http';
 import { networkInterfaces } from 'node:os';
-import { randomInt, randomUUID } from 'node:crypto';
+import { randomInt, randomUUID, timingSafeEqual } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import QRCode from 'qrcode';
@@ -13,7 +13,15 @@ import { hostView, playerView, tvView, type JoinInfo } from './views.ts';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PORT = Number(process.env.PORT ?? 3000);
 const PUBLIC_URL = process.env.PUBLIC_URL ?? null; // e.g. https://party.jpatrickbeal.com
-const HOST_PIN = process.env.HOST_PIN ?? String(randomInt(1000, 10000));
+const HOST_PIN = process.env.HOST_PIN ?? String(randomInt(100000, 1000000));
+
+// The server is on the public internet via the tunnel, so cap PIN guessing:
+// 5 wrong tries disconnects a socket, and 20 wrong tries per minute across
+// everyone pauses host login for a minute.
+const PIN_FAILS_PER_SOCKET = 5;
+const PIN_FAILS_GLOBAL = 20;
+let globalPinFails: number[] = [];
+let pinLockedUntil = 0;
 const IS_PROD = process.env.NODE_ENV === 'production';
 
 // ---------- Room code ----------
@@ -139,8 +147,24 @@ io.on('connection', (socket: GameSocket) => {
     ack({ ok: true, playerId, token: newToken });
   });
 
-  socket.on('host:auth', ({ pin }, ack) => {
-    if (pin !== HOST_PIN) return ack({ ok: false, error: 'Wrong PIN' });
+  let socketPinFails = 0;
+  socket.on('host:auth', (payload, ack) => {
+    const now = Date.now();
+    if (now < pinLockedUntil) return ack({ ok: false, error: 'Too many tries. Wait a minute.' });
+    const pin = typeof payload?.pin === 'string' ? payload.pin : '';
+    const ok =
+      pin.length === HOST_PIN.length && timingSafeEqual(Buffer.from(pin), Buffer.from(HOST_PIN));
+    if (!ok) {
+      socketPinFails++;
+      globalPinFails = [...globalPinFails.filter((t) => now - t < 60_000), now];
+      if (globalPinFails.length >= PIN_FAILS_GLOBAL) {
+        pinLockedUntil = now + 60_000;
+        console.warn('⚠️  Host PIN locked for 60s after repeated failures');
+      }
+      ack({ ok: false, error: 'Wrong PIN' });
+      if (socketPinFails >= PIN_FAILS_PER_SOCKET) socket.disconnect(true);
+      return;
+    }
     socket.data.role = 'host';
     ack({ ok: true });
     sendView(socket);

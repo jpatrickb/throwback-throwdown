@@ -1,12 +1,13 @@
 # Cousin Caption Party Game — Plan
 
 **Game day:** Sunday, Nov 29, 2026 (cousin get-together, hosted by a family member)
-**Status:** Scaffold built (Nov 22). Join flow + TV lobby work locally. Next: named tunnel, then split into an agent team (§7).
+**Status:** Monday milestone done early (Nov 22): scaffold + join flow + named tunnel working. Next: split into the agent team (§7).
 
 ## Decisions (Nov 22)
 - **Venue:** an office building, with reliable internet. **Tunnel mode is primary.** Corporate wifi may isolate devices from each other, so the tunnel matters even with good internet: phones reach the server via the internet rather than the local network. LAN mode stays as an emergency fallback (phone hotspot).
 - **Display:** MacBook → TV over HDMI (MacBook has HDMI built in). Sound goes over HDMI.
-- **Tunnel:** named Cloudflare tunnel `party` → **`https://party.jpatrickbeal.com`** → `localhost:3000`.
+- **Tunnel:** named Cloudflare tunnel `party` → **`https://party.jpatrickbeal.com`** → `localhost:3000`. Config lives in `~/.cloudflared/config.yml` (credentials JSON next to it; keep it secret). Verified end to end on Nov 22: bots joined over the public URL.
+- **Host PIN:** 6 digits, random each start (or `HOST_PIN` env). Because the server is public, wrong guesses are rate-limited: 5 per connection, then a 60s global lockout after 20 per minute.
 - **Stack as built:** Node 26, TypeScript, Express 5, Socket.IO 4, Vite 8, React 19, Vitest.
 
 ---
@@ -278,6 +279,7 @@ data/photos/           photos served at /photos/*
 - `npm run party`: production build + server on :3000 with `PUBLIC_URL=https://party.jpatrickbeal.com`
 - `npm run tunnel`: `cloudflared tunnel run party`
 - Env: `ROOM_CODE`, `HOST_PIN`, `PORT`, `PUBLIC_URL` (all optional; code and PIN are printed at startup)
+- Game-day launch: terminal 1 `npm run party`, terminal 2 `npm run tunnel`, TV browser at `localhost:3000/tv`
 
 ---
 
