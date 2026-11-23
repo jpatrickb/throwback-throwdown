@@ -2,9 +2,11 @@
 // The TV calls these; the audio teammate owns everything behind them
 // (cue manifest in cues.ts, Howler manager in manager.ts, assets in public/audio/).
 // Keep these signatures stable.
-import { useEffect } from 'react';
+import { useEffect, useSyncExternalStore } from 'react';
 import type { TvView } from '../../../shared/types.ts';
-import { audio } from './manager.ts';
+import { audio, type AudioSettings } from './manager.ts';
+
+export type { AudioSettings } from './manager.ts';
 
 export { AudioIndicator } from './AudioIndicator.tsx';
 
@@ -81,4 +83,22 @@ export function playSfx(key: SfxKey, opts?: { step?: number }): void {
 /** Browsers block audio until a user gesture. TV calls this from its "click to start" overlay. */
 export function unlockAudio(): void {
   audio.unlock();
+}
+
+// ---------- settings (TV settings panel; M and -/= go through the same path) ----------
+
+/** Current audio settings. */
+export function getAudioSettings(): AudioSettings {
+  return audio.getSettings();
+}
+
+/** Change settings: persists to localStorage and applies live. */
+export function setAudioSettings(patch: Partial<AudioSettings>): void {
+  audio.setSettings(patch);
+}
+
+/** React hook: [settings, setSettings]. Re-renders on any change (panel, keys, other code). */
+export function useAudioSettings(): [AudioSettings, (patch: Partial<AudioSettings>) => void] {
+  const settings = useSyncExternalStore(audio.subscribe, audio.getSettings);
+  return [settings, setAudioSettings];
 }

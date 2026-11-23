@@ -19,9 +19,19 @@ interface Playing {
   id: number;
 }
 
+/** User-facing audio settings (TV settings panel, M and -/= keys). Persisted in localStorage. */
+export interface AudioSettings {
+  musicOn: boolean; // default true
+  sfxOn: boolean; // default true
+  master: number; // 0..1, default 0.8
+  music: number; // 0..1 music level relative to master, default 1
+  sfx: number; // 0..1 sfx level relative to master, default 1
+}
+
 export interface AudioSnapshot {
-  volume: number; // 0..1 master
-  muted: boolean;
+  settings: AudioSettings;
+  volume: number; // = settings.master (kept for the indicator)
+  muted: boolean; // music and sfx both off
   unlocked: boolean;
   /** Date.now() of the last volume/mute change, so the indicator can flash. */
   changedAt: number;
@@ -37,18 +47,32 @@ export interface SfxOptions {
 }
 const TIMED_GRACE_MS = 1200; // phase left with <= this remaining counts as "time ran out"
 
-function loadSettings(): { volume: number; muted: boolean } {
+const DEFAULT_SETTINGS: AudioSettings = { musicOn: true, sfxOn: true, master: T.defaultVolume, music: 1, sfx: 1 };
+const unit = (v: unknown, d: number) => (typeof v === 'number' && Number.isFinite(v) ? Math.max(0, Math.min(1, v)) : d);
+
+function loadSettings(): AudioSettings {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
-      const s = JSON.parse(raw) as { volume?: unknown; muted?: unknown };
-      const volume = typeof s.volume === 'number' && s.volume >= 0 && s.volume <= 1 ? s.volume : T.defaultVolume;
-      return { volume, muted: s.muted === true };
+      const s = JSON.parse(raw) as Record<string, unknown>;
+      // v1 stored { volume, muted }; read it so nobody's volume resets.
+      const muted = s.muted === true;
+      return {
+        musicOn: typeof s.musicOn === 'boolean' ? s.musicOn : !muted,
+        sfxOn: typeof s.sfxOn === 'boolean' ? s.sfxOn : !muted,
+        master: unit(s.master ?? s.volume, DEFAULT_SETTINGS.master),
+        music: unit(s.music, 1),
+        sfx: unit(s.sfx, 1),
+      };
     }
   } catch {
     /* storage blocked or corrupt: use defaults */
   }
-  return { volume: T.defaultVolume, muted: false };
+  return { ...DEFAULT_SETTINGS };
+}
+
+function snapshotOf(settings: AudioSettings, unlocked: boolean, changedAt: number): AudioSnapshot {
+  return { settings, volume: settings.master, muted: !settings.musicOn && !settings.sfxOn, unlocked, changedAt };
 }
 
 function safe(fn: () => void): void {
@@ -96,8 +120,7 @@ export class AudioManager {
   private listeners = new Set<() => void>();
 
   constructor() {
-    const s = loadSettings();
-    this.snap = { ...s, unlocked: false, changedAt: 0 };
+    this.snap = snapshotOf(loadSettings(), false, 0);
   }
 
   // ---------- public API ----------
@@ -117,8 +140,7 @@ export class AudioManager {
         this.mod = mod;
         safe(() => {
           mod.Howler.autoUnlock = true;
-          mod.Howler.volume(this.snap.volume);
-          mod.Howler.mute(this.snap.muted);
+          mod.Howler.volume(this.snap.settings.master);
           const ctx = mod.Howler.ctx;
           if (ctx && ctx.state === 'suspended') void ctx.resume();
         });
@@ -167,6 +189,7 @@ export class AudioManager {
 
   playSfx(key: SfxKey, opts: SfxOptions = {}): void {
     if (!this.mod) return; // not unlocked yet: drop it
+    if (!this.snap.settings.sfxOn) return;
     // In team mode a new player lands on a team: one teamJoin instead of join + teamJoin.
     if (key === 'join' && this.prevView?.settings.teamMode && this.prevView.teams.length) key = 'teamJoin';
     const cue = SFX[key];
@@ -201,32 +224,48 @@ export class AudioManager {
     if (this.recent.length > 60) this.recent.shift();
     safe(() => {
       const id = howl.play();
-      howl.volume(Math.min(1, cue.volume * (opts.gain ?? 1)), id);
+      howl.volume(Math.min(1, cue.volume * this.snap.settings.sfx * (opts.gain ?? 1)), id);
       if (rate !== 1) howl.rate(rate, id);
       if (cue.duck) this.duck((howl.duration() || 1.5) / rate);
     });
   }
 
-  setVolume(v: number): void {
-    const volume = Math.round(Math.max(0, Math.min(1, v)) * 100) / 100;
-    safe(() => this.mod?.Howler.volume(volume));
-    this.set({ volume, changedAt: Date.now() });
-    this.persist();
+  getSettings = (): AudioSettings => this.snap.settings;
+
+  /** Apply and persist a settings change (live: music refades, master applies at once). */
+  setSettings(patch: Partial<AudioSettings>): void {
+    const cur = this.snap.settings;
+    const next: AudioSettings = {
+      musicOn: typeof patch.musicOn === 'boolean' ? patch.musicOn : cur.musicOn,
+      sfxOn: typeof patch.sfxOn === 'boolean' ? patch.sfxOn : cur.sfxOn,
+      master: Math.round(unit(patch.master, cur.master) * 100) / 100,
+      music: Math.round(unit(patch.music, cur.music) * 100) / 100,
+      sfx: Math.round(unit(patch.sfx, cur.sfx) * 100) / 100,
+    };
+    if ((Object.keys(next) as (keyof AudioSettings)[]).every((k) => next[k] === cur[k])) return;
+    this.snap = snapshotOf(next, this.snap.unlocked, Date.now());
+    for (const fn of this.listeners) safe(fn);
+    safe(() => this.mod?.Howler.volume(next.master));
+    if (next.musicOn !== cur.musicOn || next.music !== cur.music) this.fadeCurrentTo(250);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    } catch {
+      /* storage blocked: setting lasts for this session only */
+    }
   }
 
+  /** -/= keys: master volume up/down (turning it up also unmutes). */
   nudgeVolume(dir: 1 | -1): void {
-    if (this.snap.muted && dir > 0) this.setMuted(false);
-    this.setVolume(this.snap.volume + dir * T.volumeStep);
+    const s = this.snap.settings;
+    const unmute = dir > 0 && !s.musicOn && !s.sfxOn ? { musicOn: true, sfxOn: true } : {};
+    this.setSettings({ ...unmute, master: s.master + dir * T.volumeStep });
   }
 
-  setMuted(muted: boolean): void {
-    safe(() => this.mod?.Howler.mute(muted));
-    this.set({ muted, changedAt: Date.now() });
-    this.persist();
-  }
-
+  /** M key: if anything is on, turn music and sfx off; if both are off, turn both on. */
   toggleMute(): void {
-    this.setMuted(!this.snap.muted);
+    const s = this.snap.settings;
+    const anyOn = s.musicOn || s.sfxOn;
+    this.setSettings({ musicOn: !anyOn, sfxOn: !anyOn });
   }
 
   getSnapshot = (): AudioSnapshot => this.snap;
@@ -257,14 +296,6 @@ export class AudioManager {
   private set(patch: Partial<AudioSnapshot>): void {
     this.snap = { ...this.snap, ...patch };
     for (const fn of this.listeners) safe(fn);
-  }
-
-  private persist(): void {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ volume: this.snap.volume, muted: this.snap.muted }));
-    } catch {
-      /* storage blocked: setting lasts for this session only */
-    }
   }
 
   private howl(id: string, src: string[], loop: boolean): HowlT | null {
@@ -350,7 +381,8 @@ export class AudioManager {
   }
 
   private musicTarget(key: MusicKey): number {
-    return MUSIC[key].volume * (this.ducked ? T.duckLevel : 1);
+    const s = this.snap.settings;
+    return s.musicOn ? MUSIC[key].volume * s.music * (this.ducked ? T.duckLevel : 1) : 0;
   }
 
   private syncMusic(): void {

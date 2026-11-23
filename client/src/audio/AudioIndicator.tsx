@@ -18,7 +18,7 @@ export function AudioIndicator({ showLockedHint = true }: { showLockedHint?: boo
   }, [flashing, s.changedAt]);
 
   let text: string | null = null;
-  if (s.muted) text = '🔇 Muted · press M';
+  if (s.muted) text = '🔇 Sound off · press M';
   else if (flashing) text = `${s.volume === 0 ? '🔈' : '🔊'} ${Math.round(s.volume * 100)}%`;
   else if (!s.unlocked && showLockedHint) text = '🔈 Click anywhere for sound';
 
