@@ -31,7 +31,7 @@ export function Scoreboard({ view }: { view: TvView }) {
   return (
     <div className="screen scoreboard">
       {round ? <RoundHeader index={round.index} total={round.totalPhotosQueued} title="Scoreboard" /> : <h2 className="phase-title">Scoreboard</h2>}
-      <ol className={`leaderboard ${twoCol ? 'two-col' : ''}`} style={{ '--rows': twoCol ? Math.ceil(sorted.length / 2) : sorted.length } as CSSProperties}>
+      <ol className={`leaderboard ${twoCol ? 'two-col' : ''} ${sorted.length > 16 ? 'lb-dense' : ''}`} style={{ '--rows': twoCol ? Math.ceil(sorted.length / 2) : sorted.length } as CSSProperties}>
         {sorted.map((p, i) => (
           <motion.li
             key={p.id}

@@ -8,30 +8,15 @@ import { CountUp, Doodle, Polaroid, RoundHeader, playerColor } from './common.ts
 import { burst } from './confetti.ts';
 import { SPRING_POP, TIMING } from './motion.ts';
 import { captionDensity } from './Voting.tsx';
-
-export interface RevealPlan {
-  /** Captions in reveal order (fewest votes first). */
-  order: ScoredCaption[];
-  /** Ids of the winning caption(s); empty when nobody got a vote. */
-  winners: Set<string>;
-  /** Groups revealed together, one per step (all tied winners share the last step). */
-  steps: ScoredCaption[][];
-}
-
-export function planReveal(results: ScoredCaption[]): RevealPlan {
-  const order = [...results].sort((a, b) => a.votes - b.votes || b.text.length - a.text.length);
-  const max = Math.max(0, ...order.map((c) => c.votes));
-  const winners = new Set(max > 0 ? order.filter((c) => c.votes === max).map((c) => c.id) : []);
-  const steps: ScoredCaption[][] = order.filter((c) => !winners.has(c.id)).map((c) => [c]);
-  const w = order.filter((c) => winners.has(c.id));
-  if (w.length) steps.push(w);
-  return { order, winners, steps };
-}
+import { planReveal } from './ranking.ts';
 
 export function Results({ view }: { view: TvView }) {
   const round = view.round!;
   const results = round.results ?? [];
-  const plan = useMemo(() => planReveal(results), [results]);
+  // Keyed on content, not identity: the server re-sends views often and the reveal must not restart.
+  const sig = results.map((r) => `${r.id}:${r.votes}:${r.playerName}`).join('|');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const plan = useMemo(() => planReveal(results), [sig]);
   const [step, setStep] = useState(0); // number of steps revealed
   const done = step >= plan.steps.length;
 
@@ -84,7 +69,7 @@ export function Results({ view }: { view: TvView }) {
           )}
         </div>
 
-        <div className={`results-list density-${density}`}>
+        <div className={`results-list density-${density} ${results.length > 6 ? 'results-crowd' : ''}`}>
           <ul className="loser-list">
             <AnimatePresence>
               {losers.map((c) => (
@@ -102,7 +87,7 @@ export function Results({ view }: { view: TvView }) {
               <ResultCard key={c.id} caption={c} winner tie={plan.winners.size > 1} />
             ))}
           </div>
-          {done && results.length > 0 && plan.winners.size === 0 && (
+          {done && results.length > 1 && plan.winners.size === 0 && (
             <motion.p className="tough-crowd" initial={{ scale: 0 }} animate={{ scale: 1 }} transition={SPRING_POP}>
               Zero votes?! Everybody’s a critic. 🙄
             </motion.p>

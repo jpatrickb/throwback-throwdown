@@ -16,3 +16,22 @@ export function roundPoints(results: ScoredCaption[] | null): Record<string, num
   for (const r of results ?? []) out[r.playerId] = (out[r.playerId] ?? 0) + r.points;
   return out;
 }
+
+export interface RevealPlan {
+  /** Captions in reveal order (fewest votes first). */
+  order: ScoredCaption[];
+  /** Ids of the winning caption(s); empty when nobody got a vote. */
+  winners: Set<string>;
+  /** Groups revealed together, one per step (all tied winners share the last step). */
+  steps: ScoredCaption[][];
+}
+
+export function planReveal(results: ScoredCaption[]): RevealPlan {
+  const order = [...results].sort((a, b) => a.votes - b.votes || b.text.length - a.text.length);
+  const max = Math.max(0, ...order.map((c) => c.votes));
+  const winners = new Set(max > 0 ? order.filter((c) => c.votes === max).map((c) => c.id) : []);
+  const steps: ScoredCaption[][] = order.filter((c) => !winners.has(c.id)).map((c) => [c]);
+  const w = order.filter((c) => winners.has(c.id));
+  if (w.length) steps.push(w);
+  return { order, winners, steps };
+}

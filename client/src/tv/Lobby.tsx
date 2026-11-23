@@ -40,7 +40,7 @@ export function Lobby({ view }: { view: TvView }) {
             </>
           )}
         </h2>
-        <ul className="lobby-grid">
+        <ul className={`lobby-grid ${players.length > 18 ? 'crowd-xl' : players.length > 10 ? 'crowd' : ''}`}>
           <AnimatePresence>
             {players.map((p, i) => (
               <motion.li
@@ -65,6 +65,7 @@ export function Lobby({ view }: { view: TvView }) {
             <p>Grab your phone and scan the code!</p>
           </div>
         )}
+        {players.length > 0 && players.length <= 10 && <ArtImg src={ART.mascot} className="mascot lobby-mascot bob" />}
         <p className="waiting-host">
           <span className="dot-pulse" /> Waiting for the host to start the game…
         </p>

@@ -1,4 +1,4 @@
-import { useEffect, type ReactElement } from 'react';
+import { useEffect, useMemo, type ReactElement } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import type { Phase, TvView } from '../../../shared/types.ts';
 import { socket, useConnected, useView, IS_MOCK } from '../socket.ts';
@@ -15,6 +15,7 @@ import { Scoreboard } from '../tv/Scoreboard.tsx';
 import { Final } from '../tv/Final.tsx';
 import { Logo } from '../tv/common.tsx';
 import { screenVariants } from '../tv/motion.ts';
+import { stressView } from '../tv/devStress.ts';
 import '../tv/tv.css';
 
 const SCREENS: Record<Phase, (p: { view: TvView }) => ReactElement> = {
@@ -31,9 +32,10 @@ const SCREENS: Record<Phase, (p: { view: TvView }) => ReactElement> = {
 const NEEDS_ROUND: Phase[] = ['PHOTO_REVEAL', 'CAPTIONING', 'VOTING', 'RESULTS'];
 
 export function Tv() {
-  const view = useView('tv');
+  const rawView = useView('tv');
+  useGameAudio(rawView);
+  const view = useMemo(() => stressView(rawView), [rawView]);
   const connected = useConnected();
-  useGameAudio(view);
 
   useEffect(() => {
     const hello = () => socket.emit('tv:hello');

@@ -9,6 +9,8 @@ export function Captioning({ view }: { view: TvView }) {
   const active = view.players.filter((p) => p.connected || submitted.has(p.id));
   const players = [...active].sort((a, b) => a.name.localeCompare(b.name));
   const allIn = players.length > 0 && players.every((p) => submitted.has(p.id));
+  const crowd = players.length > 18;
+  const shown = crowd ? players.filter((p) => !submitted.has(p.id)) : players;
   return (
     <div className="screen captioning">
       <RoundHeader index={round.index} total={round.totalPhotosQueued} title="Write a caption!" />
@@ -20,12 +22,13 @@ export function Captioning({ view }: { view: TvView }) {
             {allIn ? 'Everyone’s in! 🎉' : (
               <>
                 <b>{submitted.size}</b> of <b>{players.length}</b> captions in
+                {crowd && <small className="waiting-on">Still writing:</small>}
               </>
             )}
           </p>
           <ul className="chip-grid">
             <AnimatePresence>
-              {players.map((p) => (
+              {shown.map((p) => (
                 <PlayerChip key={p.id} player={p} done={submitted.has(p.id)} />
               ))}
             </AnimatePresence>

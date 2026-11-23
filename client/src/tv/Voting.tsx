@@ -6,13 +6,17 @@ import { CountdownRing, PlayerChip, Polaroid, RoundHeader, useSfxOnIncrease } fr
 import { TIMING } from './motion.ts';
 
 /** Caption text size steps down as the number/length of captions grows. */
-export function captionDensity(n: number, longest: number): 'xl' | 'lg' | 'md' | 'sm' {
+export function captionDensity(n: number, longest: number): 'xl' | 'lg' | 'md' | 'sm' | 'xs' {
   const load = n * Math.max(30, longest);
   if (n <= 3 && load < 200) return 'xl';
   if (n <= 6 && load < 420) return 'lg';
-  if (n <= 9) return 'md';
-  return 'sm';
+  if (n <= 8) return 'md';
+  if (n <= 9 || load < 600) return 'sm';
+  return 'xs';
 }
+
+/** With a big crowd, only list who we're still waiting on. */
+const CROWD = 12;
 
 export function Voting({ view }: { view: TvView }) {
   const round = view.round!;
@@ -28,14 +32,16 @@ export function Voting({ view }: { view: TvView }) {
   }, [round.index]);
 
   const voters = [...view.players].filter((p) => p.connected || voted.has(p.id)).sort((a, b) => a.name.localeCompare(b.name));
+  const crowd = voters.length > CROWD;
+  const shownVoters = crowd ? voters.filter((p) => !voted.has(p.id)) : voters;
   const density = captionDensity(captions.length, Math.max(0, ...captions.map((c) => c.text.length)));
 
   return (
     <div className="screen voting">
       <RoundHeader index={round.index} total={round.totalPhotosQueued} title="Vote for the funniest!" />
-      <div className="voting-body">
+      <div className={`voting-body ${captions.length >= 9 ? 'voting-wide' : ''}`}>
         <div className="voting-left">
-          <Polaroid src={round.photo.url} tilt={-4} className="polaroid-small" />
+          <Polaroid src={round.photo.url} label="Pick a favorite!" tilt={-4} className="polaroid-small" />
           <CountdownRing deadline={view.deadline} serverNow={view.serverNow} phase={view.phase} settings={view.settings} size="sm" />
         </div>
         {captions.length === 0 ? (
@@ -62,10 +68,11 @@ export function Voting({ view }: { view: TvView }) {
       <footer className="voted-strip">
         <span className="voted-label">
           Voted: <b>{voted.size}</b>/{voters.length}
+          {crowd && shownVoters.length > 0 && ' · waiting on'}
         </span>
-        <ul className="chip-row">
+        <ul className={`chip-row ${shownVoters.length > 10 ? 'chip-row-crowd' : ''}`}>
           <AnimatePresence>
-            {voters.map((p) => (
+            {shownVoters.map((p) => (
               <PlayerChip key={p.id} player={p} done={voted.has(p.id)} />
             ))}
           </AnimatePresence>
