@@ -22,7 +22,7 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 const DATA_DIR = path.resolve(ROOT, process.env.DATA_DIR ?? 'data');
 const PHOTO_DIR = path.join(DATA_DIR, 'photos');
 const STATE_FILE = path.join(DATA_DIR, 'state.json');
-const MAX_PLAYERS = 60;
+const MAX_PLAYERS = 80; // counts disconnected players too
 const RESTORE_GRACE_MS = 20_000; // after a restart, give phones time to reconnect before a timer fires
 
 // ---------- Room code ----------
@@ -120,7 +120,7 @@ app.use(
   }),
 );
 if (IS_PROD) {
-  const dist = path.join(ROOT, 'dist/client');
+  const dist = path.resolve(ROOT, process.env.CLIENT_DIST ?? 'dist/client'); // CLIENT_DIST: test builds elsewhere
   app.use(express.static(dist));
   app.get(/^\/(tv|play|host)?$/, (_req, res) => res.sendFile(path.join(dist, 'index.html')));
 }

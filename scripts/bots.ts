@@ -1,9 +1,13 @@
 // Fake players for testing without a room full of phones.
 //   npm run bots -- <ROOM> [count] [url] [--host <PIN>] [--fast] [--photos N]
 // Bots join, then caption/vote with random delays whenever the phase allows.
-// --host <PIN>  also drives /host: uploads N test photos if the queue is empty (default 3),
+// --host <PIN>  also drives /host: tops the queue up to N unused test photos (default 3),
 //               starts the game, advances every step, and exits after the FINAL screen.
 // --fast        short delays (for quick end-to-end runs).
+// --lazy F      fraction (0-1) of bots that never caption or vote, so phases end on the timer.
+// --churn       bots randomly drop their connection for 1-4s during the game, then rejoin with their token.
+// --timers C,V  host sets caption/vote seconds before starting (e.g. --timers 15,10).
+// --quiet       don't log each join (automatic above 12 bots). At FINAL, host mode prints phase timings + ack latency.
 import zlib from 'node:zlib';
 import { io, type Socket } from 'socket.io-client';
 import type { ClientToServerEvents, HostAction, HostView, PlayerView, ServerToClientEvents, View } from '../shared/types.ts';
@@ -15,19 +19,23 @@ const flags: Record<string, string | true> = {};
 const argv = process.argv.slice(2);
 for (let i = 0; i < argv.length; i++) {
   const a = argv[i];
-  if (a === '--host' || a === '--photos') flags[a.slice(2)] = argv[++i] ?? '';
+  if (a === '--host' || a === '--photos' || a === '--lazy' || a === '--timers') flags[a.slice(2)] = argv[++i] ?? '';
   else if (a.startsWith('--')) flags[a.slice(2)] = true;
   else positional.push(a);
 }
 const [room, countArg, url = 'http://localhost:3000'] = positional;
 if (!room) {
-  console.error('usage: npm run bots -- <ROOM> [count] [url] [--host <PIN>] [--fast] [--photos N]');
+  console.error('usage: npm run bots -- <ROOM> [count] [url] [--host <PIN>] [--fast] [--photos N] [--lazy F] [--churn] [--timers C,V] [--quiet]');
   process.exit(1);
 }
 const count = Number(countArg ?? 6);
 const fast = flags.fast === true;
 const hostPin = typeof flags.host === 'string' ? flags.host : null;
 const photoCount = Number(flags.photos ?? 3);
+const quiet = flags.quiet === true || count > 12;
+const lazyCount = Math.round(count * Number(flags.lazy ?? 0));
+const churn = flags.churn === true;
+const timers = typeof flags.timers === 'string' ? flags.timers.split(',').map(Number) : null;
 
 const NAMES = ['Aunt Bot', 'Botty', 'Robo Cuz', 'Unit 7', 'Beep', 'Boop', 'Chip', 'Gizmo', 'Sprocket', 'Widget', 'Bolt', 'Pixel'];
 const QUIPS = [
@@ -42,6 +50,24 @@ const QUIPS = [
 ];
 const pick = <T,>(xs: T[]) => xs[Math.floor(Math.random() * xs.length)];
 const later = (fn: () => void) => setTimeout(fn, fast ? 100 + Math.random() * 600 : 1000 + Math.random() * 6000);
+// ---------- stats (printed at FINAL in --host mode) ----------
+const stats = { acks: 0, errors: 0, latencies: [] as number[], phaseStart: Date.now(), phase: '' };
+/** Wraps an ack callback to record round-trip latency and errors. */
+function timed<R extends { ok: boolean }>(cb: (r: R) => void): (r: R) => void {
+  const t = Date.now();
+  return (r) => {
+    stats.acks++;
+    stats.latencies.push(Date.now() - t);
+    if (!r.ok) stats.errors++;
+    cb(r);
+  };
+}
+function printStats() {
+  const l = [...stats.latencies].sort((a, b) => a - b);
+  const pct = (q: number) => l[Math.min(l.length - 1, Math.floor(q * l.length))] ?? 0;
+  console.log(`[stats] ${stats.acks} acks, ${stats.errors} errors, latency p50 ${pct(0.5)}ms p95 ${pct(0.95)}ms max ${l.at(-1) ?? 0}ms`);
+}
+
 const pause = (ms: number) => new Promise((r) => setTimeout(r, fast ? ms / 5 : ms));
 
 // ---------- players ----------
@@ -50,13 +76,15 @@ for (let i = 0; i < count; i++) {
   const s: Sock = io(url, { transports: ['websocket'] });
   let token: string | undefined;
   let actedOn = '';
+  const lazy = i < lazyCount;
+  let churning = false;
 
   s.on('connect', () => {
-    s.emit('player:join', { roomCode: room, name, token }, (res) => {
+    s.emit('player:join', { roomCode: room, name, token }, timed((res) => {
       if (!res.ok) return console.error(`${name}: ${res.error}`);
       token = res.token;
-      console.log(`${name} joined as ${res.playerId}`);
-    });
+      if (!quiet) console.log(`${name} joined as ${res.playerId}`);
+    }));
   });
   s.on('kicked', () => {
     console.log(`${name} was kicked`);
@@ -66,29 +94,43 @@ for (let i = 0; i < count; i++) {
   s.on('view', (v: View) => {
     if (v.role !== 'player') return;
     const pv = v as PlayerView;
+    if (churn && !churning && pv.phase !== 'LOBBY' && pv.phase !== 'FINAL') {
+      churning = true;
+      const blip = () => {
+        setTimeout(() => {
+          s.disconnect();
+          setTimeout(() => {
+            s.connect();
+            blip();
+          }, 1000 + Math.random() * 3000);
+        }, 3000 + Math.random() * 12000);
+      };
+      blip();
+    }
+    if (lazy) return;
     const key = `${pv.phase}:${pv.round?.index}`;
     if (key === actedOn) return;
     if (pv.phase === 'CAPTIONING' && !pv.myCaption) {
       actedOn = key;
       later(() =>
-        s.emit('player:caption', { text: pick(QUIPS) }, (r) => {
+        s.emit('player:caption', { text: pick(QUIPS) }, timed((r) => {
           if (!r.ok) {
             console.error(`${name} caption: ${r.error}`);
             actedOn = ''; // retry on the next view (e.g. after reconnecting)
           }
-        }),
+        })),
       );
     } else if (pv.phase === 'VOTING' && !pv.myVoteCaptionId && pv.round?.captions) {
       const options = pv.round.captions.filter((c) => c.id !== pv.myCaptionId);
       if (options.length) {
         actedOn = key;
         later(() =>
-          s.emit('player:vote', { captionId: pick(options).id }, (r) => {
+          s.emit('player:vote', { captionId: pick(options).id }, timed((r) => {
             if (!r.ok) {
-            console.error(`${name} vote: ${r.error}`);
-            actedOn = '';
-          }
-          }),
+              console.error(`${name} vote: ${r.error}`);
+              actedOn = '';
+            }
+          })),
         );
       }
     }
@@ -139,10 +181,10 @@ if (hostPin) {
 
   const act = (action: HostAction) =>
     new Promise<void>((resolve) =>
-      h.emit('host:action', action, (r) => {
+      h.emit('host:action', action, timed((r) => {
         if (!r.ok) console.error(`[host] ${action.type}: ${r.error}`);
         resolve();
-      }),
+      })),
     );
 
   h.on('connect', () => {
@@ -166,20 +208,29 @@ if (hostPin) {
       return;
     }
     const key = `${hv.phase}:${hv.round?.index ?? -1}`;
+    if (hv.phase !== stats.phase) {
+      const now = Date.now();
+      if (stats.phase === 'CAPTIONING' || stats.phase === 'VOTING')
+        console.log(`[host]   ${stats.phase} took ${((now - stats.phaseStart) / 1000).toFixed(1)}s`);
+      stats.phase = hv.phase;
+      stats.phaseStart = now;
+    }
     if (key === lastKey) return;
     busy = true;
     try {
       switch (hv.phase) {
         case 'LOBBY': {
-          if (hv.players.length < count) break; // wait for everyone
-          if (!hv.photos.some((p) => !p.used)) {
+          if (hv.players.filter((p) => p.connected).length < count) break; // wait for every bot (ignore stale players)
+          const unused = hv.photos.filter((p) => !p.used).length;
+          if (unused < photoCount) {
             if (uploaded) break;
             uploaded = true;
-            await uploadTestPhotos(photoCount);
+            await uploadTestPhotos(photoCount - unused);
             break; // the next view starts the game
           }
           lastKey = key;
-          console.log(`[host] starting with ${hv.players.length} players, ${hv.photos.length} photos`);
+          if (timers) await act({ type: 'updateSettings', settings: { captionSeconds: timers[0], voteSeconds: timers[1] } });
+          console.log(`[host] starting with ${hv.players.filter((p) => p.connected).length} players, ${unused} photos`);
           await pause(1000);
           await act({ type: 'start' });
           break;
@@ -211,6 +262,7 @@ if (hostPin) {
         case 'FINAL':
           lastKey = key;
           console.log(`[host] FINAL after ${(hv.round?.index ?? -1) + 1} round(s). Champion: ${hv.players[0]?.name} (${hv.players[0]?.score})`);
+          printStats();
           setTimeout(() => process.exit(0), 300);
           break;
       }
