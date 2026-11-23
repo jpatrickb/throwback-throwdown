@@ -7,6 +7,7 @@
 // --lazy F      fraction (0-1) of bots that never caption or vote, so phases end on the timer.
 // --churn       bots randomly drop their connection for 1-4s during the game, then rejoin with their token.
 // --timers C,V  host sets caption/vote seconds before starting (e.g. --timers 15,10).
+// --solo        host turns team mode off (individual play).   --teams N   host sets N teams (team mode).
 // --quiet       don't log each join (automatic above 12 bots). At FINAL, host mode prints phase timings + ack latency.
 import zlib from 'node:zlib';
 import { io, type Socket } from 'socket.io-client';
@@ -19,7 +20,7 @@ const flags: Record<string, string | true> = {};
 const argv = process.argv.slice(2);
 for (let i = 0; i < argv.length; i++) {
   const a = argv[i];
-  if (a === '--host' || a === '--photos' || a === '--lazy' || a === '--timers') flags[a.slice(2)] = argv[++i] ?? '';
+  if (a === '--host' || a === '--photos' || a === '--lazy' || a === '--timers' || a === '--teams') flags[a.slice(2)] = argv[++i] ?? '';
   else if (a.startsWith('--')) flags[a.slice(2)] = true;
   else positional.push(a);
 }
@@ -35,6 +36,8 @@ const photoCount = Number(flags.photos ?? 3);
 const quiet = flags.quiet === true || count > 12;
 const lazyCount = Math.round(count * Number(flags.lazy ?? 0));
 const churn = flags.churn === true;
+const solo = flags.solo === true;
+const teamCount = typeof flags.teams === 'string' ? Number(flags.teams) : null;
 const timers = typeof flags.timers === 'string' ? flags.timers.split(',').map(Number) : null;
 
 const NAMES = ['Aunt Bot', 'Botty', 'Robo Cuz', 'Unit 7', 'Beep', 'Boop', 'Chip', 'Gizmo', 'Sprocket', 'Widget', 'Bolt', 'Pixel'];
@@ -76,6 +79,7 @@ for (let i = 0; i < count; i++) {
   const s: Sock = io(url, { transports: ['websocket'] });
   let token: string | undefined;
   let actedOn = '';
+  let phaseKey = '';
   const lazy = i < lazyCount;
   let churning = false;
 
@@ -109,29 +113,32 @@ for (let i = 0; i < count; i++) {
     }
     if (lazy) return;
     const key = `${pv.phase}:${pv.round?.index}`;
+    phaseKey = key;
     if (key === actedOn) return;
     if (pv.phase === 'CAPTIONING' && !pv.myCaption) {
       actedOn = key;
-      later(() =>
+      later(() => {
+        if (actedOn !== key || phaseKey !== key) return; // phase moved on: don't send a stale caption
         s.emit('player:caption', { text: pick(QUIPS) }, timed((r) => {
           if (!r.ok) {
             console.error(`${name} caption: ${r.error}`);
-            actedOn = ''; // retry on the next view (e.g. after reconnecting)
+            if (actedOn === key) actedOn = ''; // retry on the next view (e.g. after reconnecting)
           }
-        })),
-      );
+        }));
+      });
     } else if (pv.phase === 'VOTING' && !pv.myVoteCaptionId && pv.round?.captions) {
       const options = pv.round.captions.filter((c) => c.id !== pv.myCaptionId);
       if (options.length) {
         actedOn = key;
-        later(() =>
+        later(() => {
+          if (actedOn !== key || phaseKey !== key) return;
           s.emit('player:vote', { captionId: pick(options).id }, timed((r) => {
             if (!r.ok) {
               console.error(`${name} vote: ${r.error}`);
-              actedOn = '';
+              if (actedOn === key) actedOn = '';
             }
-          })),
-        );
+          }));
+        });
       }
     }
   });
@@ -230,6 +237,8 @@ if (hostPin) {
           }
           lastKey = key;
           if (timers) await act({ type: 'updateSettings', settings: { captionSeconds: timers[0], voteSeconds: timers[1] } });
+          if (solo) await act({ type: 'updateSettings', settings: { teamMode: false } });
+          else if (teamCount) await act({ type: 'updateSettings', settings: { teamMode: true, teamCount } });
           console.log(`[host] starting with ${hv.players.filter((p) => p.connected).length} players, ${unused} photos`);
           await pause(1000);
           await act({ type: 'start' });
@@ -248,20 +257,31 @@ if (hostPin) {
         case 'RESULTS': {
           lastKey = key;
           const top = hv.round?.results?.[0];
-          console.log(`[host] results: ${top ? `"${top.text}" by ${top.playerName} (${top.votes} votes)` : 'tough crowd'}`);
+          const n = hv.round?.results?.length ?? 0;
+          console.log(`[host] results (${n} captions): ${top ? `"${top.text}" by ${top.teamName ?? top.playerName} (${top.votes} votes, +${top.points})` : 'tough crowd'}`);
           await pause(2500);
           await act({ type: 'next' });
           break;
         }
         case 'SCOREBOARD':
           lastKey = key;
-          console.log(`[host] scoreboard: ${hv.players.map((p) => `${p.name} ${p.score}`).join(', ')}`);
+          const board = hv.teams.length
+            ? hv.teams.map((t) => `${t.name} (${t.memberIds.length}) ${t.score}`)
+            : hv.players.map((p) => `${p.name} ${p.score}`);
+          console.log(`[host] scoreboard: ${board.join(', ')}`);
           await pause(2500);
           await act({ type: 'next' });
           break;
         case 'FINAL':
+          if (!lastKey) {
+            // A finished game from an earlier run: start over instead of exiting.
+            console.log('[host] found a finished game; resetting');
+            await act({ type: 'reset' });
+            break;
+          }
           lastKey = key;
-          console.log(`[host] FINAL after ${(hv.round?.index ?? -1) + 1} round(s). Champion: ${hv.players[0]?.name} (${hv.players[0]?.score})`);
+          const champ = hv.teams[0] ? `${hv.teams[0].name} (${hv.teams[0].score})` : `${hv.players[0]?.name} (${hv.players[0]?.score})`;
+          console.log(`[host] FINAL after ${(hv.round?.index ?? -1) + 1} round(s). Champion: ${champ}`);
           printStats();
           setTimeout(() => process.exit(0), 300);
           break;

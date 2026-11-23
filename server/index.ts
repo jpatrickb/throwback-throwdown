@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import QRCode from 'qrcode';
 import { Server, type Socket } from 'socket.io';
 import type { ClientToServerEvents, GameState, ServerToClientEvents } from '../shared/types.ts';
-import { apply, initialState, type EngineEvent } from './engine.ts';
+import { apply, initialState, normalizeState, type EngineEvent } from './engine.ts';
 import { loadSaved, save } from './persist.ts';
 import { archivePhoto, photoRouter, pruneMissing, scanPhotoDir } from './photos.ts';
 import { createPinGuard } from './pin.ts';
@@ -32,7 +32,7 @@ const makeRoomCode = () =>
 
 // ---------- State (restored from data/state.json unless RESET_STATE=1) ----------
 const saved = process.env.RESET_STATE === '1' ? null : loadSaved(STATE_FILE);
-let state: GameState = saved?.state ?? initialState(makeRoomCode());
+let state: GameState = saved ? normalizeState(saved.state) : initialState(makeRoomCode());
 if (process.env.ROOM_CODE) state.roomCode = process.env.ROOM_CODE.toUpperCase();
 const tokens = new Map<string, string>(saved?.tokens ?? []); // secret token -> playerId
 if (saved) {
@@ -202,7 +202,7 @@ io.on('connection', (socket: GameSocket) => {
     }
 
     if (Object.keys(state.players).length >= MAX_PLAYERS) return ack({ ok: false, error: 'The room is full' });
-    const playerId = randomUUID().slice(0, 8);
+    const playerId = `p${randomUUID().slice(0, 7)}`; // letter prefix keeps object key order = join order
     const err = dispatch({ type: 'join', playerId, name: p.name, avatar: p.avatar, color: p.color });
     if (err) return ack({ ok: false, error: err });
     const token = randomUUID();
@@ -238,6 +238,14 @@ io.on('connection', (socket: GameSocket) => {
     reply(ack, dispatch({ type: 'setAvatar', playerId, avatar: payload.avatar as string | null, color: payload.color as string | null }));
   });
 
+  on('player:renameTeam', (payload, rawAck) => {
+    const ack = ackOf(rawAck);
+    const { playerId, role } = socket.data;
+    if (role !== 'player' || !playerId) return ack({ ok: false, error: 'Join first' });
+    if (!isObj(payload) || !isStr(payload.name, 100)) return ack({ ok: false, error: 'Bad request' });
+    reply(ack, dispatch({ type: 'renameTeam', playerId, name: payload.name }));
+  });
+
   let reactionTimes: number[] = [];
   on('player:react', (payload) => {
     const { playerId, role } = socket.data;
@@ -271,7 +279,7 @@ io.on('connection', (socket: GameSocket) => {
     const action = parseHostAction(payload);
     if (!action) return ack({ ok: false, error: 'Bad request' });
     const before = state;
-    const err = dispatch({ type: 'host', action });
+    const err = dispatch({ type: 'host', action, seed: randomInt(2 ** 31) });
     if (err) return ack({ ok: false, error: err });
 
     if (action.type === 'kick') {

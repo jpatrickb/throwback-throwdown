@@ -5,9 +5,10 @@ import type {
   PlayerView,
   Round,
   RoundView,
+  TeamView,
   TvView,
 } from '../shared/types.ts';
-import { scoreRound } from './engine.ts';
+import { myCaption, scoreRound } from './engine.ts';
 
 export { scoreRound };
 
@@ -21,6 +22,15 @@ const currentRound = (s: GameState): Round | null => s.rounds.at(-1) ?? null;
 
 function sortedPlayers(s: GameState): Player[] {
   return Object.values(s.players).sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
+}
+
+/** Teams sorted by score desc (then team number), with members in join order. */
+function teamViews(s: GameState): TeamView[] {
+  const players = Object.values(s.players);
+  return s.teams
+    .map((t, i) => ({ t, i }))
+    .sort((a, b) => b.t.score - a.t.score || a.i - b.i)
+    .map(({ t }) => ({ ...t, memberIds: players.filter((p) => p.teamId === t.id).map((p) => p.id) }));
 }
 
 /** Deterministic shuffle so every client sees the same caption order. */
@@ -44,7 +54,8 @@ function roundView(s: GameState): RoundView | null {
     totalPhotosQueued: s.photos.length,
     photo: { ...photo, subject: r.subjectRevealed ? photo.subject : null },
     subjectRevealed: r.subjectRevealed,
-    submittedPlayerIds: r.captions.map((c) => c.playerId),
+    submittedPlayerIds: r.captions.map((c) => c.playerId), // team mode: last editors
+    submittedTeamIds: r.captions.flatMap((c) => (c.teamId ? [c.teamId] : [])),
     votedPlayerIds: Object.keys(r.votes),
     captions:
       s.phase === 'VOTING'
@@ -64,6 +75,7 @@ function base(s: GameState) {
     deadline: s.deadline,
     serverNow: Date.now(),
     players: sortedPlayers(s),
+    teams: teamViews(s),
     round: roundView(s),
     settings: s.settings,
   };
@@ -77,12 +89,15 @@ export function playerView(s: GameState, playerId: string): PlayerView | null {
   const me = s.players[playerId];
   if (!me) return null;
   const r = currentRound(s);
-  const mine = r?.captions.find((c) => c.playerId === playerId) ?? null;
+  const mine = (r && myCaption(s, r, playerId)) ?? null;
+  const b = base(s);
   return {
-    ...base(s),
+    ...b,
     role: 'player',
     me,
+    myTeam: b.teams.find((t) => t.id === me.teamId) ?? null,
     myCaption: mine?.text ?? null,
+    myCaptionEditedBy: mine?.teamId ? (s.players[mine.playerId]?.name ?? null) : null,
     myCaptionId: mine?.id ?? null,
     myVoteCaptionId: r?.votes[playerId] ?? null,
   };

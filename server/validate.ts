@@ -56,14 +56,24 @@ export function parseHostAction(a: unknown): HostAction | null {
     case 'updateSettings': {
       if (!isObj(a.settings)) return null;
       const out: Partial<Settings> = {};
-      for (const k of ['captionSeconds', 'voteSeconds', 'maxCaptionLength'] as const) {
+      for (const k of ['captionSeconds', 'voteSeconds', 'maxCaptionLength', 'teamCount'] as const) {
         const v = a.settings[k];
         if (v === undefined) continue;
         if (!isNum(v)) return null;
         out[k] = v;
       }
+      if (a.settings.teamMode !== undefined) {
+        if (typeof a.settings.teamMode !== 'boolean') return null;
+        out.teamMode = a.settings.teamMode;
+      }
       return { type: 'updateSettings', settings: out };
     }
+    case 'moveToTeam':
+      return isId(a.playerId) && isId(a.teamId) ? { type: 'moveToTeam', playerId: a.playerId, teamId: a.teamId } : null;
+    case 'shuffleTeams':
+      return { type: 'shuffleTeams' };
+    case 'renameTeam':
+      return isId(a.teamId) && isStr(a.name, 100) ? { type: 'renameTeam', teamId: a.teamId, name: a.name } : null;
     default:
       return null;
   }
