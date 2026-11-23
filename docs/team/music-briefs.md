@@ -1,7 +1,24 @@
 # Music & SFX briefs for Soundcraft
 
-Patrick, these are the specs for the real tracks. Placeholders are already in the game (synth beeps in
-`client/public/audio/placeholder/`), so you can make any subset in any order and the game keeps working.
+Patrick, the game now ships a **Soundcraft-made soundtrack**: all 5 music beds and all 10 stingers, rendered
+by Soundcraft's built-in Subtractive Synth and Drum Synth with EQ, reverb, and a master compressor and maximizer.
+These specs describe what each cue should be, whether you tweak the generated version or make your own.
+
+## Editing the generated soundtrack
+
+- **Open a session:** `client/src/audio/sessions/<name>.scraft` (e.g. `music-lobby.scraft`) opens in Soundcraft with
+  named instrument tracks (Drums, Bass, Keys, Brass, Lead, Bell, Pluck, Pad), their inserts, and a master track.
+  Each music session holds the loop **twice**. Bounce the **second pass only**: from bar 17 to the end for
+  16-bar loops. The second pass already contains the first pass's reverb tails, so it loops seamlessly.
+  Then export the file as described below.
+- **Change notes, chords or sounds and rebuild everything:** edit `client/src/audio/soundtrack/compose.ts`, which holds
+  the chords, melodies, drum, bass and comping patterns, synth patches and mix levels. Then run
+  `bash client/src/audio/soundtrack/build.sh` (or `build.sh music-lobby sfx-winner` for just a few). It
+  re-renders in Soundcraft, cuts the exact loop, normalizes, and writes the `.ogg`/`.mp3` files and sessions.
+  It needs `soundcraft-cli` at `~/Downloads/soundcraft/target/release/` (or set `SOUNDCRAFT_CLI`).
+
+The original ffmpeg beeps are still in `client/public/audio/placeholder/` as a fallback: switch a cue back to
+`placeholder('…')` in `cues.ts`.
 
 ## How to drop a track in (two steps)
 

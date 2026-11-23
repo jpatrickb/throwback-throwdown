@@ -15,6 +15,34 @@
 - **`docs/team/music-briefs.md`**: the per-cue spec for Patrick's Soundcraft tracks, plus the SFX list.
 - **Verified** in headless Chrome against `/tv?mock=LOBBY` and `/tv?mock=FINAL` through `window.__tvAudio` (dev only): crossfade levels at 400 ms and after, ducking, tick and timesUp sequences, mute persisting across a reload, and a missing file. The only console errors were the favicon 404 (not mine) and the deliberate 404 in the missing-file test.
 
+## Soundcraft soundtrack (Nov 23)
+- **All cues are now real tracks made in Soundcraft**, and `cues.ts` uses `real()` for everything. Files are in `client/public/audio/<name>.{ogg,mp3}`. The ffmpeg placeholders are kept as a fallback.
+- **Pipeline** (`client/src/audio/soundtrack/`):
+  - `compose.ts` writes the music data (chords, written melodies, drum/bass/comp patterns, synth patches, mix levels) as MIDI, Soundcraft track presets, and one Soundcraft script per cue.
+  - `build.sh` runs `soundcraft-cli script` for each cue: it imports the MIDI as instrument tracks (Subtractive Synth / Drum Synth), applies presets (EQ, chorus, delay, room/plate reverb), adds a master track (compressor + maximizer), bounces a WAV, and saves the session.
+  - ffmpeg then cuts the exact loop, applies static-gain normalization, and encodes ogg + mp3.
+  - Rebuilding everything takes about 30 s.
+- **Cues:**
+
+  | Cue | Tempo, key | Length | Arrangement |
+  |---|---|---|---|
+  | lobby | 120 BPM, C major | 16 bars, 32 s | Pop drums, bass, skank keys, brass stabs in the B section, lead melody + bell |
+  | captioning | 96 BPM, F major | 16 bars, 40 s | Light swung drums, walking bass, plucks, pad, bell melody (jazzy ii–V changes) |
+  | voting | 128 BPM, G major | 16 bars, 30 s | Disco drums, octave bass, brass stabs, keys, lead melody |
+  | results | 100 BPM, A minor to C major | 16 bars, 38.4 s | Pulse drums, pulse bass, pad, arpeggio, bell melody |
+  | final | 125 BPM, D major | 16 bars, 30.7 s | Disco drums, brass hits, keys, lead + bell |
+
+  SFX: bell, brass, pluck and drum-synth stingers (snare-roll reveal, brass fanfares for winner and champion, a woodblock tick, etc.).
+- **Seamless loops:** each cue is rendered twice and only the second pass is kept, so reverb and release tails wrap into the loop start. Bar lengths are whole samples at 48 kHz.
+- **Verified:**
+  - Decoded lengths are sample-exact (ogg and mp3).
+  - The sample jump at the seam is 0.007–0.024, against a typical step of 0.14–0.23.
+  - Music is at -16 LUFS (captioning -18.2, peak-limited), with peaks ≤ -1 dBFS. Stingers peak at -1.5 dBFS.
+  - Pitches checked by FFT.
+  - In Chrome, all 20 files load through the manager with no load failures and no placeholder requests.
+- **Sessions:** `client/src/audio/sessions/*.scraft` (self-contained: MIDI clips inline). Music sessions hold the loop twice; bounce the second pass. See `docs/team/music-briefs.md`.
+- **Limit:** I can't listen to the audio. Mix balance was set from per-stem loudness measurements, so Patrick should give it a listen and nudge levels in `compose.ts` (`volumeDb`, per-cue `mix`) or the `cues.ts` volumes.
+
 ## Notes for tv
 - Render `<AudioIndicator />`. Call `unlockAudio()` from the start overlay.
 - **Don't call `tick` or `timesUp`.** They're automatic.
