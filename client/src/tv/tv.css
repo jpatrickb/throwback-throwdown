@@ -314,7 +314,7 @@
 .lobby-name { white-space: nowrap; max-width: 10em; overflow: hidden; text-overflow: ellipsis; }
 .lobby-empty { display: flex; align-items: center; gap: 1.5em; font-size: 1.8em; color: var(--c-fg-muted); }
 .lobby-empty .mascot { width: 5em; }
-.lobby-mascot { position: absolute; right: 2em; bottom: 1.4em; width: 8em; }
+.lobby-mascot { position: absolute; right: 2em; bottom: 3.2em; width: 8em; } /* clears the audio pill */
 .waiting-host { margin: 0; font-size: 1.5em; color: var(--c-fg-muted); font-weight: var(--weight-strong); }
 
 /* ================= PHOTO_REVEAL ================= */

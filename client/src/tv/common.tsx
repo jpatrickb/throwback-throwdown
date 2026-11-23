@@ -112,7 +112,8 @@ export function Polaroid({
   );
 }
 
-/** Big circular countdown. Turns urgent in the last 10s and fires tick/timesUp SFX. */
+/** Big circular countdown. Turns urgent in the last 10s.
+ *  Tick/timesUp sounds are NOT played here: the audio module fires them from view.deadline. */
 export function CountdownRing({
   deadline,
   serverNow,
@@ -128,15 +129,6 @@ export function CountdownRing({
 }) {
   const secs = useCountdown(deadline, serverNow);
   const total = phase === 'VOTING' ? settings.voteSeconds : settings.captionSeconds;
-  const last = useRef<number | null>(null);
-  useEffect(() => {
-    if (secs === null) return;
-    if (last.current !== null && secs !== last.current) {
-      if (secs === 0) playSfx('timesUp');
-      else if (secs <= 10) playSfx('tick');
-    }
-    last.current = secs;
-  }, [secs]);
   if (secs === null) return null;
   const frac = Math.max(0, Math.min(1, secs / Math.max(total, secs, 1)));
   const urgent = secs <= 10;

@@ -2,7 +2,7 @@ import { useEffect, useMemo, type ReactElement } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import type { Phase, TvView } from '../../../shared/types.ts';
 import { socket, useConnected, useView, IS_MOCK } from '../socket.ts';
-import { useGameAudio } from '../audio/index.ts';
+import { AudioIndicator, useGameAudio } from '../audio/index.ts';
 import { Background } from '../tv/Background.tsx';
 import { StartOverlay } from '../tv/StartOverlay.tsx';
 import { Reactions } from '../tv/Reactions.tsx';
@@ -71,6 +71,8 @@ export function Tv() {
       </AnimatePresence>
       {view && <Reactions players={view.players} />}
       {!IS_MOCK && view && !connected && <div className="tv-offline">Reconnecting to the game…</div>}
+      {/* Rendered before the overlay so the overlay (same z-index) covers it until clicked. */}
+      <AudioIndicator />
       <StartOverlay />
     </main>
   );

@@ -89,6 +89,11 @@
   --c-timer: var(--c-mint);
   --c-timer-urgent: var(--c-danger);
 
+  /* ---- Audio indicator pill (component owned by audio, styled via these hooks) ---- */
+  --audio-indicator-bg: rgb(43 22 48 / 0.85);
+  --audio-indicator-fg: var(--c-paper);
+  --audio-indicator-inset: 24px;
+
   /* ---- TV scale: 1em on the TV = this. 24px at 1920x1080, 16px at 1280x720 ---- */
   --tv-base: min(1.25vw, 2.2222vh);
 }
