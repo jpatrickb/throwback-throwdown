@@ -22,6 +22,7 @@ export function Voting({ view }: { view: PlayerView }) {
 
   const chosen = local ?? view.myVoteCaptionId;
   const votable = captions.filter((c) => c.id !== view.myCaptionId);
+  const yoursLabel = view.myTeam ? COPY.team.yourTeam : COPY.vote.yours;
   const chosenText = captions.find((c) => c.id === chosen)?.text ?? null;
 
   const vote = async (id: string) => {
@@ -48,7 +49,7 @@ export function Voting({ view }: { view: PlayerView }) {
 
       {captions.length === 0 && <p className="ph-sub ph-center-text">{COPY.vote.none}</p>}
       {captions.length > 0 && votable.length === 0 && (
-        <p className="ph-sub ph-center-text">{COPY.vote.noVoteForYou}</p>
+        <p className="ph-sub ph-center-text">{view.myTeam ? COPY.team.noTeamVote : COPY.vote.noVoteForYou}</p>
       )}
 
       <ul className={`ph-votes${captions.length > COMPACT_AT ? ' ph-votes--compact' : ''}`}>
@@ -64,7 +65,7 @@ export function Voting({ view }: { view: PlayerView }) {
                 onClick={() => vote(c.id)}
               >
                 <span className="ph-vote__text">{c.text}</span>
-                {mine && <span className="ph-vote__tag">{COPY.vote.yours}</span>}
+                {mine && <span className="ph-vote__tag">{yoursLabel}</span>}
                 {on && <span className="ph-vote__tag ph-vote__tag--on">✓</span>}
               </button>
             </li>

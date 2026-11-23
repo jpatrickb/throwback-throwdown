@@ -27,6 +27,9 @@ export const sendCaption = (text: string) =>
 export const sendVote = (captionId: string) =>
   withTimeout((done) => socket.emit('player:vote', { captionId }, (r) => done(r.ok ? { ok: true } : r)));
 
+export const renameMyTeam = (name: string) =>
+  withTimeout((done) => socket.emit('player:renameTeam', { name }, (r) => done(r.ok ? { ok: true } : r)));
+
 export const hostAction = (a: HostAction) =>
   withTimeout((done) => socket.emit('host:action', a, (r) => done(r.ok ? { ok: true } : r)));
 

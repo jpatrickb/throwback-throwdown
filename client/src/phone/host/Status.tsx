@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { HostView } from '../../../../shared/types.ts';
 import { Countdown } from '../Countdown.tsx';
 import { COPY } from '../copy.ts';
+import { activeTeams, isTeamMode } from '../teams.ts';
 import { summarizeNames } from './names.ts';
 import { useAct } from './useAct.ts';
 
@@ -15,10 +16,15 @@ export function Status({ view }: { view: HostView }) {
   const round = view.round;
   if (!round) return null;
 
-  const active = view.players.filter((p) => p.connected);
-  const doneIds = view.phase === 'CAPTIONING' ? round.submittedPlayerIds : round.votedPlayerIds;
-  const done = active.filter((p) => doneIds.includes(p.id)).length;
-  const missing = active.filter((p) => !doneIds.includes(p.id));
+  // Team mode CAPTIONING counts teams (one caption each); everything else counts players.
+  const byTeam = isTeamMode(view) && view.phase === 'CAPTIONING';
+  const units: { id: string; name: string }[] = byTeam
+    ? activeTeams(view.teams, view.players)
+    : view.players.filter((p) => p.connected);
+  const doneIds = byTeam ? round.submittedTeamIds : view.phase === 'CAPTIONING' ? round.submittedPlayerIds : round.votedPlayerIds;
+  const done = units.filter((u) => doneIds.includes(u.id)).length;
+  const missing = units.filter((u) => !doneIds.includes(u.id));
+  const total = units.length;
 
   return (
     <section className="ph-card ph-status">
@@ -30,18 +36,20 @@ export function Status({ view }: { view: HostView }) {
           </span>
           {timed && (
             <strong>
-              {view.phase === 'CAPTIONING'
-                ? COPY.host.captionsIn(done, active.length)
-                : COPY.host.votesIn(done, active.length)}
+              {byTeam
+                ? COPY.team.teamsIn(done, total)
+                : view.phase === 'CAPTIONING'
+                  ? COPY.host.captionsIn(done, total)
+                  : COPY.host.votesIn(done, total)}
             </strong>
           )}
         </div>
         {timed && <Countdown deadline={view.deadline} serverNow={view.serverNow} />}
       </div>
 
-      {timed && active.length > 0 && (
+      {timed && total > 0 && (
         <div className="ph-progress" aria-hidden>
-          <div className="ph-progress__bar" style={{ width: `${(done / active.length) * 100}%` }} />
+          <div className="ph-progress__bar" style={{ width: `${(done / total) * 100}%` }} />
         </div>
       )}
 

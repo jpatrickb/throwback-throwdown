@@ -418,3 +418,70 @@ body:has(.phone) {
   color: var(--c-stage); font-weight: var(--weight-strong); text-decoration: underline;
 }
 .ph-card .ph-progress { background: var(--c-paper-shade); border: 2px solid var(--c-ink); height: 14px; }
+
+/* ---------- Teams ---------- */
+/* Components set --team to the team's colour (from TEAM_PRESETS via the server). */
+.ph-team {
+  display: grid; justify-items: center; gap: 6px; width: 100%;
+  border-top: 12px solid var(--team, var(--c-sun));
+}
+.ph-team--compact { padding: 12px 16px; }
+.ph-team__label { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--c-ink-soft); }
+.phone .ph-team-name {
+  font-family: var(--font-display); letter-spacing: var(--tracking-display);
+  font-size: 1.7rem; line-height: 1.1; color: inherit; text-align: center;
+}
+.ph-team-name__pen { font-size: 0.6em; opacity: 0.55; }
+.ph-team-name-form { width: 100%; }
+.ph-team__members {
+  list-style: none; margin: 4px 0 0; padding: 0; width: 100%;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px;
+}
+.ph-team__members li { display: flex; align-items: center; gap: 6px; font-size: 0.95rem; min-width: 0; }
+.ph-team__members li > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ph-team__members li.is-off { opacity: 0.45; }
+.ph-team__members em { font-style: normal; color: var(--c-ink-soft); }
+.ph-team-strip {
+  align-self: center;
+  background: var(--team, var(--c-sun)); color: var(--c-ink);
+  font-family: var(--font-display); letter-spacing: var(--tracking-display); font-size: 1.2rem;
+  border: var(--border-chunky); border-radius: var(--radius-pill);
+  padding: 4px 16px; box-shadow: 0.12em 0.12em 0 var(--c-ink);
+  transform: rotate(-1.5deg);
+}
+.ph-hint { margin: 0; font-size: 0.95rem; color: var(--c-ink-soft); }
+.ph-hint:not(:has(.ph-muted)) { font-style: italic; }
+.ph-btn--narrow { flex: none !important; min-width: 48px; }
+.ph-big-num--line { font-size: 1.5rem; line-height: 1.15; }
+.ph-standing--team { border-left: 14px solid var(--team); }
+.ph-team-dot { display: none; }
+.ph-team-tag { display: inline-flex; align-items: center; gap: 6px; }
+.ph-team-tag::before { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--team); border: 1.5px solid var(--c-ink); }
+
+.ph-team-block {
+  background: var(--c-paper); color: var(--c-ink);
+  border-radius: var(--radius); border-left: 10px solid var(--team);
+  padding: 8px 10px 10px;
+}
+.ph-team-block__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.phone .ph-team-block__head .ph-team-name { font-size: 1.25rem; text-align: left; }
+.ph-team-block__head .ph-team-name-form { flex: 1; }
+.ph-team-block__score { font-weight: var(--weight-strong); color: var(--c-ink-soft); white-space: nowrap; }
+.ph-team-block__empty { margin: 4px 0 0; }
+.ph-team-block .ph-muted { color: var(--c-ink-soft); }
+.ph-team-block__members { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 4px; }
+.ph-team-block__members li { display: flex; align-items: center; gap: 8px; min-height: 40px; }
+.ph-team-block__name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ph-select {
+  font: inherit; font-size: 0.9rem; font-weight: var(--weight-strong);
+  color: var(--c-ink); background: var(--c-paper-shade);
+  border: 0.14em solid var(--c-ink); border-radius: var(--radius-sm);
+  padding: 6px 8px; min-height: 38px; width: 92px;
+}
+.ph-settings__teams { display: grid; gap: 10px; margin-top: 8px; padding-top: 12px; border-top: 1px solid rgb(255 255 255 / 0.15); }
+.ph-toggle input { width: 28px; height: 28px; justify-self: end; accent-color: var(--c-sun); }
+.ph-stepper { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
+.ph-stepper__value { font-family: var(--font-display); font-size: 1.4rem; min-width: 1.4em; text-align: center; }
+.ph-field--row:has(.ph-stepper) { grid-template-columns: 1fr auto; }
+.ph-vote.is-mine { padding-right: 116px; }
+.ph-votes--compact .ph-vote.is-mine { padding-right: 112px; }

@@ -11,7 +11,8 @@ import { PhotoQueue } from '../phone/host/PhotoQueue.tsx';
 import { Moderation } from '../phone/host/Moderation.tsx';
 import { Players } from '../phone/host/Players.tsx';
 import { Settings } from '../phone/host/Settings.tsx';
-import { inflate } from '../phone/devMock.ts';
+import { Teams } from '../phone/host/Teams.tsx';
+import { isTeamMode } from '../phone/teams.ts';
 import '../phone/phone.css';
 
 const PIN_KEY = 'ccp:hostpin';
@@ -33,7 +34,7 @@ export function Host() {
 }
 
 function HostInner() {
-  const view = inflate(useView('host'));
+  const view = useView('host');
   const connected = useConnected();
   const [pin, setPin] = useState(readPin);
   const [error, setError] = useState<string | null>(null);
@@ -157,7 +158,12 @@ function HostPanel({ view, pin, connected }: { view: HostView; pin: string; conn
           <Moderation view={view} />
         </Section>
       )}
-      <Section title={`${COPY.host.players} (${view.players.length})`} defaultOpen={view.phase === 'LOBBY'}>
+      {isTeamMode(view) && (
+        <Section title={`${COPY.host.teams} (${view.teams.length})`} defaultOpen={view.phase === 'LOBBY'}>
+          <Teams view={view} />
+        </Section>
+      )}
+      <Section title={`${COPY.host.players} (${view.players.length})`} defaultOpen={view.phase === 'LOBBY' && !isTeamMode(view)}>
         <Players view={view} />
       </Section>
       <Section title={`${COPY.host.photos} (${view.photos.length})`} defaultOpen={view.phase === 'LOBBY'}>

@@ -7,12 +7,14 @@
 - Errors are toasts (`phone/Toast.tsx`), actions time out after 8s with a toast; mock mode skips join/PIN and actions are no-ops.
 - Unit tests: `client/src/phone/phone.test.ts` (phase button mapping, resize math, rank ties).
 
-- **Big rooms (25 players)**: voting has a sticky header (prompt + countdown), compact cards above 8 captions, and a sticky footer showing your locked-in pick. Host "Waiting on" lists 6 names then "+N more" (tap to expand), with a progress bar. Check any screen with `&mockcount=25` (dev-only, `phone/devMock.ts`).
+- **Big rooms (25 players)**: voting has a sticky header (prompt + countdown), compact cards above 8 captions, and a sticky footer showing your locked-in pick. Host "Waiting on" lists 6 names then "+N more", with a progress bar. (The `?mockcount` padding was removed; fixtures now have 25 players.)
+- **Team mode (Nov 23)**: player lobby shows a "You're on <Team>" card in team colour with teammates and inline team rename (`player:renameTeam`). CAPTIONING shows "Writing for <Team>", "3 of 5 teams have a caption", the team's current caption with "Written by X / you" and "Tap to replace it" (prefilled; submit replaces). VOTING tags your team's card "your team" (disabled). RESULTS: "Your team got 9 votes, +900", last editor, team rank and score. FINAL: team rank, team medals, confetti for top-3 teams. Host: Teams section (team cards with members, inline rename, per-player "Move…" picker, Shuffle with inline confirm, shown in LOBBY/SCOREBOARD/FINAL), status counts teams while captioning and lists missing teams, moderation shows "Team · Written by X", ±100 hidden in team mode (player scores unused), Settings has a "Play in teams" switch and a 2–8 team-count stepper (instant, lobby only). Individual mode is unchanged (`?solo=1`).
 
 ## Where to change things
 - All phone copy: `client/src/phone/copy.ts`. Avatar emoji/colors and reaction emoji: `client/src/phone/avatars.ts`.
 - Styles: `client/src/phone/phone.css`, built on tv's `theme/tokens.css`.
 - Phase → button mapping: `client/src/phone/host/primary.ts`.
+- Team helpers (team mode check, rank, members, active teams): `client/src/phone/teams.ts`.
 
 ## Next / polish ideas
 - Optimistic reorder in photo queue; drag to reorder.

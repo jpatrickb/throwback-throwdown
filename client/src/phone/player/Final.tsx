@@ -3,10 +3,12 @@ import confetti from 'canvas-confetti';
 import type { PlayerView } from '../../../../shared/types.ts';
 import { Avatar } from '../Avatar.tsx';
 import { COPY } from '../copy.ts';
+import { teamRank } from '../teams.ts';
 import { rankOf } from './rank.ts';
 
 export function Final({ view }: { view: PlayerView }) {
-  const rank = rankOf(view.players, view.me.id);
+  const team = view.myTeam;
+  const rank = team ? teamRank(view.teams, team.id) : rankOf(view.players, view.me.id);
   const podium = rank <= 3;
 
   useEffect(() => {
@@ -28,9 +30,14 @@ export function Final({ view }: { view: PlayerView }) {
       <div className={podium ? 'ph-wait__bounce' : ''}>
         <Avatar player={view.me} size={120} />
       </div>
+      {team && (
+        <div className="ph-team-strip" style={{ ['--team' as string]: team.color }}>
+          {team.name}
+        </div>
+      )}
       <div className="ph-final__rank">#{rank}</div>
-      {podium && <h2 className="ph-title">{COPY.final.medals[rank - 1]}</h2>}
-      <p className="ph-sub">{COPY.results.total(view.me.score)}</p>
+      {podium && <h2 className="ph-title">{(team ? COPY.team.finalMedals : COPY.final.medals)[rank - 1]}</h2>}
+      <p className="ph-sub">{COPY.results.total(team ? team.score : view.me.score)}</p>
       <p className="ph-muted">{COPY.final.thanks}</p>
     </section>
   );

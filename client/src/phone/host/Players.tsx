@@ -1,21 +1,23 @@
 import { useState } from 'react';
-import type { HostView, Player } from '../../../../shared/types.ts';
+import type { HostView, Player, TeamView } from '../../../../shared/types.ts';
 import { Avatar } from '../Avatar.tsx';
 import { COPY } from '../copy.ts';
+import { isTeamMode, teamById } from '../teams.ts';
 import { useAct } from './useAct.ts';
 
 export function Players({ view }: { view: HostView }) {
+  const teamMode = isTeamMode(view);
   if (view.players.length === 0) return <p className="ph-muted">{COPY.host.noPlayers}</p>;
   return (
     <ul className="ph-list">
       {view.players.map((p) => (
-        <PlayerRow key={p.id} p={p} />
+        <PlayerRow key={p.id} p={p} team={teamMode ? teamById(view.teams, p.teamId) : null} teamMode={teamMode} />
       ))}
     </ul>
   );
 }
 
-function PlayerRow({ p }: { p: Player }) {
+function PlayerRow({ p, team, teamMode }: { p: Player; team: TeamView | null; teamMode: boolean }) {
   const act = useAct();
   const [mode, setMode] = useState<'idle' | 'rename' | 'kick'>('idle');
   const [name, setName] = useState(p.name);
@@ -42,11 +44,22 @@ function PlayerRow({ p }: { p: Player }) {
             <button className="ph-linklike" onClick={() => { setName(p.name); setMode('rename'); }} title={COPY.host.rename}>
               {p.name} ✎
             </button>
-            <span className="ph-muted">{p.score} pts</span>
+            {teamMode ? (
+              <span className="ph-muted ph-team-tag" style={{ ['--team' as string]: team?.color ?? 'transparent' }}>
+                {team?.name ?? '—'}
+              </span>
+            ) : (
+              <span className="ph-muted">{p.score} pts</span>
+            )}
           </div>
           <div className="ph-player__actions">
-            <button className="ph-btn ph-btn--small ph-btn--ghost" onClick={() => act({ type: 'adjustScore', playerId: p.id, delta: -100 })}>−100</button>
-            <button className="ph-btn ph-btn--small ph-btn--ghost" onClick={() => act({ type: 'adjustScore', playerId: p.id, delta: 100 })}>+100</button>
+            {/* Individual scores only matter in solo mode; team points come from votes. */}
+            {!teamMode && (
+              <>
+                <button className="ph-btn ph-btn--small ph-btn--ghost" onClick={() => act({ type: 'adjustScore', playerId: p.id, delta: -100 })}>−100</button>
+                <button className="ph-btn ph-btn--small ph-btn--ghost" onClick={() => act({ type: 'adjustScore', playerId: p.id, delta: 100 })}>+100</button>
+              </>
+            )}
             {mode === 'kick' ? (
               <span className="ph-confirm">
                 {COPY.host.kickConfirm}

@@ -1,13 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import type { Phase, Photo, Player } from '../../../shared/types.ts';
+import type { Phase, Photo, Player, TeamView } from '../../../shared/types.ts';
 import { primaryFor } from './host/primary.ts';
 import { fitWithin } from './host/resize.ts';
 import { rankOf } from './player/rank.ts';
 import { fallbackLook } from './avatars.ts';
 import { summarizeNames } from './host/names.ts';
+import { activeTeams, isTeamMode, membersOf, teamRank } from './teams.ts';
+import { DEFAULT_SETTINGS } from '../../../shared/types.ts';
 
 const photo = (id: string, used: boolean): Photo => ({ id, url: '', subject: null, used });
-const pl = (id: string, score: number): Player => ({ id, name: id, avatar: null, color: null, score, connected: true });
+const pl = (id: string, score: number): Player => ({ id, name: id, avatar: null, color: null, score, connected: true, teamId: null });
 
 describe('primaryFor', () => {
   const photos = [photo('a', true), photo('b', false)];
@@ -63,5 +65,29 @@ describe('summarizeNames', () => {
   it('shows everything when it fits', () => {
     expect(summarizeNames(names.slice(0, 4), 6)).toEqual({ shown: names.slice(0, 4), more: 0 });
     expect(summarizeNames(names, Infinity).more).toBe(0);
+  });
+});
+
+describe('teams helpers', () => {
+  const team = (id: string, score: number, memberIds: string[]): TeamView => ({ id, name: id, color: '#fff', score, memberIds });
+  const teams = [team('t1', 900, ['a', 'b']), team('t2', 700, ['c']), team('t3', 700, ['d']), team('t4', 0, [])];
+  const players = [pl('a', 0), pl('b', 0), pl('c', 0), { ...pl('d', 0), connected: false }];
+
+  it('detects team mode only when the setting is on and teams exist', () => {
+    expect(isTeamMode({ settings: DEFAULT_SETTINGS, teams })).toBe(true);
+    expect(isTeamMode({ settings: { ...DEFAULT_SETTINGS, teamMode: false }, teams })).toBe(false);
+    expect(isTeamMode({ settings: DEFAULT_SETTINGS, teams: [] })).toBe(false);
+  });
+  it('ranks teams with shared ties', () => {
+    expect(teamRank(teams, 't1')).toBe(1);
+    expect(teamRank(teams, 't2')).toBe(2);
+    expect(teamRank(teams, 't3')).toBe(2);
+    expect(teamRank(teams, 't4')).toBe(4);
+  });
+  it('resolves members in join order', () => {
+    expect(membersOf(teams[0], players).map((p) => p.id)).toEqual(['a', 'b']);
+  });
+  it('only counts teams with a connected member as active', () => {
+    expect(activeTeams(teams, players).map((t) => t.id)).toEqual(['t1', 't2']);
   });
 });
