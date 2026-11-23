@@ -5,10 +5,11 @@ import type {
   PlayerView,
   Round,
   RoundView,
-  ScoredCaption,
   TvView,
 } from '../shared/types.ts';
-import { POINTS_PER_VOTE, SWEEP_BONUS } from '../shared/types.ts';
+import { scoreRound } from './engine.ts';
+
+export { scoreRound };
 
 export interface JoinInfo {
   joinUrl: string;
@@ -30,25 +31,6 @@ function shuffleStable<T extends { id: string }>(items: T[], seed: string): T[] 
     return h >>> 0;
   };
   return [...items].sort((a, b) => hash(seed + a.id) - hash(seed + b.id));
-}
-
-export function scoreRound(s: GameState, r: Round): ScoredCaption[] {
-  const visible = r.captions.filter((c) => !c.hidden);
-  const voters = Object.keys(r.votes).length;
-  return visible
-    .map((c) => {
-      const votes = Object.values(r.votes).filter((id) => id === c.id).length;
-      const sweep = voters >= 2 && votes === voters;
-      return {
-        id: c.id,
-        text: c.text,
-        playerId: c.playerId,
-        playerName: s.players[c.playerId]?.name ?? '(gone)',
-        votes,
-        points: votes * POINTS_PER_VOTE + (sweep ? SWEEP_BONUS : 0),
-      };
-    })
-    .sort((a, b) => b.votes - a.votes);
 }
 
 function roundView(s: GameState): RoundView | null {
