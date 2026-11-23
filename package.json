@@ -11,7 +11,8 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "bots": "tsx scripts/bots.ts",
-    "e2e": "playwright test -c tests"
+    "e2e": "playwright test -c tests",
+    "fresh": "tsx scripts/fresh.ts && RESET_STATE=1 npm run party"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",

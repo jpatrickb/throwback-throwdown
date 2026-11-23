@@ -7,3 +7,4 @@ data/state.json
 test-results/
 tests/test-results/
 playwright-report/
+data/archive/

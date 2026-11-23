@@ -12,9 +12,8 @@ Print this or keep it open on a laptop. Tick boxes as you go and write anything 
 ## 0. Before anyone arrives (10 min)
 
 - [ ] `git pull`, then `npm test` passes, then `npx playwright test -c tests` passes (both chromium and webkit).
-- [ ] Clear old test photos: move anything in `data/photos/` that isn't a real family photo somewhere else
-      (files left in that folder get added to the queue on every start).
-- [ ] Start fresh: `RESET_STATE=1 npm run party` (terminal 1) and `npm run tunnel` (terminal 2). See §5.
+- [ ] Start fresh: `npm run fresh` (terminal 1) and `npm run tunnel` (terminal 2). See §5.
+      `fresh` moves leftover photos and the saved game into `data/archive/<time>/`, so nothing is deleted, then starts a new game.
 - [ ] Write down the **room code** and **host PIN** printed by terminal 1.
 - [ ] On the laptop, open `http://localhost:3000/tv` in Chrome. Click "Click to start the party!" so audio is allowed.
 
@@ -100,7 +99,8 @@ Do each on at least one iPhone and one Android.
 
 **At home before leaving**
 1. `git tag game-day` on the version that passed Saturday.
-2. Put the real photos in `data/photos/` (named `01 - anything.jpg`, `02 - ….jpg`… to set the order), or plan for the host to
+2. Run `npx tsx scripts/fresh.ts` to archive Saturday's photos and saved game (nothing is deleted).
+   Then either put the real photos in `data/photos/` (named `01 - anything.jpg`, `02 - ….jpg`… to set the order), or plan for the host to
    upload them at the venue. JPEG/PNG/WebP only. HEIC files in the folder are skipped, but HEIC uploaded from the iPhone is fine.
 3. Charge everything. Pack: MacBook + charger, HDMI cable/adapter, phone for the hotspot, printed QR/URL card.
 
@@ -108,7 +108,9 @@ Do each on at least one iPhone and one Android.
 1. Connect HDMI, set audio output to the TV, check that the venue internet works.
 2. Terminal 1: `RESET_STATE=1 npm run party`
    (builds, then serves on :3000 with `PUBLIC_URL=https://party.jpatrickbeal.com`).
-   `RESET_STATE=1` starts a **fresh** game. Use it only for this first start, never after a crash (see below).
+   `RESET_STATE=1` starts a **fresh** game, keeping any photos you put in `data/photos/`. Use it only for this first start, never after a crash (see below).
+   If you didn't preload photos, `npm run fresh` does the archive and the fresh start in one step.
+   (Don't run `npm run fresh` after putting real photos in the folder: it archives them too.)
    Optional: `HOST_PIN=123456 ROOM_CODE=FAMS RESET_STATE=1 npm run party` to choose the PIN and room code yourself.
 3. Terminal 2: `npm run tunnel` (named Cloudflare tunnel `party` → localhost:3000).
 4. Terminal 3: `caffeinate -dis`
