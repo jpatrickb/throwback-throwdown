@@ -58,6 +58,13 @@ Old `{volume, muted}` storage migrates automatically. Turning music off keeps it
 - **Phase changes:** the new phase's music starts only after that moment's stingers (whoosh, allIn, timesUp, reveal, roundStart…) have finished. A faded-out track pauses rather than stopping, so it resumes where it left off.
 - Knobs: `AUDIO_TUNING.holdFadeMs/holdGapMs/musicReturnMs` and per-key `holdAfterMs` in `cues.ts`.
 
+## Lobby track: restored and frozen (Patrick's call)
+Patrick preferred the original lobby track, so it's back **exactly** as rendered in `e4390a0`:
+- `client/public/audio/music-lobby.ogg` and `.mp3`, plus `client/src/audio/sessions/music-lobby.scraft`. `git diff e4390a0` on these paths is empty.
+- Its composer source: the original melody, the chromatic-approach bass and 4-note voicings (as `legacy` options), and the original brass/lead detune and keys chorus (as `patchOverrides`). Composed with the freeze lifted, the source reproduces e4390a0's lobby MIDI and track presets byte for byte.
+- `frozen: 'Patrick approved the e4390a0 lobby track (Nov 23)'` on the cue is the harmony-check allowlist entry. Frozen cues aren't checked and get no render job, so `build.sh` never rewrites the approved files.
+- Everything else from the harmony pass, the no-overlap rules and CAPTIONING → lobby stay as they are.
+
 ## Music map
 LOBBY → lobby, PHOTO_REVEAL → silence, **CAPTIONING → lobby** (Patrick's favorite plays where music plays most), VOTING → voting, RESULTS/SCOREBOARD → results, FINAL → final.
 
@@ -128,7 +135,7 @@ Because the lobby track pauses and resumes, each CAPTIONING phase continues the 
   - any two notes, across layers, that start together a minor 2nd/major 7th or a tritone apart
   - a tally take that isn't on C
 - **What it found and fixed:** 109 problems on the first run.
-  - Rewrote the melodies of lobby, voting, results and final bar by bar.
+  - Rewrote the melodies of voting, results and final bar by bar. (The lobby rewrite was reverted: see "Lobby track: restored and frozen".)
   - Bass now uses chord tones only (no chromatic approach notes).
   - Comping uses triads only (no clustered maj7/9th voicings).
   - Results bar 8 is G7sus4→G instead of E major (G# was out of key).

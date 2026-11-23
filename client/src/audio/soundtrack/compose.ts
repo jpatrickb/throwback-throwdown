@@ -246,21 +246,24 @@ function chordEvents(bars: string[]) {
   return ev;
 }
 
-function bassLine(style: BassStyle, bars: string[], lo = 33): Note[] {
+/** `legacy`: the original (Nov 23, e4390a0) behaviour with chromatic approach notes, kept for the frozen lobby cue. */
+function bassLine(style: BassStyle, bars: string[], lo = 33, legacy = false): Note[] {
   const out: Note[] = [];
   for (const e of chordEvents(bars)) {
     const ch = parseChord(e.sym);
     const nx = parseChord(e.next);
     const R = pcAtOrAbove(ch.bass, lo);
     const fifth = pcAtOrAbove((ch.root + 7) % 12, R);
+    const nextR = pcAtOrAbove(nx.bass, lo);
+    const approach = legacy ? (nextR > R ? nextR - 1 : nextR + 1) : fifth;
     const third = pcAtOrAbove((ch.root + ch.tones[1]) % 12, R);
     const add = (t: number, d: number, p: number, v = 100) => {
       if (t < e.d - 1e-6) out.push({ t: e.t + t, d: Math.min(d, e.d - t), p, v });
     };
     switch (style) {
       case 'pop':
-        add(0, 0.8, R, 110); add(1.5, 0.4, R, 92); add(2, 0.8, fifth, 100); add(3, 0.4, R + 12, 90); add(3.5, 0.4, fifth, 86);
-        if (e.d <= 2) { add(1, 0.4, fifth, 92); add(1.5, 0.4, R + 12, 86); }
+        add(0, 0.8, R, 110); add(1.5, 0.4, R, 92); add(2, 0.8, fifth, 100); add(3, 0.4, R + 12, 90); add(3.5, 0.4, approach, legacy ? 88 : 86);
+        if (e.d <= 2) { add(1, 0.4, fifth, 92); add(1.5, 0.4, legacy ? approach : R + 12, 86); }
         break;
       case 'disco':
         for (let i = 0; i < e.d * 2; i++) add(i / 2, 0.42, i % 2 ? R + 12 : R, i % 2 ? 88 : 108);
@@ -277,11 +280,12 @@ function bassLine(style: BassStyle, bars: string[], lo = 33): Note[] {
   return out;
 }
 
-function comp(style: CompStyle, bars: string[], lo: number, hi: number, vel = 90): Note[] {
+/** `legacy`: original 4-note voicings (frozen lobby cue). */
+function comp(style: CompStyle, bars: string[], lo: number, hi: number, vel = 90, legacy = false): Note[] {
   const out: Note[] = [];
   let prev: number[] | null = null;
   for (const e of chordEvents(bars)) {
-    const v = voice(parseChord(e.sym), lo, hi, prev, 3); // triads: no clustered 7ths/9ths
+    const v = voice(parseChord(e.sym), lo, hi, prev, legacy ? 4 : 3); // triads: no clustered 7ths/9ths
     prev = v;
     const stab = (t: number, d: number, vv = vel) => {
       if (t < e.d - 1e-6) for (const p of v) out.push({ t: e.t + t, d: Math.min(d, e.d - t), p, v: vv });
@@ -326,6 +330,11 @@ interface Cue {
   build: (bars: string[], len: number) => Part[]; // arrangement for the full loop
   mix?: Record<string, number>; // per-cue fader offsets in dB, e.g. { Bell: 3 }
   retired?: boolean; // kept for reference, not rendered or checked
+  /** Approved and locked: excluded from the harmony check and never re-rendered, so the committed
+   *  files and session stay exactly as approved. The string says who approved which version. */
+  frozen?: string;
+  /** Per-track patch tweaks for this cue only (e.g. the frozen lobby's original detune/chorus). */
+  patchOverrides?: Record<string, { params?: Record<string, number>; inserts?: Insert[] }>;
 }
 
 const sum = (a: Note[][]) => a.flat();
@@ -336,6 +345,15 @@ const drums = (style: DrumStyle, bars: number, crashEvery = 8) =>
 const CUES: Cue[] = [
   {
     name: 'music-lobby',
+    // HARMONY-CHECK ALLOWLIST: Patrick approved this exact version (rendered in e4390a0, Nov 23) and asked
+    // for it back after the harmony pass. Do not re-compose, "fix" or re-render it. The data below is the
+    // original source; client/public/audio/music-lobby.* and sessions/music-lobby.scraft are the e4390a0 files.
+    frozen: 'Patrick approved the e4390a0 lobby track (Nov 23)',
+    patchOverrides: {
+      Brass: { params: { osc2_detune: 12 } },
+      Lead: { params: { osc2_detune: 8 } },
+      Keys: { inserts: [{ plugin: 'chorus', params: { mix: 30, rate: 0.6, depth: 35 } }, eq({ hpf_on: 1, hpf_freq: 160 }), room(18)] },
+    },
     bpm: 120,
     tonic: 72, // C5
     sections: {
@@ -344,13 +362,13 @@ const CUES: Cue[] = [
     },
     melody: {
       A: [
-        "3:.5 5:.5 r:.5 5:.5 1':.5 6:.5 5:1",
-        '1:.5 3:.5 r:.5 3:.5 3:.5 2:.5 1:1',
-        "6:.5 1':.5 r:.5 1':.5 1':.5 2':.5 1':.5 6:.5",
-        "5:1.5 6:.5 7:1 2':1",
-        "3:.5 5:.5 r:.5 5:.5 1':.5 6:.5 5:1",
-        '1:.5 3:.5 r:.5 3:.5 6:1 5:1',
-        '4:.5 4:.5 6:1 5:1 2:1',
+        '3:.5 5:.5 r:.5 5:.5 6:.5 5:.5 3:1',
+        '1:.5 3:.5 r:.5 3:.5 2:1 1:1',
+        "6:.5 1':.5 r:.5 1':.5 2':.5 1':.5 6:1",
+        '5:1.5 4:.5 3:1 2:1',
+        '3:.5 5:.5 r:.5 5:.5 6:.5 5:.5 3:1',
+        '1:.5 3:.5 r:.5 3:.5 5:1 6:1',
+        '4:.5 4:.5 6:1 5:.5 4:.5 2:1',
         '1:3 r:1',
       ],
       B: [
@@ -358,17 +376,17 @@ const CUES: Cue[] = [
         '7:1 5:.5 7:.5 r:1 5:1',
         '5:1 3:.5 5:.5 7:1 5:1',
         '6:3 r:1',
-        "1':.5 1':.5 6:.5 1':.5 4':1 1':1",
-        "2':.5 2':.5 7:.5 2':.5 5':1 2':1",
+        "1':.5 1':.5 6:.5 1':.5 2':1 1':1",
+        "2':.5 2':.5 7:.5 2':.5 3':1 2':1",
         "4':1 3':1 2':1 1':1",
         "7:1 2':1 5:2",
       ],
     },
     build: (bars, len) => [
       { name: 'Drums', drums: true, notes: drums('pop', len) },
-      { name: 'Bass', notes: bassLine('pop', bars) },
-      { name: 'Keys', notes: comp('skank', bars, 55, 72, 84) },
-      { name: 'Brass', notes: shift(comp('stabs', bars.slice(8), 60, 76, 92), 32) },
+      { name: 'Bass', notes: bassLine('pop', bars, 33, true) },
+      { name: 'Keys', notes: comp('skank', bars, 55, 72, 84, true) },
+      { name: 'Brass', notes: shift(comp('stabs', bars.slice(8), 60, 76, 92, true), 32) },
       { name: 'Lead', notes: [] }, // filled from melody below
       { name: 'Bell', notes: [] },
     ],
@@ -565,7 +583,14 @@ interface Bounce {
   end: number;
 }
 
-function emit(session: string, parts: Part[], bpm: number, bounces: Bounce[], mix: Record<string, number> = {}) {
+function emit(
+  session: string,
+  parts: Part[],
+  bpm: number,
+  bounces: Bounce[],
+  mix: Record<string, number> = {},
+  overrides: Cue['patchOverrides'] = {},
+) {
   const dir = join(out, session);
   mkdirSync(dir, { recursive: true });
   const used = parts.filter((p) => p.notes.length);
@@ -574,8 +599,10 @@ function emit(session: string, parts: Part[], bpm: number, bounces: Bounce[], mi
   const cmd = (id: string, p: object) => lines.push(`${id} ${JSON.stringify(p)}`);
   cmd('file.import_midi', { path: join(dir, `${session}.mid`) });
   for (const part of used) {
-    const patch = PATCHES[TRACK_PATCH[part.name]];
-    if (!patch) throw new Error(`no patch for track ${part.name}`);
+    const base = PATCHES[TRACK_PATCH[part.name]];
+    if (!base) throw new Error(`no patch for track ${part.name}`);
+    const o = overrides?.[part.name];
+    const patch: Patch = { ...base, params: { ...base.params, ...o?.params }, inserts: o?.inserts ?? base.inserts };
     const preset = join(dir, `${part.name}.preset.json`);
     writeFileSync(preset, JSON.stringify(trackPreset(part.name, { ...patch, volumeDb: patch.volumeDb + (mix[part.name] ?? 0) }), null, 2));
     cmd('track.load_preset', { path: preset, tracks: [part.name] });
@@ -613,6 +640,10 @@ const problems: string[] = [];
 
 for (const cue of CUES) {
   if (cue.retired) continue;
+  if (cue.frozen) {
+    console.log(`  ${cue.name}: frozen (${cue.frozen}); keeping the committed files`);
+    continue;
+  }
   const bars = [...cue.sections.A, ...cue.sections.B];
   const loopBars = bars.length;
   const keyPc = cue.tonic % 12;
@@ -640,7 +671,7 @@ for (const cue of CUES) {
   // first pass's reverb and release tails, so the file loops seamlessly.
   for (const p of parts) p.notes = [...p.notes, ...shift(p.notes, loopBars * 4)];
   const barSec = 240 / cue.bpm;
-  emit(cue.name, parts, cue.bpm, [{ out: cue.name, start: 0, end: barSec * loopBars * 2 }], cue.mix);
+  emit(cue.name, parts, cue.bpm, [{ out: cue.name, start: 0, end: barSec * loopBars * 2 }], cue.mix, cue.patchOverrides);
   jobs.push([cue.name, cue.name, 'music', (barSec * loopBars).toFixed(6), (barSec * loopBars * 2).toFixed(6)].join('\t'));
 }
 
@@ -681,4 +712,4 @@ if (problems.length) {
   process.exit(1);
 }
 writeFileSync(join(out, 'jobs.tsv'), jobs.join('\n') + '\n');
-console.log(`composed ${CUES.filter((c) => !c.retired).length} cues and ${takeCount} sfx takes (${Object.keys(SFX).length} keys) into ${out}`);
+console.log(`composed ${CUES.filter((c) => !c.retired && !c.frozen).length} cues and ${takeCount} sfx takes (${Object.keys(SFX).length} keys) into ${out}`);
