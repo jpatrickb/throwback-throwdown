@@ -3,6 +3,7 @@
 // /host?mock=RESULTS. Extra params:
 //   ?mockme=<playerId>  which player "you" are on /play (default p3)
 //   ?solo=1             individual mode (no teams); default is team mode, 5 teams
+//   ?theme=<id>         berry | cork | arcade | picnic (settings.theme)
 import type {
   Caption,
   HostView,
@@ -93,7 +94,8 @@ function round(phase: Phase, d: ReturnType<typeof build>): RoundView | null {
 
 function base(phase: Phase, d: ReturnType<typeof build>, solo: boolean) {
   const timed = phase === 'CAPTIONING' || phase === 'VOTING';
-  const settings: Settings = { ...DEFAULT_SETTINGS, teamMode: !solo };
+  const themeParam = new URLSearchParams(globalThis.location?.search ?? '').get('theme') as Settings['theme'] | null;
+  const settings: Settings = { ...DEFAULT_SETTINGS, teamMode: !solo, ...(themeParam ? { theme: themeParam } : {}) };
   const lobby = phase === 'LOBBY';
   return {
     roomCode: 'GRFW',

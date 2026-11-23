@@ -18,7 +18,19 @@ export interface Settings {
   maxCaptionLength: number; // default 80
   teamMode: boolean; // default true: one caption per team per photo, points go to teams
   teamCount: number; // default 5 (2..8); applied when teams are (re)built
+  theme: ThemeId; // visual theme for TV AND phones (set from the TV settings panel or host)
 }
+
+// ---------- Themes ----------
+// Each id maps to a [data-theme="<id>"] block in client/src/theme/tokens.css.
+// The TV settings panel sets it (tv:setTheme); every screen applies view.settings.theme.
+export type ThemeId = 'berry' | 'cork' | 'arcade' | 'picnic';
+export const THEMES: { id: ThemeId; label: string }[] = [
+  { id: 'berry', label: 'Berry Stage' },
+  { id: 'cork', label: 'Cork Board' },
+  { id: 'arcade', label: 'Retro Arcade' },
+  { id: 'picnic', label: 'Sunny Picnic' },
+];
 
 // ---------- Teams ----------
 // In team mode every player belongs to a team. Any member can submit or replace
@@ -176,6 +188,7 @@ export type Ack<T = object> = (res: ({ ok: true } & T) | { ok: false; error: str
 
 export interface ClientToServerEvents {
   'tv:hello': () => void;
+  'tv:setTheme': (p: { theme: ThemeId }, ack: Ack) => void; // only sockets that sent tv:hello
   'player:join': (
     p: { roomCode: string; name: string; token?: string; avatar?: string; color?: string },
     ack: Ack<{ playerId: string; token: string }>,
@@ -201,6 +214,7 @@ export const DEFAULT_SETTINGS: Settings = {
   maxCaptionLength: 80,
   teamMode: true,
   teamCount: 5,
+  theme: 'berry',
 };
 
 /** Preset team names/colors; teams can rename themselves. Order = team number. */
