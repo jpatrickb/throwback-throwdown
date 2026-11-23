@@ -16,6 +16,20 @@ export interface Settings {
   captionSeconds: number; // default 75
   voteSeconds: number; // default 30
   maxCaptionLength: number; // default 80
+  teamMode: boolean; // default true: one caption per team per photo, points go to teams
+  teamCount: number; // default 5 (2..8); applied when teams are (re)built
+}
+
+// ---------- Teams ----------
+// In team mode every player belongs to a team. Any member can submit or replace
+// the team's caption; everyone votes individually but not for their own team;
+// points go to the team. Assignment is automatic (see server engine), and the host
+// can move players or reshuffle. Any member or the host can rename a team.
+export interface Team {
+  id: string;
+  name: string;
+  color: string; // CSS color for chips/cards; matches theme --team-N tokens
+  score: number;
 }
 
 export interface Player {
@@ -23,8 +37,9 @@ export interface Player {
   name: string;
   avatar: string | null; // stretch: avatar key
   color: string | null; // stretch: accent color
-  score: number;
+  score: number; // individual points (individual mode); 0-ish in team mode
   connected: boolean;
+  teamId: string | null; // null in individual mode
 }
 
 export interface Photo {
@@ -36,7 +51,8 @@ export interface Photo {
 
 export interface Caption {
   id: string;
-  playerId: string;
+  playerId: string; // individual mode: author. Team mode: whoever last edited it
+  teamId: string | null; // team mode: the owning team (one caption per team per round)
   text: string;
   hidden: boolean; // host moderation
 }
@@ -54,6 +70,7 @@ export interface GameState {
   roomCode: string;
   phase: Phase;
   players: Record<string, Player>;
+  teams: Team[]; // empty in individual mode
   photos: Photo[]; // queue, in host-chosen order
   rounds: Round[];
   deadline: number | null; // epoch ms when current timed phase ends
@@ -73,7 +90,9 @@ export interface ScoredCaption {
   id: string;
   text: string;
   playerId: string;
-  playerName: string;
+  playerName: string; // team mode: last editor's name
+  teamId: string | null;
+  teamName: string | null; // team mode: show this as the author
   votes: number;
   points: number; // points awarded this round
 }
@@ -84,6 +103,7 @@ export interface RoundView {
   photo: Photo;
   subjectRevealed: boolean;
   submittedPlayerIds: string[]; // CAPTIONING: who has submitted
+  submittedTeamIds: string[]; // CAPTIONING, team mode: which teams have a caption
   votedPlayerIds: string[]; // VOTING: who has voted
   captions: AnonCaption[] | null; // VOTING only (shuffled)
   results: ScoredCaption[] | null; // RESULTS and later
@@ -95,8 +115,13 @@ interface BaseView {
   deadline: number | null;
   serverNow: number; // lets clients correct clock skew for countdowns
   players: Player[]; // sorted by score desc, then name
+  teams: TeamView[]; // sorted by score desc; empty in individual mode
   round: RoundView | null;
   settings: Settings;
+}
+
+export interface TeamView extends Team {
+  memberIds: string[]; // player ids, join order
 }
 
 export interface TvView extends BaseView {
@@ -109,9 +134,11 @@ export interface TvView extends BaseView {
 export interface PlayerView extends BaseView {
   role: 'player';
   me: Player;
-  myCaption: string | null; // current round
+  myTeam: TeamView | null; // team mode
+  myCaption: string | null; // current round; team mode: the team's current caption
+  myCaptionEditedBy: string | null; // team mode: name of whoever last set the team caption
   myVoteCaptionId: string | null; // current round
-  myCaptionId: string | null; // so the vote screen can disable own caption
+  myCaptionId: string | null; // so the vote screen can disable own (team's) caption
 }
 
 export interface HostView extends BaseView {
@@ -140,7 +167,10 @@ export type HostAction =
   | { type: 'reorderPhotos'; photoIds: string[] }
   | { type: 'setSubject'; photoId: string; subject: string | null }
   | { type: 'removePhoto'; photoId: string }
-  | { type: 'updateSettings'; settings: Partial<Settings> };
+  | { type: 'updateSettings'; settings: Partial<Settings> }
+  | { type: 'moveToTeam'; playerId: string; teamId: string }
+  | { type: 'shuffleTeams' } // random balanced reassignment (LOBBY or between rounds)
+  | { type: 'renameTeam'; teamId: string; name: string };
 
 export type Ack<T = object> = (res: ({ ok: true } & T) | { ok: false; error: string }) => void;
 
@@ -154,6 +184,7 @@ export interface ClientToServerEvents {
   'player:vote': (p: { captionId: string }, ack: Ack) => void;
   'player:react': (p: { emoji: string }) => void; // stretch
   'player:setAvatar': (p: { avatar: string | null; color: string | null }, ack: Ack) => void; // stretch
+  'player:renameTeam': (p: { name: string }, ack: Ack) => void; // team mode: rename own team
   'host:auth': (p: { pin: string }, ack: Ack) => void;
   'host:action': (a: HostAction, ack: Ack) => void;
 }
@@ -168,7 +199,21 @@ export const DEFAULT_SETTINGS: Settings = {
   captionSeconds: 75,
   voteSeconds: 30,
   maxCaptionLength: 80,
+  teamMode: true,
+  teamCount: 5,
 };
+
+/** Preset team names/colors; teams can rename themselves. Order = team number. */
+export const TEAM_PRESETS: { name: string; color: string }[] = [
+  { name: 'The Mullets', color: '#ff5fa2' },
+  { name: 'Team Scrunchie', color: '#4fb3ff' },
+  { name: 'The Bowl Cuts', color: '#ffcc33' },
+  { name: 'Overall Champs', color: '#3ddcb4' },
+  { name: 'The Velcro Kids', color: '#ff8a3d' },
+  { name: 'Slap Bracelets', color: '#b07cff' },
+  { name: 'The Jelly Shoes', color: '#ff6b6b' },
+  { name: 'Team Lunchbox', color: '#8fd14f' },
+];
 
 export const POINTS_PER_VOTE = 100;
 export const SWEEP_BONUS = 200;
