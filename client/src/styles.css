@@ -1,42 +1,45 @@
-/* Minimal placeholder styles. The graphics workstream owns the real theme. */
+/* Global styles. Every colour/font/radius/timing comes from theme/tokens.css.
+   TV-specific styles live in client/src/tv/tv.css; phone styles in client/src/phone/. */
+@import './theme/tokens.css';
+
 :root {
-  --bg: #1b1036;
-  --fg: #fff8e7;
-  --accent: #ffcc33;
-  --muted: #b9a9d9;
-  --danger: #ff6b6b;
-  font-family: system-ui, -apple-system, sans-serif;
-  color: var(--fg);
-  background: var(--bg);
+  font-family: var(--font-body);
+  font-weight: var(--weight-body);
+  color: var(--c-fg);
+  background: var(--c-stage);
+  -webkit-font-smoothing: antialiased;
 }
 * { box-sizing: border-box; }
-body { margin: 0; min-height: 100dvh; background: var(--bg); }
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background:
+    radial-gradient(ellipse at 50% 35%, var(--c-stage-hot) 0%, var(--c-stage) 45%, var(--c-stage-deep) 100%) fixed;
+  color: var(--c-fg);
+}
+h1, h2, h3 { font-family: var(--font-display); font-weight: 400; letter-spacing: var(--tracking-display); }
 .center { min-height: 100dvh; display: grid; place-content: center; text-align: center; }
-.small { font-size: 0.9rem; color: var(--muted); }
+.small { font-size: 0.9rem; color: var(--c-fg-muted); }
 .offline { opacity: 0.4; }
-.error { color: var(--danger); }
-.banner { background: var(--danger); padding: 0.5rem 1rem; border-radius: 8px; }
+.error { color: var(--c-danger); }
+.banner { background: var(--c-danger); padding: 0.5rem 1rem; border-radius: var(--radius-sm); }
 
-/* TV */
-.tv { padding: 3vw; font-size: 2vw; }
-.tv h1 { color: var(--accent); font-size: 4vw; margin: 0 0 2vw; }
-.lobby { display: grid; grid-template-columns: auto 1fr; gap: 4vw; align-items: start; }
-.qr { width: 22vw; border-radius: 1vw; background: #fff; }
-.join-url { font-size: 1.6vw; }
-.room-code { font-size: 9vw; font-weight: 900; letter-spacing: 0.15em; color: var(--accent); margin: 0; }
-.players { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 1vw; }
-.players li { background: #ffffff1a; padding: 0.5vw 1.2vw; border-radius: 99px; }
-
-/* Phones */
+/* ---- Phone base (phones teammate may override in client/src/phone/) ---- */
 .play { padding: 1.25rem 1rem; max-width: 480px; margin: 0 auto; }
 .join-form { display: grid; gap: 1rem; }
-.join-form label { display: grid; gap: 0.35rem; font-weight: 600; }
-input { font-size: 1.25rem; padding: 0.75rem; border-radius: 10px; border: 2px solid var(--muted); }
-button {
-  font-size: 1.15rem; font-weight: 700; padding: 0.85rem 1rem; border-radius: 12px; border: 0;
-  background: var(--accent); color: #1b1036; cursor: pointer;
+.join-form label { display: grid; gap: 0.35rem; font-weight: var(--weight-strong); }
+input, textarea {
+  font: inherit; font-size: 1.25rem; padding: 0.75rem; color: var(--c-ink);
+  background: var(--c-paper); border-radius: var(--radius); border: var(--border-chunky);
 }
-button:disabled { opacity: 0.5; }
+button {
+  font-family: var(--font-display); font-size: 1.25rem; letter-spacing: var(--tracking-display);
+  padding: 0.85rem 1rem; border-radius: var(--radius); border: var(--border-chunky);
+  background: var(--c-sun); color: var(--c-ink); cursor: pointer; box-shadow: var(--shadow-pop);
+  transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+button:active:not(:disabled) { transform: translate(0.15em, 0.15em); box-shadow: 0.1em 0.1em 0 var(--c-ink); }
+button:disabled { opacity: 0.5; cursor: default; }
 .host-players { list-style: none; padding: 0; display: grid; gap: 0.5rem; }
 .host-players li { display: flex; justify-content: space-between; align-items: center; }
-.host-players button { font-size: 0.9rem; padding: 0.4rem 0.8rem; background: var(--danger); color: #fff; }
+.host-players button { font-size: 0.9rem; padding: 0.4rem 0.8rem; background: var(--c-danger); color: var(--c-fg); }

@@ -1,0 +1,94 @@
+/* =====================================================================
+   THEME TOKENS: the one file to retune the look of the whole game.
+   Direction: "family photo album meets game show".
+   Deep berry stage + rotating sunburst, cream polaroids, washi tape,
+   marker doodles, chunky display type.
+   Used by the TV (client/src/tv) AND the phones (client/src/phone).
+   Fonts are loaded in client/index.html (Google Fonts).
+   ===================================================================== */
+:root {
+  /* ---- Palette: stage (backgrounds) ---- */
+  --c-stage-deep: #2a0f3d;      /* darkest corner of the background */
+  --c-stage: #5b1a6e;           /* main background */
+  --c-stage-hot: #b0246f;       /* spotlight centre */
+  --c-ray: rgb(255 214 102 / 0.07); /* sunburst rays */
+
+  /* ---- Palette: paper (cards, polaroids) ---- */
+  --c-paper: #fff7e6;
+  --c-paper-shade: #f1e2c4;
+  --c-kraft: #d9b48a;
+  --c-ink: #2b1630;             /* text on paper */
+  --c-ink-soft: #6d5470;
+
+  /* ---- Palette: accents ---- */
+  --c-sun: #ffcc33;             /* primary accent: titles, highlights */
+  --c-tangerine: #ff8a3d;
+  --c-bubblegum: #ff5fa2;
+  --c-mint: #3ddcb4;
+  --c-sky: #4fb3ff;
+  --c-grape: #9b6bff;
+  --c-success: #3ddc84;
+  --c-danger: #ff4d5e;
+
+  /* ---- Text on stage ---- */
+  --c-fg: #fff7e6;
+  --c-fg-muted: #e3c9ec;
+
+  /* ---- Washi tape ---- */
+  --tape-1: rgb(255 95 162 / 0.78);
+  --tape-2: rgb(61 220 180 / 0.78);
+  --tape-3: rgb(255 204 51 / 0.82);
+  --tape-4: rgb(79 179 255 / 0.78);
+
+  /* ---- Per-player accent colours (used when a player has no colour of their own) ---- */
+  --player-0: #ff5fa2;
+  --player-1: #ffcc33;
+  --player-2: #3ddcb4;
+  --player-3: #4fb3ff;
+  --player-4: #ff8a3d;
+  --player-5: #9b6bff;
+  --player-6: #ff4d5e;
+  --player-7: #a6e22e;
+  --player-count: 8;
+
+  /* ---- Podium ---- */
+  --c-gold: #ffcc33;
+  --c-silver: #d8dce8;
+  --c-bronze: #e09a5b;
+
+  /* ---- Type ---- */
+  --font-display: 'Lilita One', 'Arial Rounded MT Bold', 'Trebuchet MS', system-ui, sans-serif;
+  --font-body: 'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-hand: 'Permanent Marker', 'Marker Felt', 'Comic Sans MS', cursive;
+  --weight-body: 700;
+  --weight-strong: 900;
+  --tracking-display: 0.02em;
+
+  /* ---- Shape ---- */
+  --radius-sm: 0.4em;
+  --radius: 0.8em;
+  --radius-lg: 1.4em;
+  --radius-pill: 999px;
+  --border-chunky: 0.18em solid var(--c-ink);
+
+  /* ---- Depth ---- */
+  --shadow-card: 0 0.35em 0 rgb(0 0 0 / 0.25), 0 0.9em 2em rgb(0 0 0 / 0.35);
+  --shadow-pop: 0.25em 0.25em 0 var(--c-ink);
+  --shadow-text: 0 0.06em 0 var(--c-ink), 0 0.12em 0 rgb(0 0 0 / 0.35);
+  --glow-sun: 0 0 1.2em rgb(255 204 51 / 0.6);
+
+  /* ---- Motion (ms, read by CSS; JS mirrors these in client/src/tv/motion.ts) ---- */
+  --dur-fast: 180ms;
+  --dur: 400ms;
+  --dur-slow: 900ms;
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ray-spin: 120s;             /* one full sunburst rotation */
+
+  /* ---- Countdown ---- */
+  --c-timer: var(--c-mint);
+  --c-timer-urgent: var(--c-danger);
+
+  /* ---- TV scale: 1em on the TV = this. 24px at 1920x1080, 16px at 1280x720 ---- */
+  --tv-base: min(1.25vw, 2.2222vh);
+}
