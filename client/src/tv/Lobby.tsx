@@ -40,7 +40,7 @@ export function Lobby({ view }: { view: TvView }) {
             </>
           )}
         </h2>
-        <ul className={`lobby-grid ${players.length > 18 ? 'crowd-xl' : players.length > 10 ? 'crowd' : ''}`}>
+        <ul className={`lobby-grid ${players.length > 28 ? 'crowd-xl' : players.length > 15 ? 'crowd-grid' : players.length > 10 ? 'crowd' : ''}`}>
           <AnimatePresence>
             {players.map((p, i) => (
               <motion.li

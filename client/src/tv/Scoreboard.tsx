@@ -26,12 +26,13 @@ export function Scoreboard({ view }: { view: TvView }) {
 
   const sorted = [...rows].sort((a, b) => (settled ? byScore(a, b) : byScore({ ...a, score: a.prev }, { ...b, score: b.prev })));
   const rk = ranks(sorted.map((r) => ({ score: settled ? r.score : r.prev })));
-  const twoCol = sorted.length > 8;
+  // 1 column up to 8, 2 up to 16, then 3 (25+ players).
+  const cols = sorted.length > 16 ? 3 : sorted.length > 8 ? 2 : 1;
 
   return (
     <div className="screen scoreboard">
       {round ? <RoundHeader index={round.index} total={round.totalPhotosQueued} title="Scoreboard" /> : <h2 className="phase-title">Scoreboard</h2>}
-      <ol className={`leaderboard ${twoCol ? 'two-col' : ''} ${sorted.length > 16 ? 'lb-dense' : ''}`} style={{ '--rows': twoCol ? Math.ceil(sorted.length / 2) : sorted.length } as CSSProperties}>
+      <ol className={`leaderboard lb-cols-${cols}`} style={{ '--rows': Math.ceil(sorted.length / cols), '--cols': cols } as CSSProperties}>
         {sorted.map((p, i) => (
           <motion.li
             key={p.id}

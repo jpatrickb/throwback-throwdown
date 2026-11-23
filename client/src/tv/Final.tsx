@@ -49,7 +49,7 @@ export function Final({ view }: { view: TvView }) {
         )}
       </div>
 
-      <div className="final-body">
+      <div className={`final-body ${sorted.length > 12 ? 'final-crowd' : ''}`}>
         <div className="podium">
           {PLACE_ORDER.filter((i) => i < top.length).map((i) => {
             const p = top[i];
@@ -65,7 +65,7 @@ export function Final({ view }: { view: TvView }) {
                 >
                   {place === 1 && <Doodle name="crown" className="podium-crown" />}
                   <Avatar player={p} className="avatar-xl" />
-                  <span className="podium-name">{p.name}</span>
+                  <span className={`podium-name ${p.name.length > 9 ? 'podium-name-long' : ''}`}>{p.name}</span>
                   <span className="podium-score">{p.score}</span>
                 </motion.div>
                 <motion.div
@@ -81,7 +81,7 @@ export function Final({ view }: { view: TvView }) {
           })}
         </div>
 
-        <motion.ol className="standings paper-card" initial={{ x: 300, opacity: 0 }} animate={champDone ? { x: 0, opacity: 1 } : {}} transition={{ delay: 0.8, ...SPRING_POP }}>
+        <motion.ol className={`standings paper-card ${sorted.length > 12 ? 'standings-2col' : ''} ${sorted.length > 26 ? 'standings-dense' : ''}`} initial={{ x: 300, opacity: 0 }} animate={champDone ? { x: 0, opacity: 1 } : {}} transition={{ delay: 0.8, ...SPRING_POP }}>
           <span className="tape tape-top" />
           <li className="standings-title">Final standings</li>
           {sorted.map((p, i) => (

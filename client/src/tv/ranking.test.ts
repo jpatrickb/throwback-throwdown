@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import type { ScoredCaption } from '../../../shared/types.ts';
-import { byScore, planReveal, ranks, roundPoints } from './ranking.ts';
+import { byScore, planReveal, ranks, revealSchedule, roundPoints } from './ranking.ts';
 
 const cap = (id: string, votes: number, playerId = `p-${id}`): ScoredCaption => ({
   id,
   text: `caption ${id}`,
   playerId,
   playerName: playerId,
+  teamId: null,
+  teamName: null,
   votes,
   points: votes * 100,
 });
@@ -38,27 +40,53 @@ describe('roundPoints', () => {
   });
 });
 
+const ids = (plan: ReturnType<typeof planReveal>) => plan.beats.map((b) => `${b.kind}:${b.captions.map((c) => c.id).sort().join(',')}`);
+
 describe('planReveal', () => {
-  it('reveals fewest votes first and the winner last', () => {
-    const plan = planReveal([cap('a', 3), cap('b', 0), cap('c', 1)]);
-    expect(plan.steps.map((g) => g.map((c) => c.id))).toEqual([['b'], ['c'], ['a']]);
-    expect([...plan.winners]).toEqual(['a']);
+  it('reveals zeros together, then low tiers, then the top 3 one by one, winner last', () => {
+    const plan = planReveal([cap('w', 5), cap('s', 4), cap('t', 3), cap('a', 1), cap('b', 1), cap('c', 2), cap('z1', 0), cap('z2', 0)]);
+    expect(ids(plan)).toEqual(['zero:z1,z2', 'tier:a,b', 'tier:c', 'drama:t', 'drama:s', 'winner:w']);
+    expect([...plan.winners]).toEqual(['w']);
   });
-  it('reveals tied winners together in the final step', () => {
-    const plan = planReveal([cap('a', 2), cap('b', 2), cap('c', 1)]);
-    expect(plan.steps.length).toBe(2);
-    expect(plan.steps[1].map((c) => c.id).sort()).toEqual(['a', 'b']);
+  it('reveals tied winners together and counts them toward the top 3', () => {
+    const plan = planReveal([cap('a', 2), cap('b', 2), cap('c', 1), cap('d', 1)]);
+    expect(ids(plan)).toEqual(['tier:d', 'drama:c', 'winner:a,b'].map((x) => x));
     expect(plan.winners.size).toBe(2);
+  });
+  it('a three-way tie for the win has no runner-up drama', () => {
+    const plan = planReveal([cap('a', 2), cap('b', 2), cap('c', 2), cap('d', 1)]);
+    expect(ids(plan)).toEqual(['tier:d', 'winner:a,b,c']);
   });
   it('has no winner when nobody got a vote', () => {
     const plan = planReveal([cap('a', 0), cap('b', 0)]);
     expect(plan.winners.size).toBe(0);
-    expect(plan.steps.length).toBe(2);
+    expect(ids(plan)).toEqual(['zero:a,b']);
   });
   it('handles the tough-crowd cases', () => {
-    expect(planReveal([]).steps).toEqual([]);
-    const one = planReveal([cap('solo', 0)]);
-    expect(one.steps.length).toBe(1);
-    expect(one.winners.size).toBe(0);
+    expect(planReveal([]).beats).toEqual([]);
+    expect(ids(planReveal([cap('solo', 0)]))).toEqual(['zero:solo']);
+    expect(ids(planReveal([cap('solo', 1)]))).toEqual(['winner:solo']);
+  });
+});
+
+describe('revealSchedule', () => {
+  it('keeps 25 captions from 25 voters well under 45s', () => {
+    // A realistic spread: lots of zeros, a few ones/twos, a clear top 3.
+    const votes = [7, 5, 3, 2, 2, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const plan = planReveal(votes.map((v, i) => cap(`c${i}`, v)));
+    expect(revealSchedule(plan).total).toBeLessThan(45_000);
+  });
+  it('stays under 45s even when every caption has a different vote count', () => {
+    // Worst case for tiers: every caption a different count (impossible with 25 voters, so an upper bound).
+    const plan = planReveal(Array.from({ length: 25 }, (_, i) => cap(`c${i}`, i)));
+    expect(revealSchedule(plan).total).toBeLessThan(45_000);
+    expect(plan.beats.filter((b) => b.kind === 'tier').length).toBeLessThanOrEqual(5);
+    const plan10 = planReveal(Array.from({ length: 10 }, (_, i) => cap(`c${i}`, i + 1)));
+    expect(revealSchedule(plan10).total).toBeLessThan(45_000);
+  });
+  it('drumrolls before the winner', () => {
+    const plan = planReveal([cap('a', 0), cap('b', 2)]);
+    const { starts } = revealSchedule(plan);
+    expect(starts[1] - starts[0]).toBeGreaterThan(2600);
   });
 });
