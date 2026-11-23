@@ -1,0 +1,22 @@
+/* Uses theme tokens when the TV defines them; falls back to neutral values. */
+.audio-indicator {
+  position: fixed;
+  right: var(--audio-indicator-inset, 24px);
+  bottom: var(--audio-indicator-inset, 24px);
+  z-index: 50;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill, 999px);
+  background: var(--audio-indicator-bg, rgba(0, 0, 0, 0.55));
+  color: var(--audio-indicator-fg, rgba(255, 255, 255, 0.92));
+  font: 600 18px/1.2 var(--font-body, system-ui, sans-serif);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 200ms ease,
+    transform 200ms ease;
+}
+.audio-indicator.is-visible {
+  opacity: 1;
+  transform: none;
+}
