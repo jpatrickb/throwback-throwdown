@@ -17,7 +17,6 @@ import { hostView, playerView, tvView, type JoinInfo } from './views.ts';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PORT = Number(process.env.PORT ?? 3000);
 const PUBLIC_URL = process.env.PUBLIC_URL ?? null; // e.g. https://party.jpatrickbeal.com
-const HOST_PIN = process.env.HOST_PIN ?? String(randomInt(100000, 1000000));
 const IS_PROD = process.env.NODE_ENV === 'production';
 const DATA_DIR = path.resolve(ROOT, process.env.DATA_DIR ?? 'data');
 const PHOTO_DIR = path.join(DATA_DIR, 'photos');
@@ -32,6 +31,9 @@ const makeRoomCode = () =>
 
 // ---------- State (restored from data/state.json unless RESET_STATE=1) ----------
 const saved = process.env.RESET_STATE === '1' ? null : loadSaved(STATE_FILE);
+// HOST_PIN env wins; otherwise a restart keeps the saved PIN (so the host's phone stays logged in), else a new random one.
+const savedPin = saved?.hostPin && /^\d{6}$/.test(saved.hostPin) ? saved.hostPin : null;
+const HOST_PIN = process.env.HOST_PIN ?? savedPin ?? String(randomInt(100000, 1000000));
 let state: GameState = saved ? normalizeState(saved.state) : initialState(makeRoomCode());
 if (process.env.ROOM_CODE) state.roomCode = process.env.ROOM_CODE.toUpperCase();
 const tokens = new Map<string, string>(saved?.tokens ?? []); // secret token -> playerId
@@ -82,7 +84,7 @@ function dispatch(event: EngineEvent): string | undefined {
 function onChange() {
   armTimer();
   try {
-    save(STATE_FILE, state, tokens);
+    save(STATE_FILE, state, tokens, HOST_PIN);
   } catch (e) {
     console.error('⚠️  Could not save state:', (e as Error).message);
   }
@@ -304,6 +306,7 @@ io.on('connection', (socket: GameSocket) => {
 });
 
 armTimer();
+save(STATE_FILE, state, tokens, HOST_PIN); // record the room code + PIN right away, before any change
 http.listen(PORT, () => {
   console.log(`
   🎉 Throwback Throwdown server on :${PORT}
