@@ -103,11 +103,25 @@ export function Polaroid({
   return (
     <div className={`polaroid ${className ?? ''}`} style={{ '--tilt': `${tilt}deg` } as CSSProperties}>
       <span className="tape tape-top" />
-      <div className="polaroid-photo">
-        <img src={src} alt="Mystery cousin" draggable={false} />
-      </div>
+      <PolaroidPhoto src={src} />
       <div className="polaroid-label">{label}</div>
       {children}
+    </div>
+  );
+}
+
+/** Photo inside the polaroid: blurred copy fills the frame so portrait shots don't get black bars.
+ *  If the file fails to load, shows a friendly placeholder instead of a broken image. */
+function PolaroidPhoto({ src }: { src: string }) {
+  const [broken, setBroken] = useState(false);
+  useEffect(() => setBroken(false), [src]);
+  return (
+    <div className="polaroid-photo" style={{ '--photo': `url("${src}")` } as CSSProperties}>
+      {broken ? (
+        <span className="photo-missing">📷 Photo went missing!</span>
+      ) : (
+        <img src={src} alt="Mystery cousin" draggable={false} onError={() => setBroken(true)} />
+      )}
     </div>
   );
 }

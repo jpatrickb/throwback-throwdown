@@ -24,6 +24,11 @@
 - **Tests:** `client/src/tv/ranking.test.ts` covers ranking ties, round points, and the reveal plan.
 - `Tv.tsx` keeps `useView('tv')`, the `tv:hello` registration, and `useGameAudio(view)` (it gets the raw server view).
 
+## Done (Nov 23)
+- `<AudioIndicator />` is rendered once in `Tv.tsx`, under the start overlay. It's styled via `--audio-indicator-*` tokens and confirmed on LOBBY, CAPTIONING and FINAL.
+- Removed the TV's own `tick`/`timesUp` calls (audio fires them from `view.deadline`). The TV still calls reveal, submit, cardDeal, tally, winner, leaderboard, champion and join.
+- Polaroids: portrait photos are letterboxed over a blurred fill (no crop, no black bars). A photo that fails to load shows "📷 Photo went missing!" instead of a broken image.
+
 ## Dev helpers
 - `/tv?mock=<PHASE>` as usual. Click once to dismiss the start overlay.
 - `&mockplayers=16` and `&mockcaptions=0|1|10` stress the fixtures (`client/src/tv/devStress.ts`, mock mode only).
