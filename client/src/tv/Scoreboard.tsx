@@ -5,7 +5,7 @@ import { motion } from 'motion/react';
 import type { TvView } from '../../../shared/types.ts';
 import { playSfx } from '../audio/index.ts';
 import { Badge, CountUp, RoundHeader, initials } from './common.tsx';
-import { byScore, ranks } from './ranking.ts';
+import { byScore, leaderChanged, ranks } from './ranking.ts';
 import { entrantRoundPoints, entrants, isTeamMode } from './entrants.ts';
 import { SPRING_SOFT, TIMING } from './motion.ts';
 
@@ -18,13 +18,19 @@ export function Scoreboard({ view }: { view: TvView }) {
     [view, pts],
   );
   const [settled, setSettled] = useState(false);
+  const newLeader = leaderChanged(rows);
   useEffect(() => {
     setSettled(false);
-    const t = setTimeout(() => {
-      setSettled(true);
-      playSfx('leaderboard');
-    }, TIMING.scoreboardReorderDelay);
-    return () => clearTimeout(t);
+    const timers = [
+      setTimeout(() => {
+        setSettled(true);
+        playSfx('leaderboard');
+      }, TIMING.scoreboardReorderDelay),
+    ];
+    // After the reshuffle settles, a fanfare if someone new took first place.
+    if (newLeader) timers.push(setTimeout(() => playSfx('leaderChange'), TIMING.scoreboardReorderDelay + 900));
+    return () => timers.forEach(clearTimeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [round?.index]);
 
   const sorted = [...rows].sort((a, b) => (settled ? byScore(a, b) : byScore({ ...a, score: a.prev }, { ...b, score: b.prev })));

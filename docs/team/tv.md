@@ -46,9 +46,20 @@
   - `--team-0..7` tokens in `tokens.css` match `TEAM_PRESETS`; preset colours map to the tokens, so a retheme carries over.
 - Individual mode is unchanged (`?solo=1`). Both modes were screenshotted at 1920×1080 and 1280×720.
 
+## Done (Nov 23): new SFX wired (per the table in docs/team/audio.md)
+- `roundStart` at the "Round N" slam. `zeroVotes` once per zero-vote batch. The low-vote tiers keep `tally`.
+- `drumroll` starts 1.5s before the winner sting, timed from the same `winnerHitDelay()` that flips the author in, so it ends on the hit (verified: 1.52s apart). The winner card's tally blips are silenced so they don't muddy the drumroll.
+- `tie` instead of `winner` when tied, played once (only the lead winner card makes sound and confetti).
+- `sweep` plus a "🧹 Clean sweep! +200" sticker when a caption's points include `SWEEP_BONUS`.
+- `leaderChange` 0.9s after the scoreboard settles, when none of last round's leaders are still first (`leaderChanged()`, tested; never on the first scored round).
+- `podium3`/`podium2`/`podium1` as each podium place reveals, then `champion` 0.9s after podium1.
+- Removed the vote `submit` sound in Voting (audio's automatic `voteCast` covers it). No AUTO keys are called by the TV.
+- Immediate SFX now go through a 0ms timer so React StrictMode's dev double-run doesn't double-fire them.
+- Verified by wrapping `window.__tvAudio.playSfx` in headless Chrome and logging every call with timestamps on RESULTS (normal, `&mocktie`, `&mocksweep`), SCOREBOARD, FINAL and PHOTO_REVEAL, in team and solo modes. No console errors.
+
 ## Dev helpers
 - `/tv?mock=<PHASE>` as usual. Click once to dismiss the start overlay.
-- `&solo=1` individual mode. `&mockplayers=25`, `&mockcaptions=0|1|25`, `&mocklong` (all captions 80 chars) stress the fixtures (`client/src/tv/devStress.ts`, mock mode only).
+- `&solo=1` individual mode. `&mockplayers=25`, `&mockcaptions=0|1|25`, `&mocklong` (all captions 80 chars), `&mocktie`, `&mocksweep` stress the fixtures (`client/src/tv/devStress.ts`, mock mode only).
 - `&mockreactions` streams fake emoji reactions.
 
 ## Notes for others

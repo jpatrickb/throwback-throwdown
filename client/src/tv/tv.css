@@ -831,3 +831,18 @@
 .standings-teams .standings-row { align-items: center; padding: 0.35em 0; }
 .st-members { display: block; font-size: 0.65em; color: var(--c-ink-soft); font-weight: var(--weight-body); white-space: normal; line-height: 1.2; }
 .standings-teams .st-name { white-space: normal; }
+.sweep-badge {
+  position: absolute;
+  left: 3.2em;
+  top: -0.95em;
+  padding: 0.1em 0.7em;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.5em;
+  color: var(--c-ink);
+  background: var(--c-sun);
+  border: 0.12em solid var(--c-ink);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-pop);
+  z-index: 2;
+}

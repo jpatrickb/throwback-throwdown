@@ -22,16 +22,24 @@ export function Final({ view }: { view: TvView }) {
   const [shown, setShown] = useState(0);
   useEffect(() => {
     const n = top.length;
-    const timers = Array.from({ length: n }, (_, k) =>
-      setTimeout(() => {
-        setShown(k + 1);
-        if (k === n - 1) {
-          playSfx('champion');
-          cannons();
-          setTimeout(() => burst(0.5, 0.35, 1.4), 400);
-        } else playSfx('reveal');
-      }, 700 + k * TIMING.finalPodiumStep + (k === n - 1 ? 600 : 0)),
-    );
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    for (let k = 0; k < n; k++) {
+      const at = 700 + k * TIMING.finalPodiumStep + (k === n - 1 ? 600 : 0);
+      timers.push(
+        setTimeout(() => {
+          setShown(k + 1);
+          // Reveals go 3rd → 2nd → 1st; the slot being revealed is n - k (3, 2, 1).
+          const slot = n - k;
+          playSfx(slot === 3 ? 'podium3' : slot === 2 ? 'podium2' : 'podium1');
+          if (slot === 1) {
+            // podium1 hits first, then the champion celebration.
+            timers.push(setTimeout(() => playSfx('champion'), 900));
+            cannons();
+            timers.push(setTimeout(() => burst(0.5, 0.35, 1.4), 400));
+          }
+        }, at),
+      );
+    }
     return () => timers.forEach(clearTimeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [top.length]);

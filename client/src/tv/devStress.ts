@@ -5,6 +5,7 @@
 // No effect unless ?mock= is set.
 import type { Player, ScoredCaption, TvView } from '../../../shared/types.ts';
 import { IS_MOCK } from '../socket.ts';
+import { POINTS_PER_VOTE, SWEEP_BONUS } from '../../../shared/types.ts';
 
 const FIRST = ['Uncle Bartholomew', 'Zoe', 'Great-Aunt Marguerite', 'Leo', 'Nana', 'Ricky Jr.', 'Ava', 'Big Mike', 'Lulu', 'Theo',
   'Cousin Christopher', 'Mo', 'Aunt Pam', 'Dex', 'Grandma Rose', 'Ellie', 'Uncle Ray', 'Kai', 'Becca', 'Junior', 'Tia', 'Oscar',
@@ -90,6 +91,13 @@ export function stressView(v: TvView | null): TvView | null {
         votedPlayerIds: r.votedPlayerIds,
       },
     };
+  }
+  // &mocktie: top two captions tie for the win. &mocksweep: the winner gets the clean-sweep bonus.
+  if ((q.has('mocktie') || q.has('mocksweep')) && out.round?.results?.length) {
+    const rs = [...out.round.results].sort((a, b) => b.votes - a.votes).map((c) => ({ ...c }));
+    if (q.has('mocktie') && rs.length > 1) rs[1] = { ...rs[1], votes: rs[0].votes, points: rs[0].votes * POINTS_PER_VOTE };
+    if (q.has('mocksweep')) rs[0] = { ...rs[0], points: rs[0].votes * POINTS_PER_VOTE + SWEEP_BONUS };
+    out = { ...out, round: { ...out.round, results: rs } };
   }
   return out;
 }

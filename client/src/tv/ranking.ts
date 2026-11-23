@@ -91,3 +91,16 @@ export function revealSchedule(plan: RevealPlan): { starts: number[]; total: num
   });
   return { starts, total: t };
 }
+
+/**
+ * Did someone new take first place this round? True when none of last round's leaders
+ * (highest `prev` score) are among this round's leaders. False before anyone had points.
+ */
+export function leaderChanged(rows: { id: string; score: number; prev: number }[]): boolean {
+  if (!rows.length) return false;
+  const prevMax = Math.max(...rows.map((r) => r.prev));
+  if (prevMax <= 0) return false;
+  const max = Math.max(...rows.map((r) => r.score));
+  const before = new Set(rows.filter((r) => r.prev === prevMax).map((r) => r.id));
+  return !rows.some((r) => r.score === max && before.has(r.id));
+}

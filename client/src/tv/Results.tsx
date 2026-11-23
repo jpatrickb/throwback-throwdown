@@ -4,6 +4,7 @@
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import type { ScoredCaption, TvView } from '../../../shared/types.ts';
+import { POINTS_PER_VOTE, SWEEP_BONUS } from '../../../shared/types.ts';
 import { playSfx } from '../audio/index.ts';
 import { CountUp, Doodle, Polaroid, RoundHeader } from './common.tsx';
 import { captionAuthor } from './entrants.ts';
@@ -54,12 +55,17 @@ export function Results({ view }: { view: TvView }) {
         setDrumroll(false);
         setStep(i + 1);
         const b = plan.beats[i];
-        if (b.kind === 'zero') playSfx('cardDeal');
+        if (b.kind === 'zero') playSfx('zeroVotes'); // once per zero-vote batch
         if (b.kind === 'tier') playSfx('tally');
       }, t),
     );
     const wi = plan.beats.findIndex((b) => b.kind === 'winner');
     if (wi > 0) timers.push(setTimeout(() => setDrumroll(true), starts[wi] - DRUMROLL_MS));
+    if (wi >= 0) {
+      // The drumroll sound (~1.6s, ends dry) is timed so the winner/tie sting lands right on its end.
+      const hit = starts[wi] + winnerHitDelay(plan.beats[wi].captions[0].votes);
+      timers.push(setTimeout(() => playSfx('drumroll'), Math.max(0, hit - DRUMROLL_SFX_LEAD_MS)));
+    }
     return () => timers.forEach(clearTimeout);
   }, [plan, round.index]);
 
@@ -129,8 +135,8 @@ export function Results({ view }: { view: TvView }) {
             </AnimatePresence>
           </ul>
           <div className="winner-zone" style={crowd && plan.winners.size ? { minHeight: `${1.2 + plan.winners.size * 7.4}em` } : undefined}>
-            {winners.map((c) => (
-              <ResultCard key={c.id} caption={c} author={captionAuthor(c, view)} winner tie={plan.winners.size > 1} sfx />
+            {winners.map((c, i) => (
+              <ResultCard key={c.id} caption={c} author={captionAuthor(c, view)} winner tie={plan.winners.size > 1} sfx={i === 0} />
             ))}
           </div>
           {done && results.length > 1 && plan.winners.size === 0 && (
@@ -180,28 +186,46 @@ function RestGrid({ captions, revealed, view }: { captions: ScoredCaption[]; rev
 
 type Author = ReturnType<typeof captionAuthor>;
 
+/** How long after a card appears its author flips in (the winner "hit"). */
+export function winnerHitDelay(votes: number): number {
+  return 500 + Math.min(1400, 400 + votes * 200);
+}
+/** Start the drumroll this long before the winner hit (audio: ~1.6s take that ends dry). */
+const DRUMROLL_SFX_LEAD_MS = 1500;
+
+/** True when this caption's points include the clean-sweep bonus. */
+export function isSweep(c: Pick<ScoredCaption, 'votes' | 'points'>): boolean {
+  return c.votes > 0 && c.points >= c.votes * POINTS_PER_VOTE + SWEEP_BONUS;
+}
+
 function ResultCard({ caption, author, winner, tie, place, sfx }: { caption: ScoredCaption; author: Author; winner?: boolean; tie?: boolean; place?: string; sfx?: boolean }) {
   const [stage, setStage] = useState(0); // 0 text, 1 votes tally, 2 author
+  const sweep = isSweep(caption);
   useEffect(() => {
     const timers = [
       setTimeout(() => setStage(1), 500),
-      setTimeout(() => setStage(2), 500 + Math.min(1400, 400 + caption.votes * 200)),
+      setTimeout(() => setStage(2), winnerHitDelay(caption.votes)),
     ];
-    if (sfx) {
-      if (!winner) playSfx('cardDeal');
-      // one tally blip per vote while the number counts up (capped so big counts don't machine-gun)
-      for (let v = 0; v < Math.min(caption.votes, 8); v++) timers.push(setTimeout(() => playSfx('tally'), 600 + v * 160));
+    // Winner cards stay quiet while counting: the drumroll covers that build.
+    if (sfx && !winner) {
+      timers.push(setTimeout(() => playSfx('cardDeal'), 0)); // via a timer so StrictMode's re-run cancels it
+      // one tally blip per vote while the number counts up (capped; audio raises the pitch per step)
+      for (let v = 0; v < Math.min(caption.votes, 8); v++) timers.push(setTimeout(() => playSfx('tally', { step: v }), 600 + v * 160));
     }
     return () => timers.forEach(clearTimeout);
   }, [caption.votes, winner, sfx]);
   useEffect(() => {
-    if (winner && stage === 2) {
-      playSfx('winner');
+    if (stage !== 2) return;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    if (winner && sfx) {
+      // Only the lead winner card makes noise and confetti, so a tie doesn't double up.
+      playSfx(tie ? 'tie' : 'winner');
       burst(0.62, 0.7, 1.2);
-      const t = setTimeout(() => burst(0.4, 0.4, 0.8), 600);
-      return () => clearTimeout(t);
+      timers.push(setTimeout(() => burst(0.4, 0.4, 0.8), 600));
     }
-  }, [winner, stage]);
+    if (sweep && (sfx || !winner)) timers.push(setTimeout(() => playSfx('sweep'), winner ? 1100 : 300));
+    return () => timers.forEach(clearTimeout);
+  }, [winner, stage, sfx, tie, sweep]);
   const pc = author.color;
   const El = winner ? motion.div : motion.li;
   return (
@@ -232,6 +256,11 @@ function ResultCard({ caption, author, winner, tie, place, sfx }: { caption: Sco
           )}
         </AnimatePresence>
       </span>
+      {sweep && stage >= 2 && (
+        <motion.b className="sweep-badge" initial={{ scale: 0, rotate: -20 }} animate={{ scale: 1, rotate: -5 }} transition={{ ...SPRING_POP, delay: winner ? 1.1 : 0.3 }}>
+          🧹 Clean sweep! +{SWEEP_BONUS}
+        </motion.b>
+      )}
     </El>
   );
 }

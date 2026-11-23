@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { ScoredCaption } from '../../../shared/types.ts';
-import { byScore, planReveal, ranks, revealSchedule, roundPoints } from './ranking.ts';
+import { byScore, leaderChanged, planReveal, ranks, revealSchedule, roundPoints } from './ranking.ts';
 
 const cap = (id: string, votes: number, playerId = `p-${id}`): ScoredCaption => ({
   id,
@@ -88,5 +88,19 @@ describe('revealSchedule', () => {
     const plan = planReveal([cap('a', 0), cap('b', 2)]);
     const { starts } = revealSchedule(plan);
     expect(starts[1] - starts[0]).toBeGreaterThan(2600);
+  });
+});
+
+describe('leaderChanged', () => {
+  const r = (id: string, prev: number, score: number) => ({ id, prev, score });
+  it('detects a new team in first place', () => {
+    expect(leaderChanged([r('a', 500, 600), r('b', 400, 900)])).toBe(true);
+  });
+  it('is false when the leader holds on, even if tied', () => {
+    expect(leaderChanged([r('a', 500, 600), r('b', 400, 500)])).toBe(false);
+    expect(leaderChanged([r('a', 500, 700), r('b', 400, 700)])).toBe(false);
+  });
+  it('is false on the first scored round (nobody led before)', () => {
+    expect(leaderChanged([r('a', 0, 300), r('b', 0, 100)])).toBe(false);
   });
 });

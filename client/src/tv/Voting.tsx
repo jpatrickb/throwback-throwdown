@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import type { Player, TvView } from '../../../shared/types.ts';
 import { useFitText } from './fit.ts';
 import { playSfx } from '../audio/index.ts';
-import { CountdownRing, PlayerChip, Polaroid, RoundHeader, useSfxOnIncrease } from './common.tsx';
+import { CountdownRing, PlayerChip, Polaroid, RoundHeader } from './common.tsx';
 import { TIMING } from './motion.ts';
 
 /** Caption text size steps down as the number/length of captions grows. */
@@ -32,7 +32,7 @@ export function Voting({ view }: { view: TvView }) {
   const round = view.round!;
   const captions = round.captions ?? [];
   const voted = new Set(round.votedPlayerIds);
-  useSfxOnIncrease(voted.size, 'submit');
+  // Vote sounds are automatic (audio's voteCast), so nothing to fire here.
   const n = captions.length;
   // Deal all cards within ~2.5s however many there are.
   const stagger = Math.min(TIMING.cardDealStagger, 2.5 / Math.max(1, n));

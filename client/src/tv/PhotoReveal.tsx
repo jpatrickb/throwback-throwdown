@@ -11,11 +11,15 @@ export function PhotoReveal({ view }: { view: TvView }) {
   const round = view.round!;
   const [flipped, setFlipped] = useState(false);
   useEffect(() => {
+    const slam = setTimeout(() => playSfx('roundStart'), 0); // the "Round N" slam (timer: StrictMode-safe)
     const t = setTimeout(() => {
       setFlipped(true);
       playSfx('reveal');
     }, TIMING.revealRoundTitle);
-    return () => clearTimeout(t);
+    return () => {
+      clearTimeout(slam);
+      clearTimeout(t);
+    };
   }, [round.index]);
   const total = Math.max(round.totalPhotosQueued, round.index + 1);
   return (
