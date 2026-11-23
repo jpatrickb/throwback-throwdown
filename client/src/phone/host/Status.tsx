@@ -1,7 +1,12 @@
+import { useState } from 'react';
 import type { HostView } from '../../../../shared/types.ts';
 import { Countdown } from '../Countdown.tsx';
 import { COPY } from '../copy.ts';
+import { summarizeNames } from './names.ts';
 import { useAct } from './useAct.ts';
+
+/** How many missing names to list before collapsing into "+N more". */
+const MISSING_MAX = 6;
 
 /** Live progress for timed phases: who's done, who's missing, clock controls. */
 export function Status({ view }: { view: HostView }) {
@@ -34,12 +39,13 @@ export function Status({ view }: { view: HostView }) {
         {timed && <Countdown deadline={view.deadline} serverNow={view.serverNow} />}
       </div>
 
-      {timed && missing.length > 0 && (
-        <p className="ph-missing">
-          <span className="ph-muted">{COPY.host.missing}: </span>
-          {missing.map((p) => p.name).join(', ')}
-        </p>
+      {timed && active.length > 0 && (
+        <div className="ph-progress" aria-hidden>
+          <div className="ph-progress__bar" style={{ width: `${(done / active.length) * 100}%` }} />
+        </div>
       )}
+
+      {timed && missing.length > 0 && <Missing names={missing.map((p) => p.name)} />}
 
       {timed && (
         <div className="ph-btn-row">
@@ -52,5 +58,26 @@ export function Status({ view }: { view: HostView }) {
         </div>
       )}
     </section>
+  );
+}
+
+function Missing({ names }: { names: string[] }) {
+  const [all, setAll] = useState(false);
+  const { shown, more } = summarizeNames(names, all ? Infinity : MISSING_MAX);
+  return (
+    <p className="ph-missing">
+      <span className="ph-muted">{COPY.host.missing}: </span>
+      {shown.join(', ')}
+      {more > 0 && (
+        <button className="ph-missing__more" onClick={() => setAll(true)}>
+          {COPY.host.more(more)}
+        </button>
+      )}
+      {all && names.length > MISSING_MAX && (
+        <button className="ph-missing__more" onClick={() => setAll(false)}>
+          {COPY.host.less}
+        </button>
+      )}
+    </p>
   );
 }

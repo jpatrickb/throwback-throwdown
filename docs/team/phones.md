@@ -7,6 +7,8 @@
 - Errors are toasts (`phone/Toast.tsx`), actions time out after 8s with a toast; mock mode skips join/PIN and actions are no-ops.
 - Unit tests: `client/src/phone/phone.test.ts` (phase button mapping, resize math, rank ties).
 
+- **Big rooms (25 players)**: voting has a sticky header (prompt + countdown), compact cards above 8 captions, and a sticky footer showing your locked-in pick. Host "Waiting on" lists 6 names then "+N more" (tap to expand), with a progress bar. Check any screen with `&mockcount=25` (dev-only, `phone/devMock.ts`).
+
 ## Where to change things
 - All phone copy: `client/src/phone/copy.ts`. Avatar emoji/colors and reaction emoji: `client/src/phone/avatars.ts`.
 - Styles: `client/src/phone/phone.css`, built on tv's `theme/tokens.css`.

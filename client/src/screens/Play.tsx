@@ -12,6 +12,7 @@ import { Voting } from '../phone/player/Voting.tsx';
 import { Results } from '../phone/player/Results.tsx';
 import { Final } from '../phone/player/Final.tsx';
 import { Reactions } from '../phone/player/Reactions.tsx';
+import { inflate } from '../phone/devMock.ts';
 import '../phone/phone.css';
 
 const KEYS = { token: 'ccp:token', name: 'ccp:name', room: 'ccp:room', avatar: 'ccp:avatar', color: 'ccp:color' };
@@ -38,7 +39,7 @@ export function Play() {
 }
 
 function PlayInner() {
-  const view = useView('player');
+  const view = inflate(useView('player'));
   const connected = useConnected();
   const params = new URLSearchParams(window.location.search);
   const urlRoom = params.get('room')?.toUpperCase() ?? null;

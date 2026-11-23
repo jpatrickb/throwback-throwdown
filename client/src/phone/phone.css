@@ -17,7 +17,7 @@
   display: flex;
   flex-direction: column;
   gap: 14px;
-  overflow-x: hidden;
+  overflow-x: clip; /* not hidden: hidden makes .phone a scroll box and breaks position: sticky */
 }
 body:has(.phone) {
   background:
@@ -269,7 +269,6 @@ body:has(.phone) {
   border-radius: var(--radius-pill); padding: 3px 8px;
 }
 .ph-vote__tag--on { background: var(--c-success); color: #fff; font-size: 1.1rem; width: 32px; height: 32px; padding: 0; display: grid; place-items: center; }
-.ph-locked { text-align: center; font-weight: var(--weight-strong); color: var(--c-success); }
 
 /* ---------- Results / Final ---------- */
 .ph-result { display: grid; gap: 12px; text-align: center; }
@@ -382,3 +381,40 @@ body:has(.phone) {
 @media (prefers-reduced-motion: reduce) {
   .phone *, .phone *::before, .phone *::after { animation: none !important; transition: none !important; }
 }
+
+/* ---------- Big rooms (20+ players) ---------- */
+.ph-sticky-top {
+  position: sticky; top: 0; z-index: 4;
+  margin: calc(-1 * var(--ph-gutter)) calc(-1 * var(--ph-gutter)) 0;
+  padding: calc(10px + env(safe-area-inset-top)) var(--ph-gutter) 10px;
+  background: color-mix(in srgb, var(--c-stage-deep) 88%, transparent);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 6px 16px rgb(0 0 0 / 0.25);
+}
+.ph-votes--compact { gap: 8px; }
+.ph-votes--compact .ph-vote { min-height: 0; padding: 11px 48px 11px 14px; font-size: 1.1rem; border-width: 0.14em; box-shadow: 0.15em 0.15em 0 var(--c-ink); }
+.ph-votes--compact li .ph-vote { transform: none; }
+.phone .ph-votes--compact .ph-vote.is-on { transform: scale(1.01); }
+.ph-vote-footer {
+  position: sticky; bottom: calc(8px + env(safe-area-inset-bottom)); z-index: 4;
+  margin-top: 4px;
+  display: grid; gap: 2px; text-align: center;
+  background: var(--c-ink); color: var(--c-paper);
+  border: 3px solid var(--c-fg-muted);
+  border-radius: var(--radius-lg);
+  padding: 12px 16px;
+  box-shadow: var(--shadow-card);
+}
+.ph-vote-footer.is-locked { border-color: var(--c-success); }
+.ph-vote-footer__label { font-weight: var(--weight-strong); }
+.ph-vote-footer.is-locked .ph-vote-footer__label { color: var(--c-success); }
+.ph-vote-footer__text {
+  font-family: var(--font-hand); font-size: 1.05rem;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ph-vote-footer__hint { font-size: 0.8rem; color: var(--c-fg-muted); }
+.ph-missing__more {
+  background: none; border: 0; padding: 0; margin-left: 4px;
+  color: var(--c-stage); font-weight: var(--weight-strong); text-decoration: underline;
+}
+.ph-card .ph-progress { background: var(--c-paper-shade); border: 2px solid var(--c-ink); height: 14px; }

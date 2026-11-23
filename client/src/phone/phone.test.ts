@@ -4,6 +4,7 @@ import { primaryFor } from './host/primary.ts';
 import { fitWithin } from './host/resize.ts';
 import { rankOf } from './player/rank.ts';
 import { fallbackLook } from './avatars.ts';
+import { summarizeNames } from './host/names.ts';
 
 const photo = (id: string, used: boolean): Photo => ({ id, url: '', subject: null, used });
 const pl = (id: string, score: number): Player => ({ id, name: id, avatar: null, color: null, score, connected: true });
@@ -51,5 +52,16 @@ describe('rankOf', () => {
 describe('fallbackLook', () => {
   it('is stable per id', () => {
     expect(fallbackLook('p1')).toEqual(fallbackLook('p1'));
+  });
+});
+
+describe('summarizeNames', () => {
+  const names = Array.from({ length: 18 }, (_, i) => `P${i}`);
+  it('truncates long lists with a +N count', () => {
+    expect(summarizeNames(names, 6)).toEqual({ shown: names.slice(0, 6), more: 12 });
+  });
+  it('shows everything when it fits', () => {
+    expect(summarizeNames(names.slice(0, 4), 6)).toEqual({ shown: names.slice(0, 4), more: 0 });
+    expect(summarizeNames(names, Infinity).more).toBe(0);
   });
 });

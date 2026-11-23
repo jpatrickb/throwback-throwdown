@@ -11,6 +11,7 @@ import { PhotoQueue } from '../phone/host/PhotoQueue.tsx';
 import { Moderation } from '../phone/host/Moderation.tsx';
 import { Players } from '../phone/host/Players.tsx';
 import { Settings } from '../phone/host/Settings.tsx';
+import { inflate } from '../phone/devMock.ts';
 import '../phone/phone.css';
 
 const PIN_KEY = 'ccp:hostpin';
@@ -32,7 +33,7 @@ export function Host() {
 }
 
 function HostInner() {
-  const view = useView('host');
+  const view = inflate(useView('host'));
   const connected = useConnected();
   const [pin, setPin] = useState(readPin);
   const [error, setError] = useState<string | null>(null);
