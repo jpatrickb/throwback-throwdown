@@ -1,46 +1,67 @@
-# engine — status
+# engine (+ qa) — status
 
-**The real game loop is live on :3100.** Commits `204f8dc` (engine + tests) and `b9bf58b` (server wiring).
-Dev instance: room `ENGN`, host PIN `123456`, run with `DATA_DIR=<scratchpad>` so `data/photos/` stays clean.
-Point vite at it with `API_PORT=3100`.
+SendMessage to team-lead / phones / tv / cousin-party keeps failing ("Failed to write to inbox"), so everything is in this file.
 
-(SendMessage to team-lead / phones / tv / cousin-party failed with "Failed to write to inbox", so these notes are here instead.)
+## ⚠️ Needs the lead NOW (your file: client/src/socket.ts)
+**On WebKit / iPhone Safari, `/host` can stay stuck on a disabled "Connecting…" button even though the socket is connected.**
+`useConnected()` misses a `connect` event that fires between `useState(socket.connected)` and the effect subscribing.
+WebKit reliably hits that window, so this would block the host on her iPhone. Fix (verified in WebKit, then reverted because it's your file):
 
-## Done
-- `server/engine.ts`: pure reducer `apply(state, event, now) => { state, error? }`. Events: join, presence, setAvatar,
-  caption, vote, addPhotos, host, timeout. Implements the full PLAN §2 state machine. `scoreRound` lives here, and views.ts re-exports it.
-- `server/engine.test.ts`: 38 tests covering transitions, auto-advance, timeout, scoring/sweep/ties, self-vote, hidden captions,
-  skipping with <2 captions, reset, late join, kick, rename, photos, settings clamping.
-- `server/index.ts`: every intent goes through the engine. One timer is armed for `state.deadline`, and every change re-arms it, persists, and broadcasts.
-  Each handler is wrapped so a throw can't crash the server. Max 60 players. Socket payloads are capped at 64KB.
-- `server/validate.ts`: shape checks for every socket payload. `server/pin.ts`: one PIN guard (per caller plus global
-  lockout) shared by `host:auth` and the upload endpoint.
-- `server/photos.ts`: `POST /api/photos` (field `photos`, header `x-host-pin`, JPEG/PNG/WebP/GIF/AVIF, 15MB each, up to 50).
-  On boot it scans `data/photos/`, sorted naturally by filename; `03 - Cousin Jake.jpg` sets the subject to "Cousin Jake". HEIC is skipped with a warning.
-  Removed photos move to `data/photos/removed/` instead of being deleted.
-- `server/persist.ts`: atomic write of state + tokens to `data/state.json` after every change. On restore the room code is kept
-  (`ROOM_CODE` env still overrides), every player starts disconnected, and running timers get 20s of grace. `RESET_STATE=1` starts fresh.
-- `scripts/bots.ts`: `npm run bots -- <ROOM> 8 http://localhost:3100 [--host PIN] [--fast] [--photos N]`. Host mode uploads
-  generated test PNGs if the queue is empty, then runs the whole game and exits at FINAL.
-- Verified: a 3-round hands-free game end to end; killing the server mid-CAPTIONING and restarting it, after which the bots rejoined their same slots and the game went on.
+```diff
+     socket.on('connect', on);
+     socket.on('disconnect', off);
++    setConnected(socket.connected); // catch a connect that happened before this effect subscribed
+     return () => {
+```
+Until this lands, the `webkit-iphone-host` e2e project fails at the PIN screen (that's the test doing its job). With the fix, both projects pass.
 
-## Notes for phones
-- Error acks carry a readable `error`. Show it as is.
-- After a reconnect, emit `player:join` with the saved token before any caption or vote. Until then the server answers "Join first".
-- Upload reply: `{ok, photos}`, or `{ok:false,error}` with 401 for a wrong PIN, 429 when locked out, 400 for a bad file. An optional `subject` field is used for single-file uploads.
-- Host errors to expect: removePhoto on a played photo; nextRound with no photos left (use `end`); hideCaption outside
-  CAPTIONING/VOTING. `next` in LOBBY acts as start. `end` during VOTING scores the votes cast; during CAPTIONING it drops the round.
-- updateSettings clamps: captions 10–600s, voting 5–300s, max caption length 20–200.
+Also for the lead: add `test-results/` (or `tests/test-results/`) to `.gitignore`, and optionally `"e2e": "playwright test -c tests"` to package.json.
+I installed the Playwright chromium headless shell v1255 (`npx playwright install chromium`, a browser download, not an npm package), which @playwright/test 1.65.1 needed.
 
-## Notes for tv
+## Team mode — done (530a644)
+- `engine.ts`: `assignTeam` (one function: smallest team, ties to the lowest team number, which equals join-order round-robin and stays balanced after kicks),
+  rebuild on teamCount/teamMode change (lobby only; surviving teams keep names and scores), shared team caption (a later submit replaces it,
+  `playerId` = last editor), own-team vote block, CAPTIONING auto-advances when every team with a connected member has a caption,
+  VOTING waits for every connected player who has something to vote for, team scoring + sweep (≥2 votes and every eligible voter chose it),
+  `moveToTeam` (drops a vote that now targets your own team), `shuffleTeams` (seeded and balanced; LOBBY/RESULTS/SCOREBOARD/FINAL only), `renameTeam` (host) and
+  `player:renameTeam` (member), ≤24 chars. Reset keeps teams and zeroes team scores. `normalizeState` upgrades old state.json files.
+- `adjustScore` in team mode goes to the team: `playerId` may be a **team id** or a member's id. (phones: ±100 per team is possible without a contract change.)
+- Views: `teams` (score desc, members in join order), `submittedTeamIds`, team fields on results, `myTeam`, `myCaption`/`myCaptionId` = team caption,
+  `myCaptionEditedBy`. Player ids are now `p` + 7 hex characters, so object key order = join order.
+- Individual mode still works (`settings.teamMode=false`, bots `--solo`).
+- 57 engine tests (19 team). 25 bots / 5 teams / 4 rounds on a production build: 5 captions per round, 0 errors, ack p95 15ms.
+
+## Stress test (prod build, own port + DATA_DIR) — a94ade9
+| Run | Result |
+|---|---|
+| 25 bots, 3 rounds | 0 errors, ack p50 7ms / p95 21ms, RSS ~94MB, CPU peak 7% |
+| 30 bots, 10 rounds | 671 acks, 0 errors, p95 13ms, RSS ≤87MB (flat), CPU peak 18% |
+| 30 bots, 20% idle (timer path), reconnect churn, 12s/8s timers, 10 rounds | all rounds ended on the timer as expected; RSS ≤107MB; 148 recoverable errors ("Join first" from emits buffered while offline, "Voting is closed" from late votes); bots retried and finished |
+| 25 bots, 5 teams | 0 errors after fixing a bot-side double-vote race |
+
+No server changes were needed for load. Bots changed: stats at FINAL, `--lazy F`, `--churn`, `--timers C,V`, `--solo`, `--teams N`, `--quiet`;
+stale-action guard; the host waits only for *connected* players, tops up photos, and resets a finished game. Player cap raised to 80 (it counts disconnected players).
+Server: `CLIENT_DIST` env serves a build from another folder (so QA never touches `dist/`).
+
+**Phones, take note:** after a reconnect, Socket.IO sends emits buffered while offline *before* your `player:join` rejoin,
+so they get "Join first". If a caption/vote ack says "Join first", rejoin and resend.
+
+## QA deliverables
+- `tests/e2e.spec.ts` + `tests/playwright.config.ts` (ceeb961): own servers on :3120/:5120 with a temp DATA_DIR. TV at 1920×1080. Host on a
+  Pixel 7 (chromium) and an iPhone 13 (webkit): wrong PIN shows an error, right PIN logs in, uploads 2 photos through the real file picker
+  (client resize + POST). Then bots (8, 3 teams) play and drive the host. Asserts that captioning → voting → results → FINAL each show on the TV, the bots exit 0, and there are no page errors.
+  Screenshots go to `tests/test-results/`. Run: `npx playwright test -c tests`.
+- `docs/DEVICE-CHECKLIST.md` (bb55be5): iPhone host, iPhone/Android players, TV, failure drills, game-day runbook.
+- Host PIN now survives restarts (7e1e47a): it's saved in state.json and reused unless `HOST_PIN` or `RESET_STATE=1` is set, so a mid-game crash
+  doesn't log the host out.
+
+## For tv
+- On the FINAL screen at 1920px, "Champion: Team Scrunchie" runs off the right edge (seen in the e2e screenshot).
 - `reaction` events go to TV sockets only, rate-limited to 6 per 3s per player.
-- Results are sorted by votes desc, then name. Hidden captions are left out. With fewer than 2 visible captions, VOTING is skipped.
 
-## Needs the lead
-- `npm test` finds no server tests because `vite.config.ts` has `root: 'client'`. Fix: add `test: { root: '.' }`
-  to `defineConfig` (or use `vitest run --root .` in package.json). Until then: `npx vitest run --root .`.
-- No `shared/types.ts` changes needed.
+## Running instances
+- :3100: my dev server (`tsx watch`), room ENGN, PIN 123456, data in my scratchpad.
 
 ## Questions for Patrick
-- Can a player vote while they're the cousin in the photo? (Yes for now. Nothing special happens.)
-- Should the subject reveal happen automatically at RESULTS? (Right now it's host-only via revealSubject.)
+- "Per-photo mode" (Nov 23 note) was superseded by teams. Individual mode still works if he wants it back.
+- Should teams be auto-shuffled at the start instead of assigned in join order? It's a one-function change (`assignTeam` in server/engine.ts).
