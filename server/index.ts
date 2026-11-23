@@ -16,7 +16,7 @@ import { hostView, playerView, tvView, type JoinInfo } from './views.ts';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PORT = Number(process.env.PORT ?? 3000);
-const PUBLIC_URL = process.env.PUBLIC_URL ?? null; // e.g. https://party.jpatrickbeal.com
+const PUBLIC_URL = process.env.PUBLIC_URL ?? null; // e.g. https://party.example.com (see .env.example)
 const IS_PROD = process.env.NODE_ENV === 'production';
 const DATA_DIR = path.resolve(ROOT, process.env.DATA_DIR ?? 'data');
 const PHOTO_DIR = path.join(DATA_DIR, 'photos');

@@ -15,7 +15,7 @@ These specs describe what each cue should be, whether you tweak the generated ve
   the chords, melodies, drum, bass and comping patterns, synth patches and mix levels. Then run
   `bash client/src/audio/soundtrack/build.sh` (or `build.sh music-lobby sfx-winner` for just a few). It
   re-renders in Soundcraft, cuts the exact loop, normalizes, and writes the `.ogg`/`.mp3` files and sessions.
-  It needs `soundcraft-cli` at `~/Downloads/soundcraft/target/release/` (or set `SOUNDCRAFT_CLI`).
+  It needs `soundcraft-cli` on your PATH (or set `SOUNDCRAFT_CLI` to its path). Soundcraft: https://getartcraft.com/apps/soundcraft
 
 The original ffmpeg beeps are still in `client/public/audio/placeholder/` as a fallback: switch a cue back to
 `placeholder('…')` in `cues.ts`.
@@ -103,7 +103,7 @@ takes are written in `client/src/audio/soundtrack/sfx.ts`, and each key's Soundc
 holds its takes back to back. To add your own take, drop `my-take.ogg/.mp3` in `client/public/audio/` and list it:
 `winner: { takes: [real('my-take'), ...takes('sfx-winner', 4)], ... }`. The full key list (25 keys, including
 roundStart, allIn, lastCall, voteCast, drumroll, tie, sweep, zeroVotes, teamJoin, teamRename, podium1–3,
-leaderChange and whoosh) is the table at the top of `docs/team/audio.md`. The table below covers the original ten.
+leaderChange and whoosh) is the table at the top of `docs/build-log/team/audio.md`. The table below covers the original ten.
 
 | Filename | Length | Description |
 |---|---|---|

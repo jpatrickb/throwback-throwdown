@@ -1,18 +1,19 @@
 {
-  "name": "cousin-caption-party",
-  "private": true,
+  "name": "throwback-throwdown",
   "type": "module",
   "scripts": {
-    "dev": "concurrently -k -n server,client -c magenta,cyan \"PORT=${API_PORT:-3000} tsx watch server/index.ts\" \"vite\"",
+    "dev": "concurrently -k -n server,client -c magenta,cyan \"PORT=${API_PORT:-3000} tsx watch --env-file-if-exists=.env server/index.ts\" \"vite\"",
     "build": "vite build",
-    "start": "NODE_ENV=production tsx server/index.ts",
-    "party": "npm run build && PUBLIC_URL=https://party.jpatrickbeal.com npm run start",
-    "tunnel": "cloudflared tunnel run party",
+    "start": "NODE_ENV=production tsx --env-file-if-exists=.env server/index.ts",
+    "party": "npm run build && npm run start",
+    "tunnel": "cloudflared tunnel run ${TUNNEL_NAME:-party}",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "bots": "tsx scripts/bots.ts",
     "e2e": "playwright test -c tests",
-    "fresh": "tsx scripts/fresh.ts && RESET_STATE=1 npm run party"
+    "fresh": "tsx scripts/fresh.ts && RESET_STATE=1 npm run party",
+    "tunnel:quick": "cloudflared tunnel --url http://localhost:${PORT:-3000}",
+    "screenshots": "tsx scripts/screenshots.ts"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",
@@ -42,5 +43,11 @@
     "typescript": "^7.0.2",
     "vite": "^8.3.8",
     "vitest": "^5.1.1"
+  },
+  "version": "1.0.0",
+  "description": "A photo-caption party game for big family gatherings: the TV shows a childhood photo, teams caption it from their phones, everyone votes.",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.9"
   }
 }

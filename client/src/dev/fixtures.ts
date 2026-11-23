@@ -109,7 +109,7 @@ function base(phase: Phase, d: ReturnType<typeof build>, solo: boolean) {
   };
 }
 
-const JOIN_URL = 'https://party.jpatrickbeal.com/play?room=GRFW';
+const JOIN_URL = 'https://party.example.com/play?room=GRFW';
 
 export function mockView(role: View['role'], phase: Phase, meId = 'p3', solo = false): View {
   const d = build(solo);

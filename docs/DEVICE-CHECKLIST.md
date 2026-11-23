@@ -1,11 +1,13 @@
 # Device checklist — Saturday dry run (Nov 28) + game-day runbook
 
+> Throughout, replace `https://party.example.com` with your own `PUBLIC_URL` (see [SELF-HOSTING.md](SELF-HOSTING.md)).
+
 Print this or keep it open on a laptop. Tick boxes as you go and write anything that breaks in the
 **Problems** table at the bottom. Fix only what breaks; feature freeze is end of Saturday.
 
-**Setup for the dry run:** MacBook on HDMI to the real TV if possible. the host on her iPhone as host.
+**Setup for the dry run:** MacBook on HDMI to the real TV if possible. The host on their iPhone.
 3–5 family members on their own phones (at least one iPhone and one Android). Run the bots for extra players:
-`npm run bots -- <ROOM> 15 https://party.jpatrickbeal.com` (bots join through the public URL like real phones).
+`npm run bots -- <ROOM> 15 https://party.example.com` (bots join through the public URL like real phones).
 
 ---
 
@@ -19,9 +21,9 @@ Print this or keep it open on a laptop. Tick boxes as you go and write anything 
 
 ## 1. Host: the host's iPhone (Safari), the top priority
 
-- [ ] Open `https://party.jpatrickbeal.com/host` in Safari on **cellular** (wifi off). The page loads.
+- [ ] Open `https://party.example.com/host` in Safari on **cellular** (wifi off). The page loads.
 - [ ] The button changes from "Connecting…" to "Enter" within a few seconds.
-      (A WebKit bug could leave it stuck on "Connecting…". If you see that, the fix in `client/src/socket.ts` is missing. See docs/team/engine.md.)
+      (A WebKit bug could leave it stuck on "Connecting…". If you see that, the fix in `client/src/socket.ts` is missing. See docs/build-log/team/engine.md.)
 - [ ] Wrong PIN → "Wrong PIN" message. Right PIN → host controls appear.
 - [ ] **Add to Home Screen** (Share → Add to Home Screen), open it from there, and confirm it still logs in.
 - [ ] **Photo upload from the camera roll:** pick 3+ photos at once, including an iPhone HEIC photo and a
@@ -91,7 +93,7 @@ Do each on at least one iPhone and one Android.
 - [ ] **LAN fallback (no internet):** turn on the phone hotspot, connect the MacBook and 2 phones to it, then run
       `npm run build && npm run start` (no `PUBLIC_URL`). The TV QR now shows `http://<laptop-ip>:3000/play?room=…`.
       Join from a phone on the hotspot.
-- [ ] the host's phone dies: open `/host` on your own phone with the same PIN. Both can host at once.
+- [ ] The host's phone dies: open `/host` on your own phone with the same PIN. Both can host at once.
 
 ---
 
@@ -107,7 +109,7 @@ Do each on at least one iPhone and one Android.
 **At the venue (arrive ~30 min early)**
 1. Connect HDMI, set audio output to the TV, check that the venue internet works.
 2. Terminal 1: `RESET_STATE=1 npm run party`
-   (builds, then serves on :3000 with `PUBLIC_URL=https://party.jpatrickbeal.com`).
+   (builds, then serves on :3000 using `PUBLIC_URL` from your `.env`).
    `RESET_STATE=1` starts a **fresh** game, keeping any photos you put in `data/photos/`. Use it only for this first start, never after a crash (see below).
    If you didn't preload photos, `npm run fresh` does the archive and the fresh start in one step.
    (Don't run `npm run fresh` after putting real photos in the folder: it archives them too.)
@@ -118,9 +120,9 @@ Do each on at least one iPhone and one Android.
 6. Write down from terminal 1:
    - **Room code:** `____`
    - **Host PIN:** `______`
-   - Player URL: `https://party.jpatrickbeal.com/play?room=<CODE>` (it's what the QR on the TV encodes)
-   - Host URL: `https://party.jpatrickbeal.com/host`
-7. Test-join with one phone on wifi and one on cellular. the host logs in on her iPhone and uploads or checks the photos.
+   - Player URL: `https://party.example.com/play?room=<CODE>` (it's what the QR on the TV encodes)
+   - Host URL: `https://party.example.com/host`
+7. Test-join with one phone on wifi and one on cellular. The host logs in on their iPhone and uploads or checks the photos.
 8. Check that teams look right (5 teams by default), then **Start game**.
 
 **If something goes wrong**
@@ -128,11 +130,11 @@ Do each on at least one iPhone and one Android.
 | Problem | Do this |
 |---|---|
 | Server crashed or got closed | `npm run party` again, **without** `RESET_STATE`. Same room code, PIN, players, scores. |
-| Phones can't reach the site | Check terminal 2 (tunnel). Restart it with `npm run tunnel`. Test `https://party.jpatrickbeal.com/api/health`. |
+| Phones can't reach the site | Check terminal 2 (tunnel). Restart it with `npm run tunnel`. Test `https://party.example.com/api/health`. |
 | Venue internet is down | LAN fallback: hotspot → `npm run build && npm run start` → everyone joins the hotspot and scans the new QR. |
 | A phone shows the wrong screen | Refresh that phone. It rejoins as the same player. |
 | The TV is stuck or blank | Reload `localhost:3000/tv` and click the start overlay again. |
-| the host is locked out ("Too many tries") | Wait 1 minute. The PIN is printed in terminal 1. |
+| The host is locked out ("Too many tries") | Wait 1 minute. The PIN is printed in terminal 1. |
 | Want a brand-new game after the final | Host → New game (keeps players and teams, zeroes scores, photos unused). |
 
 ---

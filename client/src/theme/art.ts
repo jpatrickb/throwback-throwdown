@@ -2,7 +2,7 @@
 // To swap in Patrick's real art: drop the file in client/public/art/ and change the path here.
 // `null` means "no image yet": components fall back to CSS/text (e.g. the logo renders BRAND.name).
 // Missing files never break the game: <ArtImg> hides itself if a file 404s.
-// Prompts for generating each asset: docs/team/art-prompts.md
+// Prompts for generating each asset: docs/art-prompts.md
 export const ART = {
   /** Game logo (transparent PNG, ~1600x600). null = styled text from BRAND.name. */
   logo: null as string | null,

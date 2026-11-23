@@ -6,7 +6,7 @@
 //   winner: { takes: takes('sfx-winner', 4), ... }  ->  sfx-winner-1 ... sfx-winner-4
 //   Swap in your own file by listing it: { takes: [real('my-fanfare'), ...takes('sfx-winner', 2)] }
 // If a file is missing or fails to load, that take (or cue) is silently skipped.
-// The files are rendered in Soundcraft by client/src/audio/soundtrack/build.sh (see docs/team/music-briefs.md).
+// The files are rendered in Soundcraft by client/src/audio/soundtrack/build.sh (see docs/music-briefs.md).
 import type { Phase } from '../../../shared/types.ts';
 import type { SfxKey } from './index.ts';
 
@@ -86,7 +86,7 @@ export const SFX: Record<SfxKey, SfxCue> = {
 };
 
 /** Which music bed plays in each phase. null = silence (the reveal stinger gets the stage).
- *  The old captioning bed is retired (see docs/team/audio.md); its composition is still in compose.ts.
+ *  The old captioning bed is retired (see docs/build-log/team/audio.md); its composition is still in compose.ts.
  *  Consecutive phases with the same cue keep playing without restarting. */
 export const PHASE_MUSIC: Record<Phase, MusicKey | null> = {
   LOBBY: 'lobby',

@@ -8,7 +8,7 @@
 - **Display:** MacBook → TV over HDMI (MacBook has HDMI built in). Sound goes over HDMI.
 - **Tunnel:** named Cloudflare tunnel `party` → **`https://party.jpatrickbeal.com`** → `localhost:3000`. Config lives in `~/.cloudflared/config.yml` (credentials JSON next to it; keep it secret). Verified end to end on Nov 22: bots joined over the public URL.
 - **Host PIN:** 6 digits, random each start (or `HOST_PIN` env). Because the server is public, wrong guesses are rate-limited: 5 per connection, then a 60s global lockout after 20 per minute.
-- **Patrick's answers (Nov 23):** name stays **Throwback Throwdown**. No "who's in the photo" names: just the picture, and the reveal button is removed. Reactions only on reveal/results/scoreboard. Score fixes stay ±100. Photos are uploaded by the host from her phone, either all at the start or one at a time. **~25 players in 5 teams (the host's call, Nov 23):** one photo at a time; each team submits one caption (any member, latest replaces); everyone votes individually but not for their own team; points go to teams; preset team names that any member can rename; auto-assigned in join order (the host may switch this to a shuffle). Individual mode stays as a setting. Spec: `docs/team/briefs/teams.md`. the host hosts only, on an **iPhone** (Safari is the priority test).
+- **Patrick's answers (Nov 23):** name stays **Throwback Throwdown**. No "who's in the photo" names: just the picture, and the reveal button is removed. Reactions only on reveal/results/scoreboard. Score fixes stay ±100. Photos are uploaded by the host from their phone, either all at the start or one at a time. **~25 players in 5 teams (the host's call, Nov 23):** one photo at a time; each team submits one caption (any member, latest replaces); everyone votes individually but not for their own team; points go to teams; preset team names that any member can rename; auto-assigned in join order (the host may switch this to a shuffle). Individual mode stays as a setting. Spec: `docs/team/briefs/teams.md`. The host only hosts, on an **iPhone** (Safari is the priority test).
 - **Patrick's playtest feedback (Nov 23):** keep the berry stage as the default theme. Hide the LAN URL on the TV (it's only in the settings panel). No game-written text on the photo (players write all captions). TV gets an always-available settings button: themes, music/SFX toggles and volumes, reactions, fullscreen. **Music never plays over SFX**: it waits for stingers and ducks out under effects. The lobby track is his favorite, so it also plays during CAPTIONING (the most-played phase). Audio gets a harmony pass to remove discordant notes. Teams: join order by default, with the host able to shuffle and move people.
 - **Stack as built:** Node 26, TypeScript, Express 5, Socket.IO 4, Vite 8, React 19, Vitest.
 
@@ -86,7 +86,7 @@ Tunnel detail: a **quick tunnel** (`cloudflared tunnel --url http://localhost:30
 - Results: "You got N votes, +X points", their rank.
 - Reconnect: a token in `localStorage` puts a sleeping or refreshed phone back into the same player slot.
 
-**Host controls — `/host`** (the host, on her phone)
+**Host controls — `/host`** (the host, on their phone)
 - Gated by a **host PIN**, separate from the room code. The room code is on the TV for everyone, so it can't be the host password.
 - Photo queue: thumbnails of preloaded photos plus an **"Upload photo"** button (opens camera roll / camera). She picks the next photo.
 - Big context-sensitive buttons: **Start game → Reveal photo → Start captions → Start voting → Show results → Next round / End game.**
@@ -107,7 +107,7 @@ LOBBY ──host:start──▶ PHOTO_REVEAL ──host:next──▶ CAPTIONING
 ```
 
 Rules:
-- **Auto-advance** out of CAPTIONING and VOTING when the timer runs out or everyone is done. The host can always advance early or add time. The other steps wait for the host so the host controls the pace and the jokes land.
+- **Auto-advance** out of CAPTIONING and VOTING when the timer runs out or everyone is done. The host can always advance early or add time. The other steps wait for the host, who controls the pace and the jokes land.
 - **Default timers:** captions 75s, voting 30s. Both configurable from `/host`.
 - **Captions** are shuffled and anonymized in VOTING. You can't vote for your own caption.
 - **Scoring:** 100 points per vote received. +200 bonus if every voter picked your caption (a "clean sweep"). Ties get the same rank.
@@ -115,7 +115,7 @@ Rules:
 - The engine is a **pure function** `(state, event, now) → state`, kept separate from Socket.IO so it can be unit-tested and replayed.
 
 ### Photo upload
-- **Preload (main path):** before the party, drop photos into `data/photos/` or bulk-upload from `/host`. the host can also put them in order and add the cousin's name on each one, which is optional.
+- **Preload (main path):** before the party, drop photos into `data/photos/` or bulk-upload from `/host`. The host can also put them in order and add the cousin's name on each one, which is optional.
 - **Live upload (supported):** `/host` → file input (`accept="image/*"`). On iPhone this converts HEIC to JPEG automatically. The phone resizes the photo to about 1920px on a canvas before uploading, which keeps uploads fast through a tunnel. Then it's `POST /api/photos` (host PIN required), saved to disk, and added to the queue.
 - Photos get served from `/photos/<id>.jpg`. The TV and phones preload the next image so the reveal is instant.
 
@@ -252,9 +252,9 @@ Never cut: join by code, reconnect, caption → vote → points, host controls, 
 
 **People & roles**
 9. Roughly how many players, and age range? Do any kids or older relatives lack a phone (should they pair up and share)?
-10. Does the host also want to play, not just host? (Possible: she'd have `/host` and `/play` in two tabs, but it's clunky on one phone.)
-11. Is the host comfortable driving it from her phone, or would she rather use a laptop/tablet? What kind of phone does she have?
-12. Who test-plays Saturday, and what time? Can the host be one of them so she practices hosting?
+10. Does the host also want to play, not just host? (Possible: they'd have `/host` and `/play` in two tabs, but it's clunky on one phone.)
+11. Is the host comfortable driving it from their phone, or would they rather use a laptop/tablet? What kind of phone do they have?
+12. Who test-plays Saturday, and what time? Can the host be one of them so they practice hosting?
 
 **Creative**
 13. Game name? (Placeholder ideas: "Cousin Caption Clash", "Who Wore It Worse", "Baby Pictures Don't Lie".)

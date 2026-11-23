@@ -1,6 +1,6 @@
 # Brief: TEAM MODE (top priority, all teammates)
 
-the host (the host) wants **teams**: about 25 people in **5 teams**, one photo at a time,
+The host wants **teams**: about 25 people in **5 teams**, one photo at a time,
 with a vote after each photo. Each team sends **one** caption per photo, so every round has
 ~5 captions (quick to read and vote on). Individual mode stays as a setting (`settings.teamMode=false`).
 

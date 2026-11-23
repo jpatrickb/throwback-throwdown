@@ -393,7 +393,7 @@ const CUES: Cue[] = [
   },
   {
     name: 'music-captioning',
-    retired: true, // CAPTIONING now plays the lobby track (Patrick's favorite); see docs/team/audio.md
+    retired: true, // CAPTIONING now plays the lobby track (Patrick's favorite); see docs/build-log/team/audio.md
     bpm: 96,
     mix: { Bell: 3, Drums: -2 },
     tonic: 65, // F4

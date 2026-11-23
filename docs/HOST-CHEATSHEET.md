@@ -1,10 +1,10 @@
 # Throwback Throwdown: Host Cheat Sheet
 
-You run the game from your iPhone. Patrick looks after the computer and the TV.
+You run the game from your iPhone. Someone else looks after the computer and the TV.
 
 ## 1. Get in (2 minutes)
-1. On your iPhone, open **Safari** and go to **party.jpatrickbeal.com/host**
-2. Type the **6-digit PIN** Patrick gives you and tap **Enter**.
+1. On your iPhone, open **Safari** and go to your game's address followed by **/host** (for example **party.example.com/host**; whoever runs the computer will tell you)
+2. Type the **6-digit PIN** from whoever runs the computer and tap **Enter**.
 3. You're in. Your screen stays awake by itself during the game.
 
 > If it ever asks for the PIN again, just type it again. Nothing is lost.
@@ -56,6 +56,6 @@ While people are writing or voting, you'll see things like **"3 of 5 teams have 
 | We need to stop early | **End game now** → **Yes** (jumps to the final podium) |
 | Your screen says "Reconnecting…" | Wait a few seconds. If it stays stuck, pull down to refresh the page. |
 | A player's phone froze or died | They open the same link on the same phone and they'll be put back on their team |
-| The TV or computer has a problem | Get Patrick. The game remembers everything, even if it restarts. |
+| The TV or computer has a problem | Get whoever is running the computer. The game remembers everything, even if it restarts. |
 
 Have fun! 🎉

@@ -11,7 +11,7 @@ export type { AudioSettings } from './manager.ts';
 export { AudioIndicator } from './AudioIndicator.tsx';
 
 /** One-shot sound effects. Every key has one or more takes (random, never the same twice in a row).
- *  AUTO = fired by useGameAudio from the view; the TV doesn't call these. See docs/team/audio.md. */
+ *  AUTO = fired by useGameAudio from the view; the TV doesn't call these. See docs/build-log/team/audio.md. */
 export type SfxKey =
   // lobby
   | 'join' // TV: a player joined the lobby

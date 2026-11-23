@@ -24,7 +24,7 @@ toast, never a crash.
 - Reconnecting banner, kicked state, and a wake-lock request (Screen Wake Lock API) so phones don't sleep mid-round.
 - Stretch: reaction buttons (😂🔥👏😱💀) → `player:react`, throttled.
 
-## Host (`/host`), the host on her phone, so it must be dead simple
+## Host (`/host`), used by the host on their phone, so it must be dead simple
 - PIN gate (exists).
 - **One giant primary button** whose label/action depends on the phase: Start game → Start captions → Start voting →
   Show results → Scoreboard → Next photo / Final results → New game. Secondary actions in a smaller area.

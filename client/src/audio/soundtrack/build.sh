@@ -7,7 +7,7 @@
 #   bash client/src/audio/soundtrack/build.sh            # everything
 #   bash client/src/audio/soundtrack/build.sh music-lobby sfx-winner   # just these sessions (or sfx-winner-2)
 #
-# Env: SOUNDCRAFT_CLI (default ~/Downloads/soundcraft/target/release/soundcraft-cli), BUILD_DIR (default: temp).
+# Env: SOUNDCRAFT_CLI (path to soundcraft-cli; default: soundcraft-cli on your PATH), BUILD_DIR (default: temp).
 # Outputs: client/public/audio/<name>.{ogg,mp3} and client/src/audio/sessions/<name>.scraft
 set -euo pipefail
 
@@ -15,7 +15,7 @@ ROOT="$(cd "$(dirname "$0")/../../../.." && pwd)"
 HERE="$ROOT/client/src/audio/soundtrack"
 PUB="$ROOT/client/public/audio"
 SESS="$ROOT/client/src/audio/sessions"
-SC="${SOUNDCRAFT_CLI:-$HOME/Downloads/soundcraft/target/release/soundcraft-cli}"
+SC="${SOUNDCRAFT_CLI:-soundcraft-cli}"
 BUILD="${BUILD_DIR:-$(mktemp -d -t soundtrack)}"
 MUSIC_LUFS=-16   # integrated loudness target for music beds
 SFX_PEAK=-1.5    # peak target for stingers (too short for a meaningful LUFS reading)

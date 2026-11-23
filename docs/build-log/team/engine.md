@@ -5,7 +5,7 @@ SendMessage to team-lead / phones / tv / cousin-party keeps failing ("Failed to 
 ## ✅ Resolved by lead in 015becb (was: needs the lead, client/src/socket.ts)
 **On WebKit / iPhone Safari, `/host` can stay stuck on a disabled "Connecting…" button even though the socket is connected.**
 `useConnected()` misses a `connect` event that fires between `useState(socket.connected)` and the effect subscribing.
-WebKit reliably hits that window, so this would block the host on her iPhone. Fix (verified in WebKit, then reverted because it's your file):
+WebKit reliably hits that window, so this would block the host on their iPhone. Fix (verified in WebKit, then reverted because it's your file):
 
 ```diff
      socket.on('connect', on);
