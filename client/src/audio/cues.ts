@@ -20,7 +20,7 @@ export const placeholder = (name: string): string[] => [
 /** name-1 .. name-n, as written by the soundtrack build. */
 export const takes = (name: string, n: number): string[][] => Array.from({ length: n }, (_, i) => real(`${name}-${i + 1}`));
 
-export type MusicKey = 'lobby' | 'captioning' | 'voting' | 'results' | 'final';
+export type MusicKey = 'lobby' | 'voting' | 'results' | 'final';
 
 export interface Cue {
   src: string[];
@@ -34,8 +34,9 @@ export interface SfxCue {
   takes: string[][];
   /** 0..1, relative to the master volume. */
   volume: number;
-  /** Dip the music while this plays. */
-  duck?: boolean;
+  /** Music stays fully down for the take's length plus this gap (ms); default AUDIO_TUNING.holdGapMs.
+   *  Burst keys use a longer gap so the music stays down for the whole burst instead of pumping. */
+  holdAfterMs?: number;
   /** Consecutive calls within this many ms count as one rising run (each step plays higher). */
   risingRunMs?: number;
   /** Ignore repeat calls closer together than this (ms). */
@@ -44,7 +45,6 @@ export interface SfxCue {
 
 export const MUSIC: Record<MusicKey, Cue> = {
   lobby: { src: real('music-lobby'), volume: 0.5, loop: true },
-  captioning: { src: real('music-captioning'), volume: 0.5, loop: true },
   voting: { src: real('music-voting'), volume: 0.4, loop: true },
   results: { src: real('music-results'), volume: 0.35, loop: true },
   final: { src: real('music-final'), volume: 0.5, loop: true },
@@ -52,43 +52,44 @@ export const MUSIC: Record<MusicKey, Cue> = {
 
 export const SFX: Record<SfxKey, SfxCue> = {
   // lobby
-  join: { takes: takes('sfx-join', 4), volume: 0.55, minGapMs: 120 },
-  teamJoin: { takes: takes('sfx-teamJoin', 4), volume: 0.5, minGapMs: 200 },
+  join: { takes: takes('sfx-join', 4), volume: 0.55, holdAfterMs: 700, minGapMs: 120 },
+  teamJoin: { takes: takes('sfx-teamJoin', 4), volume: 0.5, holdAfterMs: 700, minGapMs: 200 },
   teamRename: { takes: takes('sfx-teamRename', 2), volume: 0.55, minGapMs: 400 },
   // round flow
   whoosh: { takes: takes('sfx-whoosh', 4), volume: 0.45, minGapMs: 400 },
-  roundStart: { takes: takes('sfx-roundStart', 3), volume: 0.85, duck: true, minGapMs: 1000 },
-  reveal: { takes: takes('sfx-reveal', 3), volume: 0.8, duck: true, minGapMs: 1000 },
+  roundStart: { takes: takes('sfx-roundStart', 3), volume: 0.85, minGapMs: 1000 },
+  reveal: { takes: takes('sfx-reveal', 3), volume: 0.8, minGapMs: 1000 },
   // captioning & voting
-  submit: { takes: takes('sfx-submit', 4), volume: 0.5, minGapMs: 80 },
-  voteCast: { takes: takes('sfx-voteCast', 4), volume: 0.3, minGapMs: 90 },
-  allIn: { takes: takes('sfx-allIn', 3), volume: 0.8, duck: true, minGapMs: 1500 },
-  lastCall: { takes: takes('sfx-lastCall', 2), volume: 0.75, duck: true, minGapMs: 2000 },
-  tick: { takes: takes('sfx-tick', 2), volume: 0.35 },
-  timesUp: { takes: takes('sfx-timesUp', 3), volume: 0.8, duck: true, minGapMs: 1500 },
-  cardDeal: { takes: takes('sfx-cardDeal', 3), volume: 0.5 },
+  submit: { takes: takes('sfx-submit', 4), volume: 0.5, holdAfterMs: 800, minGapMs: 80 },
+  voteCast: { takes: takes('sfx-voteCast', 4), volume: 0.3, holdAfterMs: 900, minGapMs: 90 },
+  allIn: { takes: takes('sfx-allIn', 3), volume: 0.8, minGapMs: 1500 },
+  lastCall: { takes: takes('sfx-lastCall', 2), volume: 0.75, minGapMs: 2000 },
+  tick: { takes: takes('sfx-tick', 2), volume: 0.35, holdAfterMs: 1200 },
+  timesUp: { takes: takes('sfx-timesUp', 3), volume: 0.8, minGapMs: 1500 },
+  cardDeal: { takes: takes('sfx-cardDeal', 3), volume: 0.5, holdAfterMs: 700 },
   // results
-  drumroll: { takes: takes('sfx-drumroll', 2), volume: 0.75, duck: true, minGapMs: 1000 },
-  tally: { takes: takes('sfx-tally', 3), volume: 0.5, risingRunMs: 700 },
-  zeroVotes: { takes: takes('sfx-zeroVotes', 3), volume: 0.6, duck: true, minGapMs: 600 },
-  winner: { takes: takes('sfx-winner', 4), volume: 0.9, duck: true, minGapMs: 1000 },
-  tie: { takes: takes('sfx-tie', 2), volume: 0.8, duck: true, minGapMs: 1000 },
-  sweep: { takes: takes('sfx-sweep', 2), volume: 0.85, duck: true, minGapMs: 1000 },
-  leaderboard: { takes: takes('sfx-leaderboard', 2), volume: 0.7, duck: true, minGapMs: 800 },
-  leaderChange: { takes: takes('sfx-leaderChange', 2), volume: 0.8, duck: true, minGapMs: 1000 },
+  drumroll: { takes: takes('sfx-drumroll', 2), volume: 0.75, minGapMs: 1000 },
+  tally: { takes: takes('sfx-tally', 3), volume: 0.5, holdAfterMs: 800, risingRunMs: 700 },
+  zeroVotes: { takes: takes('sfx-zeroVotes', 3), volume: 0.6, minGapMs: 600 },
+  winner: { takes: takes('sfx-winner', 4), volume: 0.9, minGapMs: 1000 },
+  tie: { takes: takes('sfx-tie', 2), volume: 0.8, minGapMs: 1000 },
+  sweep: { takes: takes('sfx-sweep', 2), volume: 0.85, minGapMs: 1000 },
+  leaderboard: { takes: takes('sfx-leaderboard', 2), volume: 0.7, minGapMs: 800 },
+  leaderChange: { takes: takes('sfx-leaderChange', 2), volume: 0.8, minGapMs: 1000 },
   // final
-  podium3: { takes: takes('sfx-podium3', 1), volume: 0.75, duck: true, minGapMs: 500 },
-  podium2: { takes: takes('sfx-podium2', 1), volume: 0.85, duck: true, minGapMs: 500 },
-  podium1: { takes: takes('sfx-podium1', 1), volume: 0.95, duck: true, minGapMs: 500 },
-  champion: { takes: takes('sfx-champion', 2), volume: 1, duck: true, minGapMs: 2000 },
+  podium3: { takes: takes('sfx-podium3', 1), volume: 0.75, minGapMs: 500 },
+  podium2: { takes: takes('sfx-podium2', 1), volume: 0.85, minGapMs: 500 },
+  podium1: { takes: takes('sfx-podium1', 1), volume: 0.95, minGapMs: 500 },
+  champion: { takes: takes('sfx-champion', 2), volume: 1, minGapMs: 2000 },
 };
 
 /** Which music bed plays in each phase. null = silence (the reveal stinger gets the stage).
+ *  The old captioning bed is retired (see docs/team/audio.md); its composition is still in compose.ts.
  *  Consecutive phases with the same cue keep playing without restarting. */
 export const PHASE_MUSIC: Record<Phase, MusicKey | null> = {
   LOBBY: 'lobby',
   PHOTO_REVEAL: null,
-  CAPTIONING: 'captioning',
+  CAPTIONING: 'lobby', // Patrick's favorite plays where music plays most; resumes where LOBBY left off
   VOTING: 'voting',
   RESULTS: 'results',
   SCOREBOARD: 'results',
@@ -111,10 +112,12 @@ export const RISING_STEPS = [0, 2, 4, 5, 7, 9, 11, 12, 14, 16, 17, 19];
 export const AUDIO_TUNING = {
   /** Phase-to-phase music crossfade. */
   crossfadeMs: 800,
-  /** Music level (multiplier) while a ducking stinger plays. */
-  duckLevel: 0.3,
-  duckInMs: 120,
-  duckOutMs: 500,
+  /** Music fades fully down this fast when an SFX starts... */
+  holdFadeMs: 90,
+  /** ...stays down for the SFX plus this gap... */
+  holdGapMs: 350,
+  /** ...then fades back up over this long. */
+  musicReturnMs: 700,
   /** Tick every second when a timed phase has fewer than this many seconds left. */
   tickFromSeconds: 10,
   /** Play lastCall (instead of a tick) when this many seconds are left. */

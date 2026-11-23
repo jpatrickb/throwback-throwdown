@@ -3,7 +3,7 @@
 ## SFX keys: who fires what (hand this to tv)
 
 Call `playSfx(key)` from `client/src/audio/index.ts`. Every key has 1–4 Soundcraft-rendered takes; the manager
-picks one at random (never the same take twice in a row), ducks the music under the big ones, and drops
+picks one at random (never the same take twice in a row), takes the music fully down while any SFX plays, and drops
 duplicates that land on the same moment. **AUTO** keys fire from `useGameAudio(view)`: **tv must not call them.**
 
 | Key | Takes | Who fires it | When |
@@ -37,6 +37,33 @@ duplicates that land on the same moment. **AUTO** keys fire from `useGameAudio(v
 Lengths: 0.3–2.2 s (champion 3.7 s, reveal 2.5 s). Takes live in `client/public/audio/sfx-<key>-<n>.{ogg,mp3}`;
 `cues.ts` lists the takes per key and their volume, ducking and repeat gap.
 
+
+## Settings API (for tv's settings panel)
+
+`client/src/audio/index.ts` exports these (spec: `docs/team/briefs/settings-audio-api.md`):
+- `AudioSettings` `{ musicOn, sfxOn, master, music, sfx }`. Defaults: on, on, 0.8, 1, 1.
+- `getAudioSettings()`
+- `setAudioSettings(patch)`: persists to localStorage `tvAudio`, applies live.
+- `useAudioSettings()`: returns `[settings, set]` and re-renders on any change.
+
+The TV keys use the same path:
+- `M`: if anything is on, turns music and SFX off; if both are off, turns both on.
+- `-` / `=`: master volume (turning it up also unmutes).
+
+Old `{volume, muted}` storage migrates automatically. Turning music off keeps it running silently, so turning it back on resumes in place.
+
+## Music & SFX overlap rules
+- **Nothing plays under an SFX.** Any SFX fades the music fully down in 90 ms. The music returns 350 ms after the SFX ends, fading up over 0.7 s.
+- **Bursts** (tick, tally, voteCast, submit, cardDeal, join/teamJoin) hold the music for 0.7–1.2 s after each hit. A burst therefore keeps the music down until it ends, with no pumping. The music is silent through the last 10 s of a timer (lastCall, then ticks).
+- **Phase changes:** the new phase's music starts only after that moment's stingers (whoosh, allIn, timesUp, reveal, roundStart…) have finished. A faded-out track pauses rather than stopping, so it resumes where it left off.
+- Knobs: `AUDIO_TUNING.holdFadeMs/holdGapMs/musicReturnMs` and per-key `holdAfterMs` in `cues.ts`.
+
+## Music map
+LOBBY → lobby, PHOTO_REVEAL → silence, **CAPTIONING → lobby** (Patrick's favorite plays where music plays most), VOTING → voting, RESULTS/SCOREBOARD → results, FINAL → final.
+
+Because the lobby track pauses and resumes, each CAPTIONING phase continues the lobby track instead of restarting the same 32 s.
+
+**Old captioning track:** retired. Its files are removed (saves 1.8 MB). The composition stays in `compose.ts` (`retired: true`) in case it's wanted back, e.g. as an alternate lobby/captioning bed on even rounds to reduce repetition. To bring it back: set `retired: false`, rebuild, and add it to `MUSIC`/`PHASE_MUSIC`.
 
 ## Done
 - **Cue manifest** `client/src/audio/cues.ts`: music cues, every SfxKey (src/volume/loop/duck), `PHASE_MUSIC`, and mixing/timing knobs (`AUDIO_TUNING`). Swapping in a real track means changing `placeholder('x')` to `real('x')`.
@@ -91,6 +118,24 @@ Lengths: 0.3–2.2 s (champion 3.7 s, reveal 2.5 s). Takes live in `client/publi
   - Takes never repeat back to back, and a tally run climbs 1 → 1.12 → 1.26 → 1.34 → 1.50 → 1.68, then a new run starts on a new take.
   - lastCall fires at 10 s; allIn fires on early advance with the whoosh suppressed; voteCast, teamJoin and teamRename fire.
   - All 66 takes load. No console errors except the favicon 404.
+
+## Harmony pass (Nov 23, after Patrick's listen)
+- **Automated check:** `soundtrack/harmony.ts` runs inside `compose.ts`, so **the build fails** on any of these:
+  - a note outside the cue's/take's major key
+  - a melody note on beat 1 or 3 (or at a chord change) that isn't a chord tone
+  - a passing note that doesn't move by step
+  - a bass note that isn't a chord tone
+  - any two notes, across layers, that start together a minor 2nd/major 7th or a tritone apart
+  - a tally take that isn't on C
+- **What it found and fixed:** 109 problems on the first run.
+  - Rewrote the melodies of lobby, voting, results and final bar by bar.
+  - Bass now uses chord tones only (no chromatic approach notes).
+  - Comping uses triads only (no clustered maj7/9th voicings).
+  - Results bar 8 is G7sus4→G instead of E major (G# was out of key).
+  - SFX: D-major and Bb chords in C-major takes, a G7 tritone in lastCall, the chromatic "aww" in zeroVotes, and the Bb neighbor note in the champion fanfare.
+- **Tally:** takes now sit on C only, and the runtime steps (`RISING_STEPS`, major scale) land on C-major degrees: C D E F G A B C…
+- **Detune:** oscillator 2 detune is now ≤4 cents everywhere (was up to 18), and chorus depth is down from 35 to 18. Rendered pitches were spot-checked by FFT.
+- **Result:** re-rendered everything in Soundcraft. Energy on out-of-key pitch classes dropped (lobby 8.6→7.4%, voting 10.6→10.0%, results 7.0→5.8%, final 9.4→7.7%). The remainder is synth overtones and drums.
 
 ## Notes for tv
 - See the table at the top. Never call the AUTO keys (teamJoin, teamRename, whoosh, voteCast, allIn, lastCall, tick, timesUp).

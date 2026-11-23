@@ -94,9 +94,12 @@ export class AudioManager {
   private fadingOut = new Map<MusicKey, Playing>();
   private fadeTimers = new Map<MusicKey, ReturnType<typeof setTimeout>>();
 
-  private ducked = false;
-  private duckUntil = 0;
-  private duckTimer: ReturnType<typeof setTimeout> | null = null;
+  private paused = new Map<MusicKey, number>(); // faded-out cues resume where they left off
+  // "Hold": while any SFX plays (plus a short gap) the music is fully down, and a phase's new
+  // music waits to start until the hold ends. Bursts just extend the hold, so music stays down.
+  private held = false;
+  private holdUntil = 0;
+  private holdTimer: ReturnType<typeof setTimeout> | null = null;
   private lastSfxAt = new Map<SfxKey, number>();
   private lastTake = new Map<SfxKey, number>();
   private runs = new Map<SfxKey, { take: number; step: number; at: number }>();
@@ -166,7 +169,6 @@ export class AudioManager {
     }
 
     this.phase = nextPhase;
-    this.setMusic(nextPhase ? PHASE_MUSIC[nextPhase] : null);
 
     const deadline = view?.deadline ?? null;
     if (view) this.skew = view.serverNow - Date.now();
@@ -180,6 +182,9 @@ export class AudioManager {
     this.syncTimer();
     safe(() => this.detect(this.prevView, view));
     this.prevView = view;
+    // Music last: stingers fired above (and by the TV's own effects, which run first) are already
+    // holding, so the new phase's music starts after them instead of under them.
+    this.setMusic(nextPhase ? PHASE_MUSIC[nextPhase] : null);
   }
 
   setMusic(key: MusicKey | null): void {
@@ -226,7 +231,7 @@ export class AudioManager {
       const id = howl.play();
       howl.volume(Math.min(1, cue.volume * this.snap.settings.sfx * (opts.gain ?? 1)), id);
       if (rate !== 1) howl.rate(rate, id);
-      if (cue.duck) this.duck((howl.duration() || 1.5) / rate);
+      this.hold(((howl.duration() || 0.8) * 1000) / rate + (cue.holdAfterMs ?? T.holdGapMs));
     });
   }
 
@@ -283,7 +288,7 @@ export class AudioManager {
       current: this.current?.key ?? null,
       currentVolume: this.current ? (this.current.howl.volume(this.current.id) as number) : null,
       fadingOut: [...this.fadingOut.keys()],
-      ducked: this.ducked,
+      held: this.held,
       failed: [...this.failed],
       phase: this.phase,
       remainingMs: this.deadline ? this.remainingMs() : null,
@@ -382,7 +387,7 @@ export class AudioManager {
 
   private musicTarget(key: MusicKey): number {
     const s = this.snap.settings;
-    return s.musicOn ? MUSIC[key].volume * s.music * (this.ducked ? T.duckLevel : 1) : 0;
+    return s.musicOn && !this.held ? MUSIC[key].volume * s.music : 0;
   }
 
   private syncMusic(): void {
@@ -392,7 +397,7 @@ export class AudioManager {
 
     if (this.current) this.fadeOut(this.current);
     this.current = null;
-    if (!key) return;
+    if (!key || this.held) return; // a stinger is playing: start when the hold ends
 
     const howl = this.howl(`music:${key}`, MUSIC[key].src, true);
     if (!howl) return;
@@ -406,7 +411,9 @@ export class AudioManager {
         howl.fade(howl.volume(reviving.id) as number, target, T.crossfadeMs, reviving.id);
         this.current = reviving;
       } else {
-        const id = howl.play();
+        const pausedId = this.paused.get(key);
+        this.paused.delete(key);
+        const id = pausedId !== undefined ? howl.play(pausedId) : howl.play();
         howl.volume(0, id);
         howl.fade(0, target, T.crossfadeMs, id);
         this.current = { key, howl, id };
@@ -416,30 +423,35 @@ export class AudioManager {
 
   private fadeOut(p: Playing): void {
     this.fadingOut.set(p.key, p);
-    safe(() => p.howl.fade(p.howl.volume(p.id) as number, 0, T.crossfadeMs, p.id));
+    const ms = this.held ? T.holdFadeMs : T.crossfadeMs;
+    safe(() => p.howl.fade(p.howl.volume(p.id) as number, 0, ms, p.id));
     clearTimeout(this.fadeTimers.get(p.key));
     this.fadeTimers.set(
       p.key,
       setTimeout(() => {
         if (this.fadingOut.get(p.key) !== p) return;
         this.fadingOut.delete(p.key);
-        safe(() => p.howl.stop(p.id));
-      }, T.crossfadeMs + 60),
+        safe(() => p.howl.pause(p.id));
+        this.paused.set(p.key, p.id);
+      }, ms + 60),
     );
   }
 
-  private duck(seconds: number): void {
-    this.duckUntil = Math.max(this.duckUntil, Date.now() + seconds * 1000);
-    if (!this.ducked) {
-      this.ducked = true;
-      this.fadeCurrentTo(T.duckInMs);
+  /** Keep the music fully down for `ms` from now (extends any hold already running). */
+  private hold(ms: number): void {
+    this.holdUntil = Math.max(this.holdUntil, Date.now() + ms);
+    if (!this.held) {
+      this.held = true;
+      this.fadeCurrentTo(T.holdFadeMs);
+      for (const p of this.fadingOut.values()) safe(() => p.howl.fade(p.howl.volume(p.id) as number, 0, T.holdFadeMs, p.id));
     }
-    if (this.duckTimer) clearTimeout(this.duckTimer);
-    this.duckTimer = setTimeout(() => {
-      this.duckTimer = null;
-      this.ducked = false;
-      this.fadeCurrentTo(T.duckOutMs);
-    }, Math.max(0, this.duckUntil - Date.now()));
+    if (this.holdTimer) clearTimeout(this.holdTimer);
+    this.holdTimer = setTimeout(() => {
+      this.holdTimer = null;
+      this.held = false;
+      this.fadeCurrentTo(T.musicReturnMs);
+      this.syncMusic(); // start the phase's music if it was waiting
+    }, Math.max(0, this.holdUntil - Date.now()));
   }
 
   private fadeCurrentTo(ms: number): void {
