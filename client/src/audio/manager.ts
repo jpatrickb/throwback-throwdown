@@ -231,7 +231,7 @@ export class AudioManager {
       const id = howl.play();
       howl.volume(Math.min(1, cue.volume * this.snap.settings.sfx * (opts.gain ?? 1)), id);
       if (rate !== 1) howl.rate(rate, id);
-      this.hold(((howl.duration() || 0.8) * 1000) / rate + (cue.holdAfterMs ?? T.holdGapMs));
+      if (!cue.overMusic) this.hold(((howl.duration() || 0.8) * 1000) / rate + (cue.holdAfterMs ?? T.holdGapMs));
     });
   }
 

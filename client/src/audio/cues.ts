@@ -37,6 +37,8 @@ export interface SfxCue {
   /** Music stays fully down for the take's length plus this gap (ms); default AUDIO_TUNING.holdGapMs.
    *  Burst keys use a longer gap so the music stays down for the whole burst instead of pumping. */
   holdAfterMs?: number;
+  /** Play on top of the music without muting it (Patrick: caption submits and votes shouldn't cut the music). */
+  overMusic?: boolean;
   /** Consecutive calls within this many ms count as one rising run (each step plays higher). */
   risingRunMs?: number;
   /** Ignore repeat calls closer together than this (ms). */
@@ -60,8 +62,8 @@ export const SFX: Record<SfxKey, SfxCue> = {
   roundStart: { takes: takes('sfx-roundStart', 3), volume: 0.85, minGapMs: 1000 },
   reveal: { takes: takes('sfx-reveal', 3), volume: 0.8, minGapMs: 1000 },
   // captioning & voting
-  submit: { takes: takes('sfx-submit', 4), volume: 0.5, holdAfterMs: 800, minGapMs: 80 },
-  voteCast: { takes: takes('sfx-voteCast', 4), volume: 0.3, holdAfterMs: 900, minGapMs: 90 },
+  submit: { takes: takes('sfx-submit', 4), volume: 0.5, overMusic: true, minGapMs: 80 },
+  voteCast: { takes: takes('sfx-voteCast', 4), volume: 0.3, overMusic: true, minGapMs: 90 },
   allIn: { takes: takes('sfx-allIn', 3), volume: 0.8, minGapMs: 1500 },
   lastCall: { takes: takes('sfx-lastCall', 2), volume: 0.75, minGapMs: 2000 },
   tick: { takes: takes('sfx-tick', 2), volume: 0.35, holdAfterMs: 1200 },
