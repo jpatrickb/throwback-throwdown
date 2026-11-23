@@ -15,7 +15,8 @@ export function useFitText<T extends HTMLElement>(
       const cells = Array.from(el.querySelectorAll<HTMLElement>('.fit-cell'));
       let s = max;
       el.style.setProperty('--fit', String(s));
-      const overflows = () => cells.some((c) => c.scrollHeight > c.clientHeight + 1 || c.scrollWidth > c.clientWidth + 1);
+      // 2px slack: line-height rounding makes scrollHeight exceed clientHeight by ~1px with no real overflow.
+      const overflows = () => cells.some((c) => c.scrollHeight > c.clientHeight + 2 || c.scrollWidth > c.clientWidth + 2);
       while (s > min && overflows()) {
         s = Math.max(min, s - step);
         el.style.setProperty('--fit', s.toFixed(3));

@@ -5,7 +5,8 @@ import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from
 import { AnimatePresence, motion } from 'motion/react';
 import type { ScoredCaption, TvView } from '../../../shared/types.ts';
 import { playSfx } from '../audio/index.ts';
-import { CountUp, Doodle, Polaroid, RoundHeader, playerColor } from './common.tsx';
+import { CountUp, Doodle, Polaroid, RoundHeader } from './common.tsx';
+import { captionAuthor } from './entrants.ts';
 import { burst } from './confetti.ts';
 import { SPRING_POP } from './motion.ts';
 import { captionDensity } from './Voting.tsx';
@@ -107,14 +108,14 @@ export function Results({ view }: { view: TvView }) {
 
         <div className={`results-list density-${density}`}>
           {crowd ? (
-            <RestGrid captions={restAll} revealed={revealedIds} />
+            <RestGrid captions={restAll} revealed={revealedIds} view={view} />
           ) : (
             <ul className="loser-list">
               <AnimatePresence>
                 {restAll
                   .filter((c) => revealedIds.has(c.id))
                   .map((c) => (
-                    <ResultCard key={c.id} caption={c} />
+                    <ResultCard key={c.id} caption={c} author={captionAuthor(c, view)} />
                   ))}
               </AnimatePresence>
             </ul>
@@ -123,13 +124,13 @@ export function Results({ view }: { view: TvView }) {
           <ul className="loser-list drama-list" style={crowd ? { minHeight: `${Math.max(0, plan.drama.size * 5.3 - 0.5)}em` } : undefined}>
             <AnimatePresence>
               {dramaShown.map((c) => (
-                <ResultCard key={c.id} caption={c} place={placeOf(c)} sfx />
+                <ResultCard key={c.id} caption={c} author={captionAuthor(c, view)} place={placeOf(c)} sfx />
               ))}
             </AnimatePresence>
           </ul>
           <div className="winner-zone" style={crowd && plan.winners.size ? { minHeight: `${1.2 + plan.winners.size * 7.4}em` } : undefined}>
             {winners.map((c) => (
-              <ResultCard key={c.id} caption={c} winner tie={plan.winners.size > 1} sfx />
+              <ResultCard key={c.id} caption={c} author={captionAuthor(c, view)} winner tie={plan.winners.size > 1} sfx />
             ))}
           </div>
           {done && results.length > 1 && plan.winners.size === 0 && (
@@ -145,7 +146,7 @@ export function Results({ view }: { view: TvView }) {
 
 /** Compact grid for the low-vote captions. Every slot is laid out from the start (hidden until
  *  revealed) so the shared font size is fitted once and nothing jumps. */
-function RestGrid({ captions, revealed }: { captions: ScoredCaption[]; revealed: Set<string> }) {
+function RestGrid({ captions, revealed, view }: { captions: ScoredCaption[]; revealed: Set<string>; view: TvView }) {
   const cols = captions.length > 12 ? 4 : captions.length > 6 ? 3 : 2;
   const rows = Math.max(1, Math.ceil(captions.length / cols));
   const ref = useFitText<HTMLOListElement>([captions.map((c) => c.id).join()], { max: 1.3, min: 0.55 });
@@ -154,11 +155,12 @@ function RestGrid({ captions, revealed }: { captions: ScoredCaption[]; revealed:
     <ol ref={ref} className="rest-grid" style={{ '--cols': cols, '--rows': rows } as CSSProperties}>
       {captions.map((c) => {
         const on = revealed.has(c.id);
+        const a = captionAuthor(c, view);
         return (
           <motion.li
             key={c.id}
             className={`rest-card paper-card ${on ? '' : 'rest-hidden'}`}
-            style={{ '--pc': playerColor({ id: c.playerId, color: null }) } as CSSProperties}
+            style={{ '--pc': a.color } as CSSProperties}
             initial={false}
             animate={on ? { scale: 1, opacity: 1, rotate: 0 } : { scale: 0.85, opacity: 0, rotate: -3 }}
             transition={SPRING_POP}
@@ -166,7 +168,7 @@ function RestGrid({ captions, revealed }: { captions: ScoredCaption[]; revealed:
             <span className="fit-cell rest-inner">
               <span className="rest-text">“{c.text}”</span>
               <span className="rest-meta">
-                <b>{c.votes}</b> · {c.playerName}
+                <b>{c.votes}</b> · {a.name}
               </span>
             </span>
           </motion.li>
@@ -176,7 +178,9 @@ function RestGrid({ captions, revealed }: { captions: ScoredCaption[]; revealed:
   );
 }
 
-function ResultCard({ caption, winner, tie, place, sfx }: { caption: ScoredCaption; winner?: boolean; tie?: boolean; place?: string; sfx?: boolean }) {
+type Author = ReturnType<typeof captionAuthor>;
+
+function ResultCard({ caption, author, winner, tie, place, sfx }: { caption: ScoredCaption; author: Author; winner?: boolean; tie?: boolean; place?: string; sfx?: boolean }) {
   const [stage, setStage] = useState(0); // 0 text, 1 votes tally, 2 author
   useEffect(() => {
     const timers = [
@@ -198,7 +202,7 @@ function ResultCard({ caption, winner, tie, place, sfx }: { caption: ScoredCapti
       return () => clearTimeout(t);
     }
   }, [winner, stage]);
-  const pc = playerColor({ id: caption.playerId, color: null });
+  const pc = author.color;
   const El = winner ? motion.div : motion.li;
   return (
     <El
@@ -221,8 +225,9 @@ function ResultCard({ caption, winner, tie, place, sfx }: { caption: ScoredCapti
         <AnimatePresence>
           {stage >= 2 && (
             <motion.span className="author" initial={{ rotateX: 90, opacity: 0 }} animate={{ rotateX: 0, opacity: 1 }} transition={{ duration: 0.35 }}>
-              — {caption.playerName}
+              — {author.name}
               {caption.points > 0 && <b className="points">+{caption.points}</b>}
+              {author.editor && (winner || place) && <small className="written-by">written by {author.editor}</small>}
             </motion.span>
           )}
         </AnimatePresence>

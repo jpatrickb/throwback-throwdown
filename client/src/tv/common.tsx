@@ -35,16 +35,8 @@ export function Logo({ size = 'lg' }: { size?: 'lg' | 'sm' }) {
   );
 }
 
-/** Accent colour for a player: their own colour if set, else a palette slot from tokens.css. */
-export function playerColor(p: Pick<Player, 'id' | 'color'>, index?: number): string {
-  if (p.color) return p.color;
-  let n = index;
-  if (n === undefined) {
-    n = 0;
-    for (const ch of p.id) n = (n * 31 + ch.charCodeAt(0)) >>> 0;
-  }
-  return `var(--player-${n % 8})`;
-}
+export { playerColor } from './colors.ts';
+import { playerColor } from './colors.ts';
 
 export function initials(name: string): string {
   const parts = name.trim().split(/\s+/);
@@ -56,6 +48,15 @@ export function Avatar({ player, className }: { player: Player; className?: stri
   return (
     <span className={`avatar ${className ?? ''}`} style={{ '--pc': playerColor(player) } as CSSProperties}>
       {player.avatar ?? initials(player.name)}
+    </span>
+  );
+}
+
+/** Round badge for anything with a colour and short label (teams, entrants). */
+export function Badge({ color, label, className }: { color: string; label: string; className?: string }) {
+  return (
+    <span className={`avatar ${className ?? ''}`} style={{ '--pc': color } as CSSProperties}>
+      {label}
     </span>
   );
 }

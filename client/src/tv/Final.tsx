@@ -3,7 +3,8 @@ import { useEffect, useState, type CSSProperties } from 'react';
 import { motion } from 'motion/react';
 import type { TvView } from '../../../shared/types.ts';
 import { playSfx } from '../audio/index.ts';
-import { Avatar, Doodle, Logo, playerColor } from './common.tsx';
+import { Badge, Doodle, Logo, initials } from './common.tsx';
+import { entrants, isTeamMode } from './entrants.ts';
 import { cannons, burst } from './confetti.ts';
 import { byScore, ranks } from './ranking.ts';
 import { SPRING_POP, TIMING } from './motion.ts';
@@ -11,7 +12,9 @@ import { SPRING_POP, TIMING } from './motion.ts';
 const PLACE_ORDER = [1, 0, 2]; // podium layout: 2nd, 1st, 3rd
 
 export function Final({ view }: { view: TvView }) {
-  const sorted = [...view.players].sort(byScore);
+  // Teams in team mode, players otherwise (see entrants.ts).
+  const teamMode = isTeamMode(view);
+  const sorted = entrants(view).sort(byScore);
   const rk = ranks(sorted);
   const top = sorted.slice(0, 3);
   const champs = sorted.filter((_, i) => rk[i] === 1);
@@ -56,7 +59,7 @@ export function Final({ view }: { view: TvView }) {
             const place = rk[i];
             const on = revealedIdx(i);
             return (
-              <div key={p.id} className={`podium-col place-${Math.min(place, 3)} slot-${i + 1}`} style={{ '--pc': playerColor(p) } as CSSProperties}>
+              <div key={p.id} className={`podium-col place-${Math.min(place, 3)} slot-${i + 1}`} style={{ '--pc': p.color } as CSSProperties}>
                 <motion.div
                   className="podium-player"
                   initial={{ y: -400, opacity: 0 }}
@@ -64,9 +67,10 @@ export function Final({ view }: { view: TvView }) {
                   transition={{ type: 'spring', stiffness: 180, damping: 13 }}
                 >
                   {place === 1 && <Doodle name="crown" className="podium-crown" />}
-                  <Avatar player={p} className="avatar-xl" />
+                  <Badge color={p.color} label={p.badge ?? initials(p.name)} className="avatar-xl" />
                   <span className={`podium-name ${p.name.length > 9 ? 'podium-name-long' : ''}`}>{p.name}</span>
                   <span className="podium-score">{p.score}</span>
+                  {p.members.length > 0 && <span className="podium-members">{p.members.join(' · ')}</span>}
                 </motion.div>
                 <motion.div
                   className="podium-block"
@@ -81,13 +85,16 @@ export function Final({ view }: { view: TvView }) {
           })}
         </div>
 
-        <motion.ol className={`standings paper-card ${sorted.length > 12 ? 'standings-2col' : ''} ${sorted.length > 26 ? 'standings-dense' : ''}`} initial={{ x: 300, opacity: 0 }} animate={champDone ? { x: 0, opacity: 1 } : {}} transition={{ delay: 0.8, ...SPRING_POP }}>
+        <motion.ol className={`standings paper-card ${teamMode ? 'standings-teams' : ''} ${sorted.length > 12 ? 'standings-2col' : ''} ${sorted.length > 26 ? 'standings-dense' : ''}`} initial={{ x: 300, opacity: 0 }} animate={champDone ? { x: 0, opacity: 1 } : {}} transition={{ delay: 0.8, ...SPRING_POP }}>
           <span className="tape tape-top" />
-          <li className="standings-title">Final standings</li>
+          <li className="standings-title">{teamMode ? 'Team standings' : 'Final standings'}</li>
           {sorted.map((p, i) => (
-            <li key={p.id} className="standings-row" style={{ '--pc': playerColor(p) } as CSSProperties}>
+            <li key={p.id} className="standings-row" style={{ '--pc': p.color } as CSSProperties}>
               <span className="st-rank">{rk[i]}</span>
-              <span className="st-name">{p.name}</span>
+              <span className="st-name">
+                {p.name}
+                {p.members.length > 0 && <small className="st-members">{p.members.join(' · ')}</small>}
+              </span>
               <span className="st-score">{p.score}</span>
             </li>
           ))}

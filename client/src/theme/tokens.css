@@ -51,6 +51,17 @@
   --player-7: #a6e22e;
   --player-count: 8;
 
+  /* ---- Team colours (team mode). Same order/values as TEAM_PRESETS in shared/types.ts;
+     the TV maps a preset colour to its token, so retuning these recolours the teams. ---- */
+  --team-0: #ff5fa2; /* The Mullets */
+  --team-1: #4fb3ff; /* Team Scrunchie */
+  --team-2: #ffcc33; /* The Bowl Cuts */
+  --team-3: #3ddcb4; /* Overall Champs */
+  --team-4: #ff8a3d; /* The Velcro Kids */
+  --team-5: #b07cff; /* Slap Bracelets */
+  --team-6: #ff6b6b; /* The Jelly Shoes */
+  --team-7: #8fd14f; /* Team Lunchbox */
+
   /* ---- Podium ---- */
   --c-gold: #ffcc33;
   --c-silver: #d8dce8;

@@ -16,6 +16,7 @@ import { Final } from '../tv/Final.tsx';
 import { Logo } from '../tv/common.tsx';
 import { screenVariants } from '../tv/motion.ts';
 import { stressView } from '../tv/devStress.ts';
+import { decorateView } from '../tv/entrants.ts';
 import '../tv/tv.css';
 
 const SCREENS: Record<Phase, (p: { view: TvView }) => ReactElement> = {
@@ -34,7 +35,7 @@ const NEEDS_ROUND: Phase[] = ['PHOTO_REVEAL', 'CAPTIONING', 'VOTING', 'RESULTS']
 export function Tv() {
   const rawView = useView('tv');
   useGameAudio(rawView);
-  const view = useMemo(() => stressView(rawView), [rawView]);
+  const view = useMemo(() => decorateView(stressView(rawView)), [rawView]);
   const connected = useConnected();
 
   useEffect(() => {

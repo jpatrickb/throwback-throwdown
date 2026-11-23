@@ -29,9 +29,26 @@
 - Removed the TV's own `tick`/`timesUp` calls (audio fires them from `view.deadline`). The TV still calls reveal, submit, cardDeal, tally, winner, leaderboard, champion and join.
 - Polaroids: portrait photos are letterboxed over a blurred fill (no crop, no black bars). A photo that fails to load shows "📷 Photo went missing!" instead of a broken image.
 
+## Done (Nov 23, later): 25-player scaling, then TEAM MODE
+- **Big rooms:** the voting grid uses 1–5 columns (`voteColumns`) plus one shared fitted font size (`useFitText` in `tv/fit.ts`).
+  25 captions of 80 characters fit at about 22px (1080p) / 15px (720p), with numbered corner badges. With more than 12 voters, the strip becomes a progress bar plus the stragglers.
+  The scoreboard uses 3 columns past 16 players, the lobby a 4-column grid past 15, and the final standings 2 columns past 12.
+- **Results pacing** (`planReveal` / `revealSchedule` in `ranking.ts`, tested): zero-vote captions all at once, low-vote captions by vote count
+  (at most 5 quick beats), 3rd then 2nd one at a time, then a drumroll and the winner. The header narrates each beat. 25 captions take about 20s; the tests assert under 45s.
+- **Team mode** (`settings.teamMode && teams.length`; logic lives in `tv/entrants.ts`):
+  - LOBBY: one column per team (team colour header, member count, members pop in).
+  - CAPTIONING: a big chip per team flipping to ✓ (`submittedTeamIds`); teams with nobody connected don't count.
+  - VOTING: about 5 big fitted cards.
+  - RESULTS: the team name is the author, with "written by <last editor>" on the top-3 cards.
+  - SCOREBOARD: teams ranked, with member names under each team.
+  - FINAL: a team podium with member names, and team standings.
+  - Players wear their team's colour everywhere (`decorateView`).
+  - `--team-0..7` tokens in `tokens.css` match `TEAM_PRESETS`; preset colours map to the tokens, so a retheme carries over.
+- Individual mode is unchanged (`?solo=1`). Both modes were screenshotted at 1920×1080 and 1280×720.
+
 ## Dev helpers
 - `/tv?mock=<PHASE>` as usual. Click once to dismiss the start overlay.
-- `&mockplayers=16` and `&mockcaptions=0|1|10` stress the fixtures (`client/src/tv/devStress.ts`, mock mode only).
+- `&solo=1` individual mode. `&mockplayers=25`, `&mockcaptions=0|1|25`, `&mocklong` (all captions 80 chars) stress the fixtures (`client/src/tv/devStress.ts`, mock mode only).
 - `&mockreactions` streams fake emoji reactions.
 
 ## Notes for others

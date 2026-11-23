@@ -411,10 +411,14 @@
   border: 0.1em solid var(--c-ink);
 }
 .card-text {
+  /* Stretched to the card's height so useFitText can see real overflow. */
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  min-height: 0;
   font-size: calc(var(--fit, 1.7) * 1em);
   line-height: 1.12;
   font-weight: var(--weight-strong);
-  max-height: 100%;
   overflow: hidden;
   overflow-wrap: anywhere;
 }
@@ -717,3 +721,113 @@
 @media (prefers-reduced-motion: reduce) {
   .sunburst, .float-doodle, .logo-word, .bob, .ring-urgent { animation: none; }
 }
+
+/* ================= TEAM MODE ================= */
+.team-count { font-family: var(--font-body); font-size: 0.5em; color: var(--c-fg-muted); text-shadow: none; }
+/* Lobby: one column per team */
+.team-columns {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--teams), minmax(0, 1fr));
+  gap: 0.9em;
+  align-items: start;
+  margin-bottom: 0.8em;
+}
+.team-col {
+  background: var(--c-paper);
+  color: var(--c-ink);
+  border-radius: var(--radius);
+  border: 0.16em solid var(--c-ink);
+  box-shadow: 0.3em 0.3em 0 var(--tc);
+  overflow: hidden;
+  rotate: var(--tilt);
+  min-width: 0;
+}
+.team-col-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.3em;
+  padding: 0.45em 0.6em;
+  background: var(--tc);
+  border-bottom: 0.14em solid var(--c-ink);
+}
+.team-col-name { font-family: var(--font-display); font-size: 1.2em; line-height: 1.05; overflow-wrap: normal; word-break: normal; hyphens: auto; min-width: 0; }
+.team-col-count {
+  flex: none;
+  display: grid;
+  place-items: center;
+  min-width: 1.6em;
+  height: 1.6em;
+  border-radius: var(--radius-pill);
+  background: var(--c-paper);
+  border: 0.1em solid var(--c-ink);
+  font-family: var(--font-display);
+  font-size: 1.1em;
+}
+.team-col-members { list-style: none; margin: 0; padding: 0.5em; display: flex; flex-direction: column; gap: 0.4em; }
+.team-member { display: flex; align-items: center; gap: 0.4em; font-size: 1.15em; font-weight: var(--weight-strong); min-width: 0; }
+.team-member .avatar { width: 1.8em; height: 1.8em; font-size: 0.85em; border-width: 0.1em; }
+.team-member-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.team-member.offline { opacity: 0.45; }
+.team-col-crowd .team-member { font-size: 0.95em; }
+.team-empty { color: var(--c-ink-soft); font-size: 1em; padding: 0.3em; }
+
+/* Captioning: big team chips */
+.team-chips { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.45em; width: 26em; }
+.captioning:has(.team-chips) .ring { width: 10em; height: 10em; }
+.captioning:has(.team-chips) .caption-side { gap: 0.8em; }
+.team-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.35em 0.9em 0.35em 0.35em;
+  border-radius: var(--radius-pill);
+  background: rgb(255 255 255 / 0.12);
+  border: 0.14em solid var(--tc);
+  font-size: 1.2em;
+  font-weight: var(--weight-strong);
+}
+.team-chip-face {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2em;
+  height: 2em;
+  border-radius: 50%;
+  background: var(--tc);
+  color: var(--c-ink);
+  border: 0.12em solid var(--c-ink);
+  font-family: var(--font-display);
+  font-size: 0.85em;
+}
+.team-chip-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.team-chip-state { font-size: 0.75em; color: var(--c-fg-muted); }
+.team-chip-done { background: var(--c-paper); color: var(--c-ink); }
+.team-chip-done .team-chip-face { background: var(--c-success); font-size: 1.1em; }
+.team-chip-done .team-chip-state { color: var(--c-success); font-weight: var(--weight-strong); }
+
+/* Results */
+.written-by { display: block; font-family: var(--font-body); font-size: 0.55em; color: var(--c-ink-soft); text-align: right; }
+
+/* Scoreboard: tall team rows with member names */
+.lb-name-wrap { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+.lb-name-wrap .lb-name { flex: none; }
+.lb-members { font-size: 0.95em; color: var(--c-ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lb-teams { grid-template-rows: repeat(var(--rows), minmax(0, 5.6em)); gap: 0.9em; width: 60em; }
+.lb-teams .lb-row { font-size: 1.3em; }
+.lb-teams .lb-row .avatar { width: 2.4em; height: 2.4em; }
+
+/* Final */
+.podium-members {
+  max-width: 13em;
+  text-align: center;
+  font-size: 0.95em;
+  line-height: 1.2;
+  color: var(--c-fg);
+  text-shadow: var(--shadow-text);
+}
+.standings-teams .standings-row { align-items: center; padding: 0.35em 0; }
+.st-members { display: block; font-size: 0.65em; color: var(--c-ink-soft); font-weight: var(--weight-body); white-space: normal; line-height: 1.2; }
+.standings-teams .st-name { white-space: normal; }
