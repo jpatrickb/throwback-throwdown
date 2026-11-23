@@ -1,10 +1,13 @@
 import { useEffect } from 'react';
 import { socket, useView } from '../socket.ts';
+import { useGameAudio } from '../audio/index.ts';
+import { BRAND } from '../brand.ts';
 
 // Placeholder TV screen. The graphics workstream replaces the visuals;
 // keep the data wiring (useView('tv')).
 export function Tv() {
   const view = useView('tv');
+  useGameAudio(view);
 
   useEffect(() => {
     const hello = () => socket.emit('tv:hello');
@@ -19,7 +22,7 @@ export function Tv() {
 
   return (
     <main className="tv">
-      <h1>Cousin Caption Party</h1>
+      <h1>{BRAND.name}</h1>
       {view.phase === 'LOBBY' ? (
         <section className="lobby">
           <div>

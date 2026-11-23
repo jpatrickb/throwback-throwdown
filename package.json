@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "concurrently -k -n server,client -c magenta,cyan \"tsx watch server/index.ts\" \"vite\"",
+    "dev": "concurrently -k -n server,client -c magenta,cyan \"PORT=${API_PORT:-3000} tsx watch server/index.ts\" \"vite\"",
     "build": "vite build",
     "start": "NODE_ENV=production tsx server/index.ts",
     "party": "npm run build && PUBLIC_URL=https://party.jpatrickbeal.com npm run start",
@@ -13,7 +13,11 @@
     "bots": "tsx scripts/bots.ts"
   },
   "dependencies": {
+    "canvas-confetti": "^1.9.4",
     "express": "^5.3.0",
+    "howler": "^2.2.4",
+    "motion": "^14.14.0",
+    "multer": "^2.5.0",
     "qrcode": "^1.5.4",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
@@ -21,7 +25,11 @@
     "socket.io-client": "^4.8.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.1",
+    "@types/canvas-confetti": "^1.9.0",
     "@types/express": "^5.0.6",
+    "@types/howler": "^2.2.13",
+    "@types/multer": "^2.3.0",
     "@types/node": "^26.6.6",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19.3.0",

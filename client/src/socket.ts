@@ -1,16 +1,24 @@
 import { useEffect, useState } from 'react';
 import { io, type Socket } from 'socket.io-client';
 import type { ClientToServerEvents, ServerToClientEvents, View } from '../../shared/types.ts';
+import { mockFromUrl } from './dev/fixtures.ts';
 
 export type GameSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
 // One shared connection per page. Same origin in prod; Vite proxies in dev.
 export const socket: GameSocket = io({ transports: ['websocket', 'polling'] });
 
-/** Latest view snapshot from the server, narrowed to the expected role. */
+/** True when the page was opened with ?mock=<PHASE> (see dev/fixtures.ts). */
+export const IS_MOCK = new URLSearchParams(window.location.search).has('mock');
+
+/** Latest view snapshot from the server, narrowed to the expected role.
+ *  With ?mock=<PHASE> it returns a fixture instead (no server needed). */
 export function useView<R extends View['role']>(role: R): Extract<View, { role: R }> | null {
-  const [view, setView] = useState<Extract<View, { role: R }> | null>(null);
+  const [view, setView] = useState<Extract<View, { role: R }> | null>(
+    () => mockFromUrl(role) as Extract<View, { role: R }> | null,
+  );
   useEffect(() => {
+    if (IS_MOCK) return;
     const onView = (v: View) => {
       if (v.role === role) setView(v as Extract<View, { role: R }>);
     };

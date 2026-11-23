@@ -206,7 +206,7 @@ io.on('connection', (socket: GameSocket) => {
 
 http.listen(PORT, () => {
   console.log(`
-  🎉 Cousin Caption Party server on :${PORT}
+  🎉 Throwback Throwdown server on :${PORT}
      Room code : ${state.roomCode}
      Host PIN  : ${HOST_PIN}
      Join URL  : ${join.joinUrl}${join.lanJoinUrl ? `\n     LAN URL   : ${join.lanJoinUrl}` : ''}

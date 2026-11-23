@@ -296,6 +296,9 @@ The lead (main session) owns `shared/types.ts`, `PLAN.md`, integration, and merg
 | **qa** (Wed/Sat) | `tests/**`, `docs/DEVICE-CHECKLIST.md` | Playwright end-to-end run (TV + host + bots), reconnect/restart tests, a device checklist for the Saturday dry run | engine + phones |
 
 Notes:
-- **Fixtures first.** On day one, the lead (or phones) writes `client/src/dev/fixtures.ts`: one sample `View` per phase. `?mock=VOTING` on any screen then renders that fixture, so UI work never waits for the engine.
+- **Team rules** (ports, git, messaging, file ownership) are in `TEAM.md`.
+- **Fixtures are done:** `client/src/dev/fixtures.ts` holds one sample `View` per phase, and `?mock=VOTING` on any screen renders it.
+- **Working title: "Throwback Throwdown"**, set in `client/src/brand.ts`. Patrick will choose the final name; changing it is a one-line edit.
+- **Audio seam:** `Tv.tsx` calls `useGameAudio(view)` from `client/src/audio/index.ts`. Audio owns everything behind that hook.
 - Agents can't drive Soundcraft or an image generator. **Patrick makes the real music and art.** Agents write the briefs and prompts, wire everything up, and ship placeholders, so missing assets never block the game.
 - Engine and phones are the **critical path** for Wednesday. TV polish and audio are Saturday-morning work if time is short.

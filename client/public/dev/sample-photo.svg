@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6d7a7"/><stop offset="1" stop-color="#c98b5a"/></linearGradient></defs>
+  <rect width="1200" height="900" fill="url(#g)"/>
+  <circle cx="600" cy="380" r="170" fill="#ffe0bd" stroke="#7a4b2a" stroke-width="8"/>
+  <circle cx="540" cy="350" r="18" fill="#3b2314"/><circle cx="660" cy="350" r="18" fill="#3b2314"/>
+  <path d="M520 440 Q600 520 680 440" stroke="#3b2314" stroke-width="12" fill="none" stroke-linecap="round"/>
+  <path d="M440 300 Q600 120 760 300 Q700 220 600 230 Q500 220 440 300Z" fill="#6b3b1f"/>
+  <rect x="430" y="560" width="340" height="260" rx="60" fill="#e94f64"/>
+  <text x="600" y="870" font-family="sans-serif" font-size="40" text-anchor="middle" fill="#3b2314">SAMPLE PHOTO (dev fixture)</text>
+</svg>

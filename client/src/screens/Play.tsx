@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { socket, useConnected, useView } from '../socket.ts';
+import { BRAND } from '../brand.ts';
 
 const TOKEN_KEY = 'ccp:token';
 const NAME_KEY = 'ccp:name';
@@ -75,7 +76,7 @@ export function Play() {
   if (!joined || !view) {
     return (
       <main className="play">
-        <h1>Cousin Caption Party</h1>
+        <h1>{BRAND.name}</h1>
         <form onSubmit={onSubmit} className="join-form">
           <label>
             Room code
