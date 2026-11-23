@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import type { HostView, Photo } from '../../../../shared/types.ts';
 import { IS_MOCK } from '../../socket.ts';
 import { COPY } from '../copy.ts';
@@ -33,14 +33,7 @@ export function PhotoQueue({ view, pin }: { view: HostView; pin: string }) {
 
 function PhotoRow({ photo, index, last, onMove }: { photo: Photo; index: number; last: boolean; onMove: (i: number, d: -1 | 1) => void }) {
   const act = useAct();
-  const [subject, setSubject] = useState(photo.subject ?? '');
   const [confirm, setConfirm] = useState(false);
-  useEffect(() => setSubject(photo.subject ?? ''), [photo.subject]);
-
-  const saveSubject = () => {
-    const s = subject.trim() || null;
-    if (s !== photo.subject) act({ type: 'setSubject', photoId: photo.id, subject: s });
-  };
 
   return (
     <li className={`ph-list__item ph-photo${photo.used ? ' is-used' : ''}`}>
@@ -49,15 +42,6 @@ function PhotoRow({ photo, index, last, onMove }: { photo: Photo; index: number;
         <img src={photo.url} alt="" loading="lazy" />
         {photo.used && <span className="ph-badge">{COPY.host.used}</span>}
       </div>
-      <input
-        className="ph-input ph-input--small ph-photo__subject"
-        value={subject}
-        placeholder={COPY.host.subjectPlaceholder}
-        maxLength={40}
-        onChange={(e) => setSubject(e.target.value)}
-        onBlur={saveSubject}
-        onKeyDown={(e) => e.key === 'Enter' && (e.currentTarget as HTMLInputElement).blur()}
-      />
       <div className="ph-photo__actions">
         <button className="ph-btn ph-btn--small ph-btn--ghost" disabled={index === 0} onClick={() => onMove(index, -1)} aria-label="Move up">↑</button>
         <button className="ph-btn ph-btn--small ph-btn--ghost" disabled={last} onClick={() => onMove(index, 1)} aria-label="Move down">↓</button>

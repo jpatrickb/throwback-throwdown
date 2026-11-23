@@ -359,12 +359,11 @@ body:has(.phone) {
 .ph-inline-form { flex: 1; display: flex; gap: 6px; }
 .ph-confirm { display: inline-flex; align-items: center; gap: 6px; font-weight: var(--weight-strong); }
 
-.ph-photo { display: grid; grid-template-columns: auto 64px 1fr; grid-template-areas: 'num thumb subject' 'num thumb actions'; row-gap: 6px; }
+.ph-photo { display: grid; grid-template-columns: auto 64px 1fr; grid-template-areas: 'num thumb actions'; }
 .ph-photo.is-used { opacity: 0.6; }
 .ph-photo__num { grid-area: num; font-family: var(--font-display); font-size: 1.3rem; color: var(--c-ink-soft); width: 1.4em; text-align: center; }
 .ph-photo__thumb { grid-area: thumb; position: relative; width: 64px; height: 64px; }
 .ph-photo__thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-sm); border: 2px solid var(--c-ink); }
-.ph-photo__subject { grid-area: subject; }
 .ph-photo__actions { grid-area: actions; display: flex; gap: 6px; justify-content: flex-end; }
 .ph-badge {
   position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%);

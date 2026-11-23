@@ -41,25 +41,16 @@ export function Status({ view }: { view: HostView }) {
         </p>
       )}
 
-      <div className="ph-btn-row">
-        {timed && (
-          <>
-            <button className="ph-btn ph-btn--ghost" onClick={() => act({ type: 'addTime', seconds: 30 })}>
-              {COPY.host.addTime}
-            </button>
-            <button className="ph-btn ph-btn--ghost" onClick={() => act({ type: 'next' })}>
-              {COPY.host.skip}
-            </button>
-          </>
-        )}
-        <button
-          className="ph-btn ph-btn--ghost"
-          disabled={round.subjectRevealed}
-          onClick={() => act({ type: 'revealSubject' })}
-        >
-          {round.subjectRevealed ? COPY.host.subjectRevealed : COPY.host.revealSubject}
-        </button>
-      </div>
+      {timed && (
+        <div className="ph-btn-row">
+          <button className="ph-btn ph-btn--ghost" onClick={() => act({ type: 'addTime', seconds: 30 })}>
+            {COPY.host.addTime}
+          </button>
+          <button className="ph-btn ph-btn--ghost" onClick={() => act({ type: 'next' })}>
+            {COPY.host.skip}
+          </button>
+        </div>
+      )}
     </section>
   );
 }
